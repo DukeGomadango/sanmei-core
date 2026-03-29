@@ -1,5 +1,7 @@
 # Sanmeigaku（算命学コア）
 
+**GitHub**: [github.com/DukeGomadango/sanmei-core](https://github.com/DukeGomadango/sanmei-core)
+
 設計ドキュメントは [Docs/](./Docs/) 、実装の現状マップは [**Docs/IMPLEMENTATION.md**](./Docs/IMPLEMENTATION.md)（随時更新用）を参照してください。コードは **Monorepo** の [packages/sanmei-core](./packages/sanmei-core) にあります。
 
 Cursor / AI エージェント向けの作業フローは [AGENTS.md](./AGENTS.md) と [.cursor/rules](./.cursor/rules) を参照してください。コミット規約は [.cursor/rules/sanmei-commits.mdc](./.cursor/rules/sanmei-commits.mdc) です。

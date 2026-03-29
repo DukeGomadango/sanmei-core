@@ -46,6 +46,13 @@ alwaysApply: true
 
 **原則**: 「コードだけマージしてドキュメントは後」にしない。後回しにすると、次のセッションで同じファイル探索と誤りが再発する。
 
+## Git・GitHub
+
+- **リモートの正本**: [github.com/DukeGomadango/sanmei-core](https://github.com/DukeGomadango/sanmei-core)。ローカルフォルダ名（例: `Sanmeigaku`）とリポジトリ名が違ってもよい。
+- **初回だけ**: `git init -b main` → `git remote add origin <url>` → `git push -u origin main`。認証は Git Credential Manager・SSH・[GitHub CLI](https://cli.github.com/) のいずれか（環境依存でエージェントはユーザーに任せる）。
+- **含めないもの**: `.gitignore` に従う（`node_modules/`、`dist/`、**`*.bsp`** 等）。天球暦バイナリはコミットせず、ビルド環境で Skyfield の取得／キャッシュを使う。
+- **プッシュ前**: `npm test` が通る状態を推奨。
+
 ## コミュニケーション
 
 ユーザーへの説明は **日本語**（リポジトリの会話言語）。
