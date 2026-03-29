@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.tsbuildinfo
+coverage/
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+
+# 天文エフェメリス（ローカル配置・Skyfield キャッシュ相当。リポジトリには含めない）
+*.bsp

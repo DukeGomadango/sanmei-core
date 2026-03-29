@@ -1,0 +1,20 @@
+---
+description: tools/solar-term-build 等のオフライン生成スクリプト（Python）
+globs: tools/**/*.py
+alwaysApply: false
+---
+
+# Python（オフラインツール）
+
+## 役割
+
+- **節入りマスタ生成のみ**。出力は `packages/sanmei-core/data/solar-terms/solar_terms.json`（またはドキュメントで定義したパス）に限定。
+- 生成ロジックを TS のランタイムに移植しない（データ同梱が正）。
+
+## 品質
+
+- 天文・黄経の境界は**既存スクリプトの方針**（前向き弧・通過判定・二分等）に合わせる。仕様変更時は `Docs/IMPLEMENTATION.md` §4 とテスト／サンプル年を更新。
+
+## 型とエラー
+
+- 可能なら引数・戻りに型ヒント。無言 `except:` や広すぎる握りつぶしは避け、失敗はメッセージ付きで終了させる。

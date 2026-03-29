@@ -1,0 +1,33 @@
+{
+  "name": "@sanmei/sanmei-core",
+  "version": "0.1.0",
+  "description": "算命学コア Layer1 — primitives, 節入り, 暦境界, 年月日柱（三柱の器のみ）",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "data"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@js-joda/core": "^5.6.3",
+    "@js-joda/timezone": "^2.21.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.3"
+  }
+}

@@ -1,0 +1,18 @@
+---
+description: 算命学ドメインの語彙・層境界（Layer1/2/3）。命名、域断定、四柱推命との混同を避けるときに参照。
+alwaysApply: false
+---
+
+# ドメイン（算命学）
+
+## 正本
+
+- **用語・層・型の形**: `Docs/DOMAIN-GLOSSARY.md`（ここに追記・矛盾解消が必要なら GLOSSARY を直す）。
+- **HTTP・エラー・再現性**: `Docs/REQUIREMENTS-v1.1.md`。
+- **学派差・未確定**: `Docs/OPEN-QUESTIONS.md`、`Docs/SECT-RULESET-MATRIX.template.md`。
+
+## 実装・会話での注意
+
+- **算命学の命式を「四柱推命の四柱（時柱込み）」としてモデル化しない**。製品の境界は GLOSSARY の Layer 定義に合わせる。
+- **占いの正誤をコードコメントや AI の返答で断定しない**。機械的に返すのは **ルールと数値**まで。解釈文はフロント／LLM。
+- 学派依存の真理値表・テーブルは **`ruleset` 側**に寄せ、ハードコード乱立を避ける。

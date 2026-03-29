@@ -1,0 +1,49 @@
+---
+description: packages 配下の TypeScript（strict・型安全・構造・巨大ファイル回避・エラー処理・テスト）
+globs: packages/**/*.ts
+alwaysApply: false
+---
+
+# TypeScript（sanmei パッケージ）
+
+## 構造（スパゲッティ回避）
+
+- **責務分離の詳細**（ファイル分割・循環依存・行数目安）は `.cursor/rules/sanmei-architecture.mdc` を参照。
+- **関数は短く**: 1 関数が複数のことをしすぎるなら抽出。分岐だらけなら **lookup テーブル**や既存の `*Tables.ts` パターンに寄せる。
+- **index の肥大化**: `index.ts` は再エクスポートに留め、実装を詰め込まない。
+
+## コンパイラ
+
+`packages/sanmei-core/tsconfig.json` は **strict**、未使用禁止。これを弱める変更はしない。
+
+## 型（`any` を避ける）
+
+- **`any` は使わない**。どうしても不明なら **`unknown` + 型ガード / Zod parse** で狭める。
+- 外部入力は **スキーマで検証**してからドメイン型へ。握りつぶし禁止。
+
+```typescript
+// ❌ BAD
+catch (e: any) {
+  return null;
+}
+function parse(x: any) { ... }
+
+// ✅ GOOD
+catch (e) {
+  const msg = e instanceof Error ? e.message : String(e);
+  throw new Error(`...: ${msg}`, { cause: e });
+}
+```
+
+## エラー処理
+
+- **空の `catch` 禁止**。ログ・再送出・ドメイン例外に変換のいずれか。
+- 「失敗を成功として返す」（黙ってデフォルト値）より、**呼び出し側が扱える明示的エラー**を優先（Layer1 は現状 `throw new Error` 中心でよい）。
+
+## テスト
+
+- 計算・境界は **Vitest** でカバー。既存の `*.test.ts` のスタイルに合わせる。
+
+## 実装のお手本
+
+新規コードは `packages/sanmei-core/src/layer1/` の既存分割に揃える。迷ったら `Docs/IMPLEMENTATION.md` §3。

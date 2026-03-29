@@ -1,0 +1,59 @@
+---
+description: Sanmeigaku モノレポの全体像とドキュメント正本への参照（常時）
+alwaysApply: true
+---
+
+# プロジェクト・コンテキスト
+
+## リポジトリの骨格
+
+- **計算コア**: `packages/sanmei-core`（現状は主に Layer1）。
+- **オフラインビルド**: `tools/solar-term-build` — 節入りマスタ生成のみ。ランタイムの TS から天文計算ライブラリを引かない。
+- **同梱データ**: `packages/sanmei-core/data/`（例: `solar-terms/solar_terms.json`）。
+
+## ドキュメント正本（ルールに全文を複製しない）
+
+| 用途 | パス |
+|------|------|
+| 実装インデックス・モジュールマップ・Mermaid | `Docs/IMPLEMENTATION.md` |
+| ドメイン層・用語境界・Layer1/2/3 | `Docs/DOMAIN-GLOSSARY.md` |
+| API・NFR・万年暦要約 | `Docs/REQUIREMENTS-v1.1.md` |
+| アーキテクチャ・Proto/ゴールデン・節入り方針 | `Docs/ARCHITECTURE-AND-CONTRACTS.md` |
+| 確定待ち論点 | `Docs/OPEN-QUESTIONS.md` |
+
+仕様とコードが食い違ったら、**コードか `IMPLEMENTATION.md` のどちらかを直し**、可能なら両方を揃える。
+
+## 変更時の同期（自動ではない）
+
+- ドキュメントと **本フォルダの `.mdc` は CI で検証されない**。実装・要件・層境界を変えたら、**§7 チェックリスト**（`Docs/IMPLEMENTATION.md`）に沿って更新する。
+- 繰り返しエージェント／人が同じ誤りをするなら、**正本（`Docs/*.md`）を先に直し**、必要なら本ルールに**短い追記**（パス・禁則のみ。長文はドキュメント側）。
+
+## Cursor エージェント向け（毎タスク）
+
+**着手前（短く）**
+
+- `packages/sanmei-core` や `tools/` を触るなら、先に `Docs/IMPLEMENTATION.md` の **§3（モジュール）** と **システム図** を当たり、全体 grep より**索引から入る**。
+- 語彙・Layer 境界に触れるなら `Docs/DOMAIN-GLOSSARY.md`。未確定は `Docs/OPEN-QUESTIONS.md`。
+
+**タスク完了時（コード変更と同じセッションで必ず）**
+
+| 変えたもの | 更新するもの（必要な範囲） |
+|------------|----------------------------|
+| ファイル配置・公開 API・データパイプライン | `IMPLEMENTATION.md` §3・§4・Mermaid |
+| 日界・節入り・キャリブレーション等の前提 | `IMPLEMENTATION.md` §5、`REQUIREMENTS-v1.1.md` 等の該当箇所 |
+| Layer 境界・新パッケージ・契約方針（Proto/Zod） | `ARCHITECTURE-AND-CONTRACTS.md`、`sanmei-architecture.mdc` |
+| 同じバグ／同じ説明の繰り返し | 正本 `Docs` を直し、再発防止を **`.cursor/rules` に 1〜3 行**だけ追加 |
+
+**原則**: 「コードだけマージしてドキュメントは後」にしない。後回しにすると、次のセッションで同じファイル探索と誤りが再発する。
+
+## コミュニケーション
+
+ユーザーへの説明は **日本語**（リポジトリの会話言語）。
+
+## 検証
+
+変更後は該当パッケージで `npm test` / `npm run build` を実行し、通す。
+
+## コミット
+
+メッセージは **`sanmei-commits.mdc`**（Conventional Commits の型 ＋ 日本語要約）に従う。

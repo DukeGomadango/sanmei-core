@@ -1,0 +1,50 @@
+---
+description: Git コミット・PR タイトル（Conventional Commits の型＋日本語要約）
+alwaysApply: true
+---
+
+# コミットメッセージ
+
+仕様の全体像: [Conventional Commits 1.0.0（日本語）](https://www.conventionalcommits.org/ja/v1.0.0/)
+
+## 形式
+
+```
+<型>[(任意スコープ)]: <日本語で一行要約>
+
+（空行）
+
+（任意）なぜ変えたか・注意点・Refs #123
+```
+
+- **型**: 英語・小文字推奨。よく使う: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `build`, `ci`, `perf`, `style`
+- **コロン後**: **日本語**。チーム内で英語のみにする場合はそのときに統一する（混在しない）
+- **スコープ（任意）**: `sanmei-core`, `solar-term-build`, `docs`, `cursor-rules`, `root` など、変更の塊に合わせる
+
+## 一行目のルール
+
+- **目安 50 文字前後**（短く具体的に）
+- **末尾にピリオドを付けない**
+- **曖昧語だけにしない**（「修正」→ 何がどうなっていたかを短く）
+- 可能なら **命令形・現在形**（例: 「〜を追加する」「〜の不具合を直す」）
+
+## 破壊的変更
+
+- 型に `!`（例: `feat(api)!:`）または本文・フッターに `BREAKING CHANGE:`（仕様どおり）
+
+## 例
+
+```
+feat(sanmei-core): 陰占三柱の Zod スキーマを追加
+
+fix(calendar): 節入り日と生年月日の一致判定を修正
+
+docs: IMPLEMENTATION に Cursor 向けチェックリストを追記
+
+chore(cursor-rules): コミットメッセージ規約のルールを追加
+```
+
+## エージェント向け
+
+- コミットを提案・実行するときは **上記に合わせる**。複数論点が混ざるなら **コミットを分ける**。
+- **PR タイトル** も同じ規約でよい（リポジトリが squash マージなら merge コミットが審査の要になる）。
