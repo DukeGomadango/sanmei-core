@@ -36,7 +36,11 @@ export {
 } from "./schemas/calculateInput.js";
 export {
   CalculateResultSchema,
+  DestinyBugCodeSchema,
+  EnergyDataSchema,
   type CalculateResult,
+  type DestinyBugCode,
+  type EnergyData,
   type InsenLayer2,
   type BaseProfileLayer2,
 } from "./schemas/layer2.js";

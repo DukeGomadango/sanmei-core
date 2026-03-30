@@ -1,7 +1,7 @@
 import { createRequire } from "node:module";
 import { ZodError } from "zod";
 import { CalculateInputSchema } from "./schemas/calculateInput.js";
-import type { CalculateResult } from "./schemas/layer2.js";
+import type { CalculateResult, InsenLayer2 } from "./schemas/layer2.js";
 import { SanmeiError, SanmeiErrorCode } from "./errors/sanmeiError.js";
 import { requiresBirthTimeForAnySolarTermOnDate } from "./layer1/calendar/calendarBoundary.js";
 import { resolveInsenWithDepth } from "./layer1/pillars.js";
@@ -14,6 +14,8 @@ import { resolveSubordinateStars } from "./layer2/resolveSubordinateStars.js";
 import { resolveGuardianKishin } from "./layer2/resolveGuardianKishin.js";
 import { resolveMainStars } from "./layer2/resolveMainStars.js";
 import { resolveFamilyNodes } from "./layer2/resolveFamilyNodes.js";
+import { resolveEnergyData } from "./layer2/resolveEnergyData.js";
+import { resolveDestinyBugs } from "./layer2/resolveDestinyBugs.js";
 
 const require = createRequire(import.meta.url);
 const { version: packageVersion } = require("../package.json") as { version: string };
@@ -122,6 +124,15 @@ export function calculate(rawInput: unknown, deps: CalculateDeps): CalculateResu
   const { guardianDeities, kishin } = resolveGuardianKishin(dayStem, l1.month.branch, ruleset);
   const familyNodes = resolveFamilyNodes(dayStem, ruleset);
 
+  const insenLayer2: InsenLayer2 = {
+    ...pillars,
+    displayDepth: l1.displayDepth,
+    rawDelta: l1.rawDelta,
+  };
+
+  const energyData = resolveEnergyData(insenLayer2, ruleset);
+  const destinyBugs = resolveDestinyBugs(insenLayer2, ruleset);
+
   const calculatedAt = new Date(deps.nowUtcMs ?? Date.now()).toISOString();
 
   return {
@@ -148,6 +159,8 @@ export function calculate(rawInput: unknown, deps: CalculateDeps): CalculateResu
         ],
       },
       familyNodes,
+      energyData,
+      destinyBugs,
     },
     interactionRules: {
       guardianDeities,
