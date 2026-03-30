@@ -81,18 +81,20 @@
   },
   "dynamicTimeline": {
     "daiun": {
-      "startAge": 2,
+      "startAge": 7,
+      "direction": "forward",
+      "startDayDiff": 22,
       "phases": [
-        { "phaseIndex": 0, "sexagenaryIndex": 0, "spanYears": 10 },
-        { "phaseIndex": 1, "sexagenaryIndex": 1, "spanYears": 10 },
-        { "phaseIndex": 2, "sexagenaryIndex": 2, "spanYears": 10 },
-        { "phaseIndex": 3, "sexagenaryIndex": 3, "spanYears": 10 },
-        { "phaseIndex": 4, "sexagenaryIndex": 4, "spanYears": 10 },
-        { "phaseIndex": 5, "sexagenaryIndex": 5, "spanYears": 10 },
-        { "phaseIndex": 6, "sexagenaryIndex": 6, "spanYears": 10 },
-        { "phaseIndex": 7, "sexagenaryIndex": 7, "spanYears": 10 }
+        { "phaseIndex": 0, "sexagenaryIndex": 19, "spanYears": 10 },
+        { "phaseIndex": 1, "sexagenaryIndex": 20, "spanYears": 10 },
+        { "phaseIndex": 2, "sexagenaryIndex": 21, "spanYears": 10 },
+        { "phaseIndex": 3, "sexagenaryIndex": 22, "spanYears": 10 },
+        { "phaseIndex": 4, "sexagenaryIndex": 23, "spanYears": 10 },
+        { "phaseIndex": 5, "sexagenaryIndex": 24, "spanYears": 10 },
+        { "phaseIndex": 6, "sexagenaryIndex": 25, "spanYears": 10 },
+        { "phaseIndex": 7, "sexagenaryIndex": 26, "spanYears": 10 }
       ],
-      "currentPhase": { "phaseIndex": 2, "sexagenaryIndex": 2, "spanYears": 10 }
+      "currentPhase": { "phaseIndex": 1, "sexagenaryIndex": 20, "spanYears": 10 }
     },
     "annual": {
       "calendarYear": 2026,

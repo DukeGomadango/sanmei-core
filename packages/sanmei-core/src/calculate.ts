@@ -305,17 +305,22 @@ export function calculate(rawInput: unknown, deps: CalculateDeps): CalculateResu
     ),
   );
   if (includeDebugTrace) {
+    const researchRuleId = ruleset.meta.rulesetVersion === "research-v1" ? ruleset.researchDaiun?.ruleIds.start ?? null : null;
     traceNodes.push({
       phase: "LAYER3",
       stepId: "resolveDynamicTimeline",
-      ruleId: "timelineMock.fixedStartAge",
+      ruleId: researchRuleId ?? "timelineMock.fixedStartAge",
       inputs: {
         asOf: input.context.asOf,
+        sourceLevel: ruleset.researchDaiun?.sourceLevel ?? "L3_UNVERIFIED",
       },
       result: {
         startAge: dynamicTimeline.daiun.startAge,
         currentPhaseIndex: dynamicTimeline.daiun.currentPhase.phaseIndex,
         annualYear: dynamicTimeline.annual.calendarYear,
+        direction: dynamicTimeline.daiun.direction ?? "forward",
+        startDayDiff: dynamicTimeline.daiun.startDayDiff ?? -1,
+        roundedStartAge: dynamicTimeline.daiun.startAge,
       },
       reasonCode: "TIMELINE_RULE_APPLIED",
     });

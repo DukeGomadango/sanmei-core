@@ -63,6 +63,36 @@ export const TimelineMockSchema = z.object({
   annualStarPlaceholder: z.string().min(1),
 });
 
+export const DaiunDirectionSchema = z.enum(["forward", "backward"]);
+export const DaiunRoundingSchema = z.enum(["round"]);
+
+export const ResearchDaiunRulesSchema = z.object({
+  directionByYearStemAndGender: z.object({
+    yangYearStemMale: DaiunDirectionSchema,
+    yangYearStemFemale: DaiunDirectionSchema,
+    yinYearStemMale: DaiunDirectionSchema,
+    yinYearStemFemale: DaiunDirectionSchema,
+  }),
+  startDayDiffPolicy: z.object({
+    forwardUses: z.literal("NEXT_MONTH_START_TERM"),
+    backwardUses: z.literal("PREV_MONTH_START_TERM"),
+    dayDiffBasis: z.literal("LOCAL_JDN_DIFF"),
+  }),
+  startAgePolicy: z.object({
+    divideBy: z.number().int().positive(),
+    rounding: DaiunRoundingSchema,
+    clampZeroToOne: z.boolean(),
+    clampElevenToTen: z.boolean(),
+  }),
+  sourceLevel: z.string(),
+  ruleIds: z.object({
+    start: z.string().min(1),
+    direction: z.string().min(1),
+    rounding: z.string().min(1),
+    boundaryException: z.string().min(1),
+  }),
+});
+
 export const IsouhouKindSchema = z.enum([
   "SHIGO",
   "HOSANUI",
@@ -125,6 +155,7 @@ const rulesetBodySchema = z.object({
     mockV1Nodes: z.array(FamilyNodeRuleSchema),
   }),
   timelineMock: TimelineMockSchema,
+  researchDaiun: ResearchDaiunRulesSchema.optional(),
   interaction: InteractionRulesetSchema.optional(),
 });
 

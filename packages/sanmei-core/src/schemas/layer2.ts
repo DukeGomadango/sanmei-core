@@ -181,6 +181,8 @@ export const DaiunTimelineSchema = z.object({
   startAge: z.number().int().nonnegative(),
   phases: z.array(DaiunPhaseSchema),
   currentPhase: DaiunPhaseSchema,
+  direction: z.enum(["forward", "backward"]).optional(),
+  startDayDiff: z.number().int().nonnegative().optional(),
 });
 
 export const AnnualTimelineSchema = z.object({

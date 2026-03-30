@@ -12,6 +12,32 @@ const cache: Record<string, BundledRuleset> = {
       rulesetVersion: "research-v1",
       description: "Research sect baseline bundle (M1 contract-ready; logic mirrors mock-v1).",
     },
+    researchDaiun: {
+      directionByYearStemAndGender: {
+        yangYearStemMale: "forward",
+        yangYearStemFemale: "backward",
+        yinYearStemMale: "backward",
+        yinYearStemFemale: "forward",
+      },
+      startDayDiffPolicy: {
+        forwardUses: "NEXT_MONTH_START_TERM",
+        backwardUses: "PREV_MONTH_START_TERM",
+        dayDiffBasis: "LOCAL_JDN_DIFF",
+      },
+      startAgePolicy: {
+        divideBy: 3,
+        rounding: "round",
+        clampZeroToOne: true,
+        clampElevenToTen: true,
+      },
+      sourceLevel: "L2_SECONDARY",
+      ruleIds: {
+        start: "research-daiun-start-rule-v1",
+        direction: "research-daiun-direction-rule-v1",
+        rounding: "research-daiun-rounding-rule-v1",
+        boundaryException: "research-daiun-boundary-exception-v1",
+      },
+    },
     interaction: {
       enabledKinds: ["SHIGO", "HOSANUI", "HANKAI", "SANGOU", "TAICHU", "GAI", "KEI", "HA"],
       patterns: [
