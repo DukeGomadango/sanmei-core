@@ -7,6 +7,42 @@ import {
   sanmeiErrorToHttp,
 } from "./mapSanmeiErrorToHttp.js";
 
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return typeof v === "object" && v !== null;
+}
+
+function allowDebugTraceByHeader(debugHeaderValue: string | undefined): boolean {
+  if (process.env.NODE_ENV !== "production") return true;
+  const requiredKey = process.env.SANMEI_DEBUG_TRACE_KEY;
+  if (!requiredKey) return false;
+  return debugHeaderValue === requiredKey;
+}
+
+function normalizeDebugTraceOption(payload: unknown, allowDebugTrace: boolean): unknown {
+  if (!isRecord(payload)) return payload;
+  const reqOptions = isRecord(payload.options) ? payload.options : {};
+  const requested = reqOptions.includeDebugTrace === true;
+  return {
+    ...payload,
+    options: {
+      ...reqOptions,
+      includeDebugTrace: requested && allowDebugTrace,
+    },
+  };
+}
+
+function stripDebugTraceForClient(result: unknown, allowDebugTrace: boolean): unknown {
+  if (allowDebugTrace) return result;
+  if (!isRecord(result)) return result;
+  const ir = isRecord(result.interactionRules) ? result.interactionRules : undefined;
+  if (!ir || !("debugTrace" in ir)) return result;
+  const { debugTrace: _omit, ...restIr } = ir;
+  return {
+    ...result,
+    interactionRules: restIr,
+  };
+}
+
 /** 空白・JSON 以外は null（→ MALFORMED_JSON） */
 export function parseJsonBodyOrNull(text: string): unknown | null {
   const t = text.trim();
@@ -94,8 +130,10 @@ export function createApp(deps: CalculateDeps): Hono {
     if (parsed === null) {
       return c.json(malformedJsonBody(), 400);
     }
-    const result = calculate(parsed, deps);
-    return c.json(result);
+    const allowDebugTrace = allowDebugTraceByHeader(c.req.header("x-sanmei-debug-trace-key"));
+    const normalized = normalizeDebugTraceOption(parsed, allowDebugTrace);
+    const result = calculate(normalized, deps);
+    return c.json(stripDebugTraceForClient(result, allowDebugTrace));
   });
 
   return app;

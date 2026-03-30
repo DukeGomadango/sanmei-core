@@ -51,6 +51,7 @@ describe("POST /api/v1/calculate", () => {
   });
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllEnvs();
   });
 
   it("200: golden 入力・スキーマ通過・スナップショット", async () => {
@@ -163,5 +164,54 @@ describe("POST /api/v1/calculate", () => {
     const json = (await res.json()) as { error: { code: string; message: string } };
     expect(json.error.code).toBe(MALFORMED_JSON_CODE);
     expect(json.error.message).toBe("Invalid JSON payload");
+  });
+
+  it("debugTrace 要求してもヘッダ不正なら返さない", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const input = JSON.parse(readFileSync(goldenInputPath, "utf-8")) as Record<string, unknown>;
+    input.options = { includeDebugTrace: true };
+    const app = makeApp();
+    const res = await app.request("http://test/api/v1/calculate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    expect(res.status).toBe(200);
+    const json = (await res.json()) as { interactionRules?: Record<string, unknown> };
+    expect(json.interactionRules?.debugTrace).toBeUndefined();
+  });
+
+  it("debugTrace キー一致時のみ返す", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("SANMEI_DEBUG_TRACE_KEY", "test-key");
+    const input = JSON.parse(readFileSync(goldenInputPath, "utf-8")) as Record<string, unknown>;
+    input.options = { includeDebugTrace: true };
+    const app = makeApp();
+    const res = await app.request("http://test/api/v1/calculate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-sanmei-debug-trace-key": "test-key",
+      },
+      body: JSON.stringify(input),
+    });
+    expect(res.status).toBe(200);
+    const json = (await res.json()) as { interactionRules?: { debugTrace?: { traceVersion?: number } } };
+    expect(json.interactionRules?.debugTrace?.traceVersion).toBe(1);
+  });
+
+  it("開発環境ではキー未設定でも debugTrace を返せる", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    const input = JSON.parse(readFileSync(goldenInputPath, "utf-8")) as Record<string, unknown>;
+    input.options = { includeDebugTrace: true };
+    const app = makeApp();
+    const res = await app.request("http://test/api/v1/calculate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    expect(res.status).toBe(200);
+    const json = (await res.json()) as { interactionRules?: { debugTrace?: { traceVersion?: number } } };
+    expect(json.interactionRules?.debugTrace?.traceVersion).toBe(1);
   });
 });
