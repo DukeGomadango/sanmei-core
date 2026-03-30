@@ -219,6 +219,11 @@ export type DaiunTimeline = z.infer<typeof DaiunTimelineSchema>;
 export type AnnualTimeline = z.infer<typeof AnnualTimelineSchema>;
 export type DynamicTimeline = z.infer<typeof DynamicTimelineSchema>;
 
+export const CalculateMetaDisplaySchema = z.object({
+  /** 当該計算結果の陽占に出た starId のみ（主星5＋従星3 の部分集合） */
+  starLabels: z.record(z.string(), z.string()).optional(),
+});
+
 export const CalculateMetaSchema = z.object({
   engineVersion: z.string(),
   rulesetVersion: z.string(),
@@ -226,6 +231,8 @@ export const CalculateMetaSchema = z.object({
   calculatedAt: z.string(),
   /** 監修前アルゴリズム・ruleset の注意喚起（任意） */
   warnings: z.array(z.string()).optional(),
+  /** UI 向け表示キャッシュ（研究系 starLabels 等）。将来キー追加時は .passthrough 相当で緩める余地あり。 */
+  display: CalculateMetaDisplaySchema.optional(),
 });
 
 export const CalculateResultSchema = z.object({
@@ -238,6 +245,7 @@ export const CalculateResultSchema = z.object({
 export type InsenLayer2 = z.infer<typeof InsenLayer2Schema>;
 export type YousenLayer2 = z.infer<typeof YousenLayer2Schema>;
 export type FamilyNode = z.infer<typeof FamilyNodeSchema>;
+export type FamilyLocation = z.infer<typeof FamilyLocationSchema>;
 export type BaseProfileLayer2 = z.infer<typeof BaseProfileLayer2Schema>;
 export type InteractionRulesLayer2 = z.infer<typeof InteractionRulesLayer2Schema>;
 export type TimelineInteractionEntry = z.infer<typeof TimelineInteractionEntrySchema>;

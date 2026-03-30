@@ -1,7 +1,13 @@
 import { BundledRulesetSchema, type BundledRuleset, BUNDLED_RULESET_VERSIONS } from "../schemas/rulesetMockV1.js";
 import rawV1 from "../data/rulesets/mock-v1.json" with { type: "json" };
 import rawInternalV2 from "../data/rulesets/mock-internal-v2.json" with { type: "json" };
-import { RESEARCH_DAIUN_BLOCK, RESEARCH_INTERACTION_BLOCK } from "./bundledResearchV1Shared.js";
+import {
+  RESEARCH_DAIUN_BLOCK,
+  RESEARCH_INTERACTION_BLOCK,
+  RESEARCH_STAR_LABELS,
+  RESEARCH_TENCHU_RULES,
+} from "./bundledResearchV1Shared.js";
+import { RESEARCH_DESTINY_BUG_RULES_SUBSET } from "./researchDestinyBugRulesSubset.js";
 
 const cache: Record<string, BundledRuleset> = {
   "mock-v1": BundledRulesetSchema.parse(rawV1),
@@ -13,8 +19,11 @@ const cache: Record<string, BundledRuleset> = {
       rulesetVersion: "research-v1",
       description: "Research sect baseline bundle (M1 contract-ready; logic mirrors mock-v1).",
     },
+    starLabels: RESEARCH_STAR_LABELS,
+    tenchuRules: RESEARCH_TENCHU_RULES,
     researchDaiun: RESEARCH_DAIUN_BLOCK,
     interaction: RESEARCH_INTERACTION_BLOCK,
+    destinyBugRules: RESEARCH_DESTINY_BUG_RULES_SUBSET,
   }),
   "research-experimental-v1": BundledRulesetSchema.parse({
     ...rawV1,
@@ -24,7 +33,10 @@ const cache: Record<string, BundledRuleset> = {
       description:
         "Research sect experimental: baseline + extended isouhou kinds (L2_SECONDARY). Parallel to research-v1.",
     },
+    starLabels: RESEARCH_STAR_LABELS,
+    tenchuRules: RESEARCH_TENCHU_RULES,
     researchDaiun: RESEARCH_DAIUN_BLOCK,
+    destinyBugRules: RESEARCH_DESTINY_BUG_RULES_SUBSET,
     interaction: {
       ...RESEARCH_INTERACTION_BLOCK,
       priorityVersion: "research-experimental-v1-l3a-priority-r1",

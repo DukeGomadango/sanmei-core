@@ -66,6 +66,31 @@ export const TimelineMockSchema = z.object({
 export const DaiunDirectionSchema = z.enum(["forward", "backward"]);
 export const DaiunRoundingSchema = z.enum(["round"]);
 
+/**
+ * 天中殺 B2 DSL（研究系）。`research-tenchu-b2-v1` は年運・大運現フェーズの六十甲子 index を
+ * ruleset 配列と照合する最小機械層。真のスライド条件はこのブロックを拡張して追記する。
+ *
+ * Iteration 28 / 拡張候補（監修・論点8確定後に Zod へ昇格。未確定のため未実装）:
+ * - `annual`: 窓の期間（暦年／立春境界／暦日範囲）・`sexagenaryIndex` オフセット
+ * - `daiun`: 連続フェーズ数・スライド成立条件（干合・異常干支・接運など）の ruleId 参照
+ * - `priority` / `conflictWithB1`: B1 フラグとの併存・上書き規則
+ * 正本: Docs/OPEN-QUESTIONS.md 論点8「B2 監修質問票」、Docs/RESEARCH-SECT-RULESET-WORKFLOW.md 18.11。
+ */
+export const TenchuRulesB2Schema = z.object({
+  dslVersion: z.literal("research-tenchu-b2-v1"),
+  sourceLevel: z.string(),
+  annual: z.object({
+    activeWhenSexagenaryIndexIn: z.array(z.number().int().min(0).max(59)),
+  }),
+  daiun: z.object({
+    activeWhenCurrentPhaseSexagenaryIndexIn: z.array(z.number().int().min(0).max(59)),
+  }),
+});
+
+export const TenchuRulesSchema = z.object({
+  b2: TenchuRulesB2Schema.optional(),
+});
+
 export const ResearchDaiunRulesSchema = z.object({
   directionByYearStemAndGender: z.object({
     yangYearStemMale: DaiunDirectionSchema,
@@ -181,6 +206,8 @@ const rulesetBodySchema = z.object({
   energyWeights: EnergyWeightsSchema,
   energyMock: EnergyMockSchema,
   destinyBugRules: DestinyBugRulesSchema,
+  /** 研究系など: `starId` → 表示用文字列。mock JSON 未記載でも optional で通過。 */
+  starLabels: z.record(z.string(), z.string()).optional(),
   subordinateStars: twoLevelStringTable,
   mainStars: mainStarsTable,
   guardianByDayStemMonthBranch: twoLevelElementArrays,
@@ -191,6 +218,7 @@ const rulesetBodySchema = z.object({
   }),
   timelineMock: TimelineMockSchema,
   researchDaiun: ResearchDaiunRulesSchema.optional(),
+  tenchuRules: TenchuRulesSchema.optional(),
   interaction: InteractionRulesetSchema.optional(),
 });
 
@@ -265,6 +293,8 @@ export type RulesetMockV1 = z.infer<typeof RulesetMockV1Schema>;
 export type BundledRuleset = z.infer<typeof BundledRulesetSchema>;
 export type IsouhouExtendedKind = z.infer<typeof IsouhouExtendedKindSchema>;
 export type IsouhouExtendedRules = z.infer<typeof IsouhouExtendedRulesSchema>;
+export type TenchuRulesB2 = z.infer<typeof TenchuRulesB2Schema>;
+export type TenchuRules = z.infer<typeof TenchuRulesSchema>;
 
 /** サポートするバンドル版（`RULESET_VERSION_UNSUPPORTED` 判定用） */
 export const BUNDLED_RULESET_VERSIONS = [

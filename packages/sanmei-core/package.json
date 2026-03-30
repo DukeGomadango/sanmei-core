@@ -9,6 +9,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./sexagenary": {
+      "types": "./dist/layer1/sexagenary.d.ts",
+      "import": "./dist/layer1/sexagenary.js"
     }
   },
   "files": [

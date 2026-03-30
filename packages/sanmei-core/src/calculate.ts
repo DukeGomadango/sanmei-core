@@ -32,6 +32,8 @@ import {
   resolveResearchTimelinePairInteractions,
 } from "./layer2/applyLayer3Mock.js";
 import { applyLayer3bByRuleset } from "./layer2/applyLayer3b.js";
+import { resolveTenchuSatsuStatus } from "./layer2/resolveTenchuSatsuStatus.js";
+import { subsetStarLabelsForYousen } from "./layer2/subsetStarLabelsForYousen.js";
 
 const require = createRequire(import.meta.url);
 const { version: packageVersion } = require("../package.json") as { version: string };
@@ -457,6 +459,37 @@ export function calculate(rawInput: unknown, deps: CalculateDeps): CalculateResu
         ]
       : [];
 
+  const isResearchRuleset =
+    ruleset.meta.rulesetVersion === "research-v1" ||
+    ruleset.meta.rulesetVersion === "research-experimental-v1";
+  if (isResearchRuleset && ruleset.tenchuRules?.b2) {
+    metaWarnings.push(
+      "tenchu B2: research-tenchu-b2-v1 は六十甲子 index 集合照合のみ。スライド本算法は DSL 拡張・監修待ち。",
+    );
+  }
+
+  const yousenLayer = {
+    mainStars,
+    subordinateStars: [
+      { anchor: "YEAR_BRANCH" as const, starId: sub.yearBranch },
+      { anchor: "MONTH_BRANCH" as const, starId: sub.monthBranch },
+      { anchor: "DAY_BRANCH" as const, starId: sub.dayBranch },
+    ],
+  };
+  const displayStarLabels = subsetStarLabelsForYousen(yousenLayer, ruleset.starLabels);
+
+  const tenchuSatsuStatus = isResearchRuleset
+    ? resolveTenchuSatsuStatus(insenLayer2, ruleset, destinyBugs, {
+        annual: dynamicTimelineWithInteractions.annual,
+        daiun: dynamicTimelineWithInteractions.daiun,
+      })
+    : undefined;
+
+  const dynamicTimelineOut: DynamicTimeline = {
+    ...dynamicTimelineWithInteractions,
+    ...(tenchuSatsuStatus ? { tenchuSatsuStatus } : {}),
+  };
+
   return {
     meta: {
       engineVersion: packageVersion,
@@ -464,6 +497,7 @@ export function calculate(rawInput: unknown, deps: CalculateDeps): CalculateResu
       sect: input.systemConfig.sect,
       calculatedAt,
       ...(metaWarnings.length > 0 ? { warnings: metaWarnings } : {}),
+      ...(displayStarLabels ? { display: { starLabels: displayStarLabels } } : {}),
     },
     baseProfile: {
       insen: {
@@ -473,19 +507,12 @@ export function calculate(rawInput: unknown, deps: CalculateDeps): CalculateResu
         displayDepth: l1.displayDepth,
         rawDelta: l1.rawDelta,
       },
-      yousen: {
-        mainStars,
-        subordinateStars: [
-          { anchor: "YEAR_BRANCH", starId: sub.yearBranch },
-          { anchor: "MONTH_BRANCH", starId: sub.monthBranch },
-          { anchor: "DAY_BRANCH", starId: sub.dayBranch },
-        ],
-      },
+      yousen: yousenLayer,
       familyNodes,
       energyData,
       destinyBugs,
     },
-    dynamicTimeline: dynamicTimelineWithInteractions,
+    dynamicTimeline: dynamicTimelineOut,
     interactionRules,
   };
 }

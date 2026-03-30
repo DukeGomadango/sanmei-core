@@ -3,7 +3,20 @@
     "engineVersion": "0.2.0",
     "rulesetVersion": "research-v1",
     "sect": "research",
-    "calculatedAt": "1970-01-01T00:00:00.000Z"
+    "calculatedAt": "1970-01-01T00:00:00.000Z",
+    "warnings": [
+      "tenchu B2: research-tenchu-b2-v1 は六十甲子 index 集合照合のみ。スライド本算法は DSL 拡張・監修待ち。"
+    ],
+    "display": {
+      "starLabels": {
+        "MA_0_6": "禄存星",
+        "MA_0_9": "調舒星",
+        "MA_0_7": "司禄星",
+        "MA_0_8": "鳳閣星",
+        "SU_0_4": "天堂星",
+        "SU_0_6": "天极星"
+      }
+    }
   },
   "baseProfile": {
     "insen": {
@@ -84,7 +97,7 @@
         "areaRatioPermille": 140
       }
     },
-    "destinyBugs": []
+    "destinyBugs": ["SHUKUMEI_TENCHUSATSU_MONTH"]
   },
   "dynamicTimeline": {
     "daiun": {
@@ -279,6 +292,30 @@
       "calendarYear": 2026,
       "sexagenaryIndex": 41,
       "relatedStarId": "ANNUAL_MOCK_41_d0"
+    },
+    "tenchuSatsuStatus": {
+      "sourceLevel": "L2_SECONDARY",
+      "phase": "B2_DYNAMIC",
+      "natal": {
+        "yearPillarKey": "庚辰",
+        "monthPillarKey": "壬午",
+        "dayPillarKey": "甲辰",
+        "listedInShukumeiTenchusatsuYear": false,
+        "listedInShukumeiTenchusatsuMonth": true,
+        "listedInAbnormalKanshiNormal": false,
+        "listedInAbnormalKanshiDark": false
+      },
+      "destinyBugs": ["SHUKUMEI_TENCHUSATSU_MONTH"],
+      "dynamic": {
+        "dslVersion": "research-tenchu-b2-v1",
+        "sourceLevel": "L2_SECONDARY",
+        "calendarYear": 2026,
+        "annualSexagenaryIndex": 41,
+        "daiunCurrentPhaseIndex": 1,
+        "daiunCurrentPhaseSexagenaryIndex": 20,
+        "annualTenchuWindowActive": true,
+        "daiunPhaseTenchuWindowActive": true
+      }
     }
   },
   "interactionRules": {
