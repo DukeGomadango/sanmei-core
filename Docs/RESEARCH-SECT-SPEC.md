@@ -137,9 +137,14 @@
 
 ## 6. Layer3b 仕様（格法）
 
-- `allowGohouInKaku` の反映境界は未確定。
 - Layer3a の結果を入力に格法を判定する。
-- `research-v1` では最小構成で接続点のみ固定する。
+- `research-v1` では次の契約を固定する:
+  - `kaku.candidates[]`: 成立候補（全件保持）
+  - `kaku.resolved[]`: 最終採用（1件でも配列）
+  - `kaku.suppressed[]`: 棄却理由付きリスト
+  - `kaku.meta`: `ruleSetId` / `priorityVersion` / `sourceLevel` / `allowGohouInKakuApplied` / `evaluateShadowProfileApplied`
+- `allowGohouInKaku` は `GOHOU` タグ候補の suppress 判定に用いる。
+- `evaluateShadowProfile` は ruleset 側フラグで制御し、**M3既定値は `false`（kyoki は格法評価対象外）** とする。
 
 ---
 

@@ -115,6 +115,32 @@
       "ruleSetId": "research-v1",
       "priorityVersion": "research-v1-l3a-priority-r1",
       "sourceLevel": "L2_SECONDARY"
+    },
+    "kaku": {
+      "candidates": [
+        {
+          "id": "KAKU_KEI",
+          "label": "刑格",
+          "priority": 30,
+          "reasons": ["isouhou:KEI"]
+        }
+      ],
+      "resolved": [
+        {
+          "id": "KAKU_KEI",
+          "label": "刑格",
+          "priority": 30,
+          "reasons": ["isouhou:KEI"]
+        }
+      ],
+      "suppressed": [],
+      "meta": {
+        "ruleSetId": "research-v1",
+        "priorityVersion": "research-v1-l3a-priority-r1",
+        "sourceLevel": "L2_SECONDARY",
+        "allowGohouInKakuApplied": false,
+        "evaluateShadowProfileApplied": false
+      }
     }
   }
 }

@@ -18,6 +18,7 @@ import { resolveEnergyData } from "./layer2/resolveEnergyData.js";
 import { resolveDestinyBugs } from "./layer2/resolveDestinyBugs.js";
 import { resolveDynamicTimeline } from "./layer2/resolveDynamicTimeline.js";
 import { applyLayer3aByRuleset } from "./layer2/applyLayer3Mock.js";
+import { applyLayer3bByRuleset } from "./layer2/applyLayer3b.js";
 
 const require = createRequire(import.meta.url);
 const { version: packageVersion } = require("../package.json") as { version: string };
@@ -54,8 +55,8 @@ function mapCalendarFailure<T>(timeZoneId: string, fn: () => T): T {
 }
 
 /**
- * Layer1〜Layer3a までのオーケストレータ:
- * 入力検証 → 節入り日の時刻要否 → Layer1（深さ付）→ バンドル ruleset で L2a–c → dynamicTimeline（mock）→ Layer3a。
+ * Layer1〜Layer3b までのオーケストレータ:
+ * 入力検証 → 節入り日の時刻要否 → Layer1（深さ付）→ バンドル ruleset で L2a–c → dynamicTimeline（mock）→ Layer3a → Layer3b。
  */
 export function calculate(rawInput: unknown, deps: CalculateDeps): CalculateResult {
   let input;
@@ -329,6 +330,9 @@ export function calculate(rawInput: unknown, deps: CalculateDeps): CalculateResu
   interactionRules = applyLayer3aByRuleset(interactionRules, ruleset, {
     insen: insenLayer2,
     dynamicTimeline,
+  });
+  interactionRules = applyLayer3bByRuleset(interactionRules, ruleset, {
+    allowGohouInKaku: input.systemConfig.allowGohouInKaku,
   });
   if (includeDebugTrace) {
     interactionRules.debugTrace = {

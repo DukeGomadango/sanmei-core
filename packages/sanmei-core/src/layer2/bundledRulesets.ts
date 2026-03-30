@@ -75,6 +75,38 @@ const cache: Record<string, BundledRuleset> = {
       kyoki: {
         featureEnabled: false,
       },
+      kaku: {
+        candidateRules: [
+          {
+            id: "KAKU_SANGOU",
+            label: "三合格",
+            priority: 10,
+            tags: ["GOHOU"],
+            requiresIsouhouKindsAny: ["SANGOU"],
+          },
+          {
+            id: "KAKU_HANKAI",
+            label: "半会格",
+            priority: 20,
+            tags: ["GOHOU"],
+            requiresIsouhouKindsAny: ["HANKAI"],
+          },
+          {
+            id: "KAKU_KEI",
+            label: "刑格",
+            priority: 30,
+            tags: ["SANPOU"],
+            requiresIsouhouKindsAny: ["KEI"],
+          },
+        ],
+        selectionPolicy: {
+          resolveMode: "MULTI",
+        },
+        allowGohouInKakuPolicy: {
+          whenFalseSuppressTags: ["GOHOU"],
+        },
+        evaluateShadowProfile: false,
+      },
     },
   }),
 };

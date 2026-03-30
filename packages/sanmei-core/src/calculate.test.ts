@@ -185,6 +185,24 @@ describe("calculate", () => {
     }
   });
 
+  it("allowGohouInKaku で kaku.resolved が分岐する", () => {
+    const baseInput = JSON.parse(readFileSync(join(researchGoldenDir, "calculate_input.json"), "utf-8"));
+    const rFalse = calculate(baseInput, { solarTermStore: store, port, nowUtcMs: 0 });
+    const rTrue = calculate(
+      {
+        ...baseInput,
+        systemConfig: {
+          ...baseInput.systemConfig,
+          allowGohouInKaku: true,
+        },
+      },
+      { solarTermStore: store, port, nowUtcMs: 0 },
+    );
+    expect(rFalse.interactionRules.kaku?.meta.allowGohouInKakuApplied).toBe(false);
+    expect(rTrue.interactionRules.kaku?.meta.allowGohouInKakuApplied).toBe(true);
+    expect(rFalse.interactionRules.kaku?.meta.evaluateShadowProfileApplied).toBe(false);
+  });
+
   it("includeDebugTrace=true のとき typed debugTrace を返す", () => {
     const r = calculate(
       {

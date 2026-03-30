@@ -88,6 +88,28 @@ export const InteractionRulesetSchema = z.object({
   kyoki: z.object({
     featureEnabled: z.boolean(),
   }),
+  kaku: z
+    .object({
+      candidateRules: z.array(
+        z.object({
+          id: z.string().min(1),
+          label: z.string().min(1),
+          priority: z.number().int(),
+          tags: z.array(z.string()).optional(),
+          requiresIsouhouKindsAny: z.array(IsouhouKindSchema).optional(),
+          requiresKyokiShadow: z.boolean().optional(),
+        }),
+      ),
+      selectionPolicy: z.object({
+        resolveMode: z.enum(["MULTI", "SINGLE"]),
+        maxResolved: z.number().int().positive().optional(),
+      }),
+      allowGohouInKakuPolicy: z.object({
+        whenFalseSuppressTags: z.array(z.string()),
+      }),
+      evaluateShadowProfile: z.boolean(),
+    })
+    .optional(),
 });
 
 const rulesetBodySchema = z.object({

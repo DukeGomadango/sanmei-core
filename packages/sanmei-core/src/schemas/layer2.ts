@@ -98,6 +98,31 @@ export const IsouhouEntrySchema = z.object({
 
 export type IsouhouEntry = z.infer<typeof IsouhouEntrySchema>;
 
+export const KakuCandidateSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  priority: z.number().int(),
+  reasons: z.array(z.string()),
+});
+
+export const KakuSuppressedSchema = z.object({
+  id: z.string(),
+  reasonCode: z.string(),
+});
+
+export const KakuResultSchema = z.object({
+  candidates: z.array(KakuCandidateSchema),
+  resolved: z.array(KakuCandidateSchema),
+  suppressed: z.array(KakuSuppressedSchema),
+  meta: z.object({
+    ruleSetId: z.string(),
+    priorityVersion: z.string(),
+    sourceLevel: z.string(),
+    allowGohouInKakuApplied: z.boolean(),
+    evaluateShadowProfileApplied: z.boolean(),
+  }),
+});
+
 const TraceScalarSchema = z.union([
   z.string(),
   z.number(),
@@ -141,6 +166,7 @@ export const InteractionRulesLayer2Schema = z.object({
       sourceLevel: z.string(),
     })
     .optional(),
+  kaku: KakuResultSchema.optional(),
   priorityResolution: z.unknown().optional(),
   debugTrace: DebugTraceSchema.optional(),
 });
