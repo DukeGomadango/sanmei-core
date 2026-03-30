@@ -18,6 +18,10 @@
 | 大運天中殺: 期間・スライド有無 | **共通 (YES)** | **共通 (YES)** | NOTE:PENDING（候補未確定） | 大運天中殺の有無・基本スパン（例: 20 年＝2 旬の説）の扱い。**スライドの機械的条件は下段の ruleset**。[OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) §8。 |
 | `isShifted` 成立条件 | `takao-shift-rules-v1` | `shugakuin-shift-rules-v1` | NOTE:PENDING（候補未確定） | **【要監修】** 初旬・三旬の異常干支、大運同士の干合スライド等。**JSON／DSL**で版管理。**機械的条件の適用は API が行い**、フロントは同条件を再計算しない（[OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) §8）。 |
 | 位相法: 対象関係の集合 | **共通（例）** | **共通（例）** | `research-isouhou-pattern-catalog-v1` (PENDING-VERIFICATION, sourceLevel: L2/L1) | 支合・半会・**対冲**・刑・害・干合 等。採用集合と `kind` ID は `ruleset` で列挙。[DOMAIN-GLOSSARY.md](./DOMAIN-GLOSSARY.md) §3.3。四柱推命表記の「冲」は API では **対冲** に正規化。 |
+| 位相法: 拡張集合（干合/納音/律音/天剋地冲/大半会） | `takao-isouhou-extended-v1` | `shugakuin-isouhou-extended-v1` | `research-isouhou-extended-taxonomy-v1` (ADOPTED-R1-SECONDARY, sourceLevel: L2) | カテゴリ存在は独立2系統で照合済み。`research-v1` の既存8種ロジックは保持し、`research-v1.1` 以降で feature gate による段階採用を検討。 |
+| 位相法: 適用スコープ（命式内/命式×大運/命式×年運） | **【要監修】** | **【要監修】** | `research-isouhou-scope-boundary-v1` (PENDING-HIGH) | Layer3a/3b の責務境界を固定し、競合優先度と suppress ルールを resolver 仕様として定義。 |
+| 位相法: 拡張集合の競合優先度 | `takao-isouhou-extended-priority-v1` | `shugakuin-isouhou-extended-priority-v1` | `research-isouhou-extended-conflict-priority-v1` (PENDING-HIGH, sourceLevel: L2) | `research-v1` の既存8種を主系列、拡張5種を副系列として扱う暫定。`candidates/resolved/suppressed` 契約で追跡。 |
+| 位相法拡張: locator 回収優先度（P0/P1） | **【要監修】** | **【要監修】** | NOTE:Iteration24（research 初期割当） | `P0`: `TENKOKUCHICHU`,`DAIHANKAI`。`P1`: `KANGO`,`NACHION`,`RITSUON`。`owner/due/lastChecked` 必須。詳細は [RESEARCH-SECT-RULESET-WORKFLOW.md](./RESEARCH-SECT-RULESET-WORKFLOW.md) `18.7`。 |
 | `allowGohouInKaku` サブセット | **【要監修】** | **【要監修】** | NOTE:PENDING（候補未確定） | 格法に位相法（半会・支合等）をどこまで織り込むか。 |
 | 虚気: 干合 + 月支条件 | `takao-kyoki-matrix-v1` | `shugakuin-kyoki-matrix-v1` | `research-kyoki-overlay-separation-v1` (PENDING) | **【要監修】** 真理値表。 |
 | 守護神・忌神マトリクス版 | `takao-shugoshin-v1` | `shugakuin-shugoshin-v1` | NOTE:PENDING（候補未確定） | **【要監修】** 日干×月支の 2 次元表。第一・第二守護神の定義差。 |
