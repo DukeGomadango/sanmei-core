@@ -1,0 +1,35 @@
+{
+  "name": "@sanmei/sanmei-bff",
+  "version": "0.1.0",
+  "private": true,
+  "description": "算命学 HTTP BFF — POST /api/v1/calculate（Hono + sanmei-core）",
+  "type": "module",
+  "main": "./dist/app.js",
+  "types": "./dist/app.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/app.d.ts",
+      "import": "./dist/app.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "@sanmei/sanmei-core": "file:../sanmei-core",
+    "hono": "^4.6.12"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

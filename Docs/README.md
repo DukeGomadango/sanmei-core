@@ -9,6 +9,7 @@
 | [ARCHITECTURE-AND-CONTRACTS.md](./ARCHITECTURE-AND-CONTRACTS.md) | Monorepo、Protobuf/JSON、バージョン、ゴールデンテスト、節入りマスタ・時刻補正の方針、Rust 移行 |
 | [DOMAIN-GLOSSARY.md](./DOMAIN-GLOSSARY.md) | **3層ドメイン辞書**（Primitives / Core / Dynamic）、型・算出パターン・`ruleset` との分担 |
 | [OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) | 占い師／監修者による確定待ちの論点一覧 |
+| [PHASE2-RULESET-AND-DAIUN.md](./PHASE2-RULESET-AND-DAIUN.md) | **フェーズ2**（`takao-v1`・大運本算法・監修ゴールデン）の実装ロードマップ正本。フロント並行可の整理あり |
 | [SECT-RULESET-MATRIX.template.md](./SECT-RULESET-MATRIX.template.md) | 学派差分を表形式で固定するテンプレート |
 | [`.cursor/rules`](../.cursor/rules) | **Cursor Project Rules**（アーキテクチャ・TS/Python・ドメイン要点。詳細は各 `.mdc` と本フォルダの md を正とする） |
 | [AGENTS.md](../AGENTS.md) | Cursor / Agent 向けの短い作業フロー（※ 本 `.mdc` が正本） |

@@ -2,7 +2,7 @@
 
 **GitHub**: [github.com/DukeGomadango/sanmei-core](https://github.com/DukeGomadango/sanmei-core)
 
-設計ドキュメントは [Docs/](./Docs/) 、実装の現状マップは [**Docs/IMPLEMENTATION.md**](./Docs/IMPLEMENTATION.md)（随時更新用）を参照してください。コードは **Monorepo** の [packages/sanmei-core](./packages/sanmei-core) にあります。
+設計ドキュメントは [Docs/](./Docs/) 、実装の現状マップは [**Docs/IMPLEMENTATION.md**](./Docs/IMPLEMENTATION.md)（随時更新用）を参照してください。計算コアは [packages/sanmei-core](./packages/sanmei-core)、HTTP BFF は [packages/sanmei-bff](./packages/sanmei-bff) です。
 
 Cursor / AI エージェント向けの作業フローは [AGENTS.md](./AGENTS.md) と [.cursor/rules](./.cursor/rules) を参照してください。コミット規約は [.cursor/rules/sanmei-commits.mdc](./.cursor/rules/sanmei-commits.mdc) です。
 
@@ -10,7 +10,15 @@ Cursor / AI エージェント向けの作業フローは [AGENTS.md](./AGENTS.m
 
 ```bash
 npm install
-npm test
+npm test    # sanmei-core ビルド後、コア Test → BFF Test の順
+npm run build
+```
+
+BFF 単体（例）:
+
+```bash
+cd packages/sanmei-bff
+npm run dev      # tsx watch（コアは先に npm run build -w @sanmei/sanmei-core）
 ```
 
 ## 節入りデータ生成（Skyfield + DE421）

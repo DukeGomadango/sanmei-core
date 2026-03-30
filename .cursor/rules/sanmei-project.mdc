@@ -8,6 +8,8 @@ alwaysApply: true
 ## リポジトリの骨格
 
 - **計算コア**: `packages/sanmei-core`（Layer1 ＋ **Layer2 mock（L2a–c）** ＋ **`dynamicTimeline` mock** ＋ **Layer3a スタブ**・`calculate` オーケストレータ。本番 `ruleset` 拡張は別フェーズ）。
+- **HTTP BFF**: `packages/sanmei-bff`（Hono・`POST /api/v1/calculate`・要件 §7 のエラーマップ・最小 Playground）。
+- **フェーズ2（計画）**: `takao-v1`・大運本算法・監修ゴールデン → **`Docs/PHASE2-RULESET-AND-DAIUN.md`** を正本（詳細はルールに書かない）。
 - **オフラインビルド**: `tools/solar-term-build` — 節入りマスタ生成のみ。ランタイムの TS から天文計算ライブラリを引かない。
 - **同梱データ**: `packages/sanmei-core/data/`（例: `solar-terms/solar_terms.json`）。
 

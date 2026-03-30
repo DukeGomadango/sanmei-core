@@ -219,34 +219,62 @@
 
 ## 7. エラー契約（Error Contract）
 
-HTTP ステータスと機械可読 `code` を組み合わせる。
+HTTP ステータスと機械可読 `code` を組み合わせる。**BFF**（HTTP 境界）がコアの `SanmeiError`・パース失敗を下表にマップする。
 
-| 状況 | HTTP | `code` 例 | メッセージ方針 |
-|------|------|-----------|----------------|
+### 7.1 HTTP と `code` の対応（固定）
+
+| 状況 | HTTP | `code` | メッセージ方針 |
+|------|------|--------|----------------|
+| リクエストボディが JSON として解釈できない（空・句法エラー等） | 400 | `MALFORMED_JSON` | ペイロード修正を促す |
+| バリデーション失敗（Zod 等） | 400 | `VALIDATION_ERROR` | フィールド別 `details`（flatten 等）を **そのまま**返す |
+| TZ 不正・暦変換失敗（コアが `INVALID_TIMEZONE` と判定） | 400 | `INVALID_TIMEZONE` | IANA 名の例示 |
+| 未サポートの `rulesetVersion`（構文・型は正しいが版が存在しない） | 422 | `RULESET_VERSION_UNSUPPORTED` | サポート一覧への誘導 |
 | 「節入り日」に該当する `birthDate` で `birthTime` が未指定 | 422 | `TIME_REQUIRED_FOR_SOLAR_TERM` | フロントが時刻入力へ誘導（[OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) 暦・時刻 **1**） |
-| 未サポートの `rulesetVersion` | 400 または 422 | `RULESET_VERSION_UNSUPPORTED` | サポート一覧への誘導 |
-| `ruleset` 参照で必須データ欠損 | 422 または 500 | `RULESET_DATA_MISSING` | 版と参照明示 |
-| 深さ等の計算異常（例: `rawDelta < 0`） | 500 | `CALCULATION_ANOMALY` | 内部不整合・マスタ欠落の疑い |
-| TZ 不正 | 400 | `INVALID_TIMEZONE` | IANA 名の例示 |
-| バリデーション失敗 | 400 | `VALIDATION_ERROR` | フィールド別 `details[]` |
+| `ruleset` 参照で必須データ欠損（配備データの不整合） | 500 | `RULESET_DATA_MISSING` | クライアントは **詳細なし**（運用はサーバログ） |
+| 深さ等の計算異常（例: `rawDelta < 0`） | 500 | `CALCULATION_ANOMALY` | クライアントは **詳細なし**（運用はサーバログ） |
+| 上記以外の内部エラー・未知の例外 | 500 | （実装から導出または汎用） | クライアントは **詳細なし**（運用はサーバログ） |
 
-**422 レスポンス例**:
+### 7.2 `details` の開示ポリシー
+
+- **4xx（400 / 422）**: クライアントが修正可能な内容のため、`details` に **コアが保持する情報を可能な限り含めて**返す（Zod flatten、`TIME_REQUIRED` の理由・節気 ID 等）。
+- **5xx（500）**: レスポンスの `details` は **`null` または省略**とし、スタック・内部変数は **サーバログにのみ**出力する。監視（Sentry / Datadog 等）では 5xx をアラート条件にできるよう、サーバ側責務の欠損（`RULESET_DATA_MISSING`）も **500 に統一**する。
+
+### 7.3 `TIME_REQUIRED_FOR_SOLAR_TERM` の `details` 形（コア正・BFF で時刻を JSON 化）
+
+コアは **機械可読な安定 ID** を返す（§6.2 の「星・干・支は列挙コードを正」方針に沿い、節気の**表示名・i18n**はフロント責務）。
+
+- **`solarTerm`**: 二十四節気の **`termId`**（例: `"jingzhe"`）。欠けうる場合は `null`。
+- **`reason`**: 理由コード（例: `BIRTH_DATE_EQUALS_SOLAR_TERM_LOCAL_DAY`）。
+- **`solarTermInstantUtcMs`**: コア内部・エラー `details` では **UTC エポックミリ秒**（数値）のままよい。
+
+**BFF が JSON レスポンスに載せるとき**: `solarTermInstantUtcMs` が非 `null` なら、**ISO 8601 UTC**（`YYYY-MM-DDThh:mm:ss.sssZ` 形式、`Date.prototype.toISOString()` 相当）へ変換した文字列を **`solarTermInstant`** として返す。`null` のときは `solarTermInstant` を省略するか `null` とする（BFF で統一）。
+
+**HTTP 422 の例**（BFF 出力イメージ）:
 
 ```json
 {
   "error": {
     "code": "TIME_REQUIRED_FOR_SOLAR_TERM",
-    "message": "節入り前後のため出生時刻が必要です",
+    "message": "節入り日前後のため出生時刻が必要です",
     "details": {
-      "solarTerm": "啓蟄",
-      "solarTermInstant": "2026-03-05T17:44:00+09:00",
+      "solarTerm": "jingzhe",
+      "solarTermInstant": "2020-02-04T05:00:00.000Z",
       "reason": "BIRTH_DATE_EQUALS_SOLAR_TERM_LOCAL_DAY"
     }
   }
 }
 ```
 
-`solarTermInstant`・`reason` の開示はプライバシー／情報量のポリシーに合わせ調整可。
+**不正 JSON の例**（HTTP 400）:
+
+```json
+{
+  "error": {
+    "code": "MALFORMED_JSON",
+    "message": "Invalid JSON payload"
+  }
+}
+```
 
 ---
 
@@ -333,6 +361,7 @@ HTTP ステータスと機械可読 `code` を組み合わせる。
 | v1.1.3 | **sanmei-core v1** で暦を固定: 節入り境界は \(t \ge t_s\) で当月、**節入り日一致時のみ** `TIME_REQUIRED_FOR_SOLAR_TERM`。民用標準時として解釈し**API 内では真太陽時変換しない**（補正はクライアント任意）。`birthLongitude` / `birthCityCode` は v1 コア未使用。OPEN-QUESTIONS・ARCHITECTURE §7 と整合 |
 | v1.1.4 | §9.2: Swiss Ephemeris AGPL リスクと**代替生成**を明記。§5: **日柱は民用0:00日界**・**子初換日は v1 未対応**、`TIME_REQUIRED` の **TZ 変換後ローカル日付**での一致判定を明記 |
 | v1.1.5 | §6.2: L2c の **`energyData`**（素の器・幾何正規化・丸め）・**`destinyBugs`**（静的のみ、動的天中殺は §6.3）を具体化。IMPLEMENTATION §2・GLOSSARY と整合 |
+| v1.1.6 | §7: **`RULESET_VERSION_UNSUPPORTED` を 422 に統一**、**`RULESET_DATA_MISSING` を 500 に統一**。**`MALFORMED_JSON`（400）**を追加。4xx は `details` 開示・5xx はマスク。`TIME_REQUIRED` の例を **コアの `termId`＋BFF の ISO `solarTermInstant`** に整合 |
 
 ---
 

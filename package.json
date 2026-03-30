@@ -5,8 +5,8 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build -w @sanmei/sanmei-core",
-    "test": "npm run test -w @sanmei/sanmei-core",
+    "build": "npm run build -w @sanmei/sanmei-core && npm run build -w @sanmei/sanmei-bff",
+    "test": "npm run build -w @sanmei/sanmei-core && npm run test -w @sanmei/sanmei-core && npm run test -w @sanmei/sanmei-bff",
     "generate:solar-terms": "python tools/solar-term-build/build_solar_terms.py"
   },
   "engines": {

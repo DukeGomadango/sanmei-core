@@ -41,7 +41,7 @@
 ### 2.4 `sanmei-core` と HTTP／BFF の責務分界
 
 - **コア**（`packages/sanmei-core/src/calculate.ts` オーケストレータを含む）は、生の出生ペイロードと **`systemConfig.sect` / `systemConfig.rulesetVersion`（必須）**、節入りマスタを用いて**境界計算、（現状 mock のみ）Layer2、`dynamicTimeline`（mock）、Layer3a スタブ**まで完結させる。`TIME_REQUIRED_FOR_SOLAR_TERM` 等は**型付きドメインエラー**（`SanmeiError`、`code` 一覧は [IMPLEMENTATION.md](./IMPLEMENTATION.md) §5.0.1）としてコアが送出しうる。
-- **BFF／HTTP 層**は上記エラーを **HTTP 422** および要件書の `code` に**マップ**する。呼び出し側に「節入り判定を行ってからコアへ渡せ」と**天文学ロジックを要求しない**（二重実装と逸脱の防止）。
+- **BFF／HTTP 層**は上記エラー＋不正 JSON を [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §7 の **HTTP（400 / 422 / 500）と `code`** に**マップ**する。呼び出し側に「節入り判定を行ってからコアへ渡せ」と**天文学ロジックを要求しない**（二重実装と逸脱の防止）。
 - Layer2 の純関数・リゾルバは、**既に確定した三柱＋深さ**などを入力とし、テストで暦をモックしない方針と整合する。詳細は [IMPLEMENTATION.md](./IMPLEMENTATION.md) §2・§5.0。
 
 **オーケストレータの実行 DAG（採用）**: Layer1（暦・三柱＋深さ）→ Layer2a/b（蔵干・主従星・六親・守護神忌神の組み立て）→ **Layer2c**（`energyData`・`destinyBugs`。位相・虚気は**入力に含めない**）→ Layer3a（位相法・虚気）→ Layer3b（格法・`allowGohouInKaku`）。レスポンス JSON のキー並びとは独立に、**依存関係**はこの順を正とする。全体像は [IMPLEMENTATION.md](./IMPLEMENTATION.md) §2「Orchestrator 実行順」。
