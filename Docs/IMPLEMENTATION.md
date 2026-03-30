@@ -9,7 +9,7 @@
 - PR・リリース前に、変更した節（ディレクトリ・公開 API・データパイプライン）を本書に反映する。
 - **層・フェーズ・契約（Proto/Zod 等）や責務境界が変わったら** [ARCHITECTURE-AND-CONTRACTS.md](./ARCHITECTURE-AND-CONTRACTS.md) と、必要なら [DOMAIN-GLOSSARY.md](./DOMAIN-GLOSSARY.md) を更新する。
 - **実装で繰り返し使う方針・禁則が変わったら** [.cursor/rules/](../.cursor/rules) を見直す（ルールは長文を持たず正本ドキュメントを指すが、パス・レイヤ説明のズレはここでも解消する）。
-- `packages/sanmei-core` の **バージョン**（Layer1 の実体の目安）は [packages/sanmei-core/package.json](../packages/sanmei-core/package.json) の `version` を正とする（本書に毎回書かなくてよい）。
+- `packages/sanmei-core` の **バージョン**（`meta.engineVersion`・リリースの目安）は [packages/sanmei-core/package.json](../packages/sanmei-core/package.json) の `version` を正とする（本書に毎回書かなくてよい）。
 - **レイアウトやサイクルが変わったら**、下記の Mermaid 図も併せて更新する。
 
 ---
@@ -120,7 +120,25 @@ sequenceDiagram
   Store-->>Pillars: 節月の節エントリ
   Pillars->>Jul: gregorianToJulianDayNumber birthDate
   Jul-->>Pillars: JDN
-  Pillars-->>Caller: year month day 等（Layer2 向けに月建の節からの経過日数を含める方針）
+  Pillars-->>Caller: year month day（`resolveInsenWithDepth` は rawDelta・displayDepth も返す）
+```
+
+### `calculate` オーケストレータ（Layer1→2・概要）
+
+```mermaid
+flowchart TB
+  in[CalculateInputSchema]
+  calc[calculate.ts]
+  req[requiresBirthTimeForAnySolarTermOnDate]
+  d1[resolveInsenWithDepth]
+  rs[bundled mock ruleset JSON]
+  l2[layer2 リゾルバ群]
+  in --> calc
+  calc --> req
+  calc --> d1
+  calc --> rs
+  calc --> l2
+  d1 --> l2
 ```
 
 ### Layer1 内部の依存（主要ファイル）

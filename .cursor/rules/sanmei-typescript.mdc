@@ -38,7 +38,7 @@ catch (e) {
 ## エラー処理
 
 - **空の `catch` 禁止**。ログ・再送出・ドメイン例外に変換のいずれか。
-- 「失敗を成功として返す」（黙ってデフォルト値）より、**呼び出し側が扱える明示的エラー**を優先（Layer1 は現状 `throw new Error` 中心でよい）。
+- 「失敗を成功として返す」（黙ってデフォルト値）より、**呼び出し側が扱える明示的エラー**を優先。オーケストレータ・契約境界は **`SanmeiError`（`SanmeiErrorCode`）**、Layer1 純粋部は当面 `Error` も許容（`IMPLEMENTATION.md` §5.0.1）。
 
 ## テスト
 
@@ -46,4 +46,4 @@ catch (e) {
 
 ## 実装のお手本
 
-新規コードは `packages/sanmei-core/src/layer1/` の既存分割に揃える。迷ったら `Docs/IMPLEMENTATION.md` §3。
+新規コードは `layer1/` の分割に揃え、命理ルール適用は `layer2/`・`schemas/`・`calculate.ts` の流れに寄せる。迷ったら `Docs/IMPLEMENTATION.md` §3。

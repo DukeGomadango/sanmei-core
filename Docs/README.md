@@ -14,9 +14,9 @@
 | [AGENTS.md](../AGENTS.md) | Cursor / Agent 向けの短い作業フロー（※ 本 `.mdc` が正本） |
 | [sanmei-commits.mdc](../.cursor/rules/sanmei-commits.mdc) | **コミット / PR タイトル**: Conventional Commits の型 ＋ 日本語要約 |
 
-## Layer 1 実装の所在
+## sanmei-core 実装の所在（Layer1 ＋ Layer2 mock）
 
-- **詳細**: [IMPLEMENTATION.md](./IMPLEMENTATION.md)（モジュール一覧・節入り／**ruleset** JSON・**Phase L2 / L2c 境界**・経過日数 §5.0・`SanmeiError` §5.0.1・Orchestrator・ゴールデン・Zod→Proto）。[REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §6 は L2 スコープと同期。
+- **詳細**: [IMPLEMENTATION.md](./IMPLEMENTATION.md)（モジュール一覧・節入り／**ruleset**（`src/data/rulesets/`・`dist` ミラー）・**Phase L2 / L2c 境界**・経過日数 §5.0・`SanmeiError` §5.0.1・`calculate.ts`・ゴールデン・Zod→Proto）。[REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §6 と応答形の対応は IMPLEMENTATION §2 と突き合わせる。
 - **パッケージ**: [`packages/sanmei-core`](../packages/sanmei-core)。
 - **README / ライセンス**: ルート [README.md](../README.md) ・ [LICENSES.md](../LICENSES.md)。
 
