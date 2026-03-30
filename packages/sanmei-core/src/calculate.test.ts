@@ -21,6 +21,11 @@ const goldenDir = join(dirname(fileURLToPath(import.meta.url)), "__fixtures__", 
 const researchGoldenDir = join(dirname(fileURLToPath(import.meta.url)), "__fixtures__", "golden_research_v1");
 
 describe("calculate", () => {
+  const researchBase = {
+    context: { asOf: "2026-01-01", timeZone: "Asia/Tokyo" },
+    systemConfig: { sect: "research", rulesetVersion: "research-v1" },
+  } as const;
+
   it("RULESET_VERSION_UNSUPPORTED", () => {
     expect(() =>
       calculate(
@@ -145,6 +150,14 @@ describe("calculate", () => {
     expect(normalizeResultMeta(got, { calculatedAt: "1970-01-01T00:00:00.000Z" })).toEqual(expected);
   });
 
+  it("research-v1 の大運は direction と startDayDiff を返す", () => {
+    const input = JSON.parse(readFileSync(join(researchGoldenDir, "calculate_input.json"), "utf-8"));
+    const got = calculate(input, { solarTermStore: store, port, nowUtcMs: 0 });
+    expect(got.dynamicTimeline.daiun.direction).toMatch(/forward|backward/);
+    expect(got.dynamicTimeline.daiun.startDayDiff).toBeTypeOf("number");
+    expect((got.dynamicTimeline.daiun.startDayDiff ?? -1) >= 0).toBe(true);
+  });
+
   it("UTC タイムゾーンで計算できる", () => {
     const r = calculate(
       {
@@ -221,6 +234,130 @@ describe("calculate", () => {
     expect(r.interactionRules.debugTrace).toBeDefined();
     expect(r.interactionRules.debugTrace?.traceVersion).toBe(1);
     expect((r.interactionRules.debugTrace?.nodes ?? []).length).toBeGreaterThan(0);
+  });
+
+  it("research-v1 の debugTrace に大運根拠値が載る", () => {
+    const r = calculate(
+      {
+        user: {
+          birthDate: "2000-06-15",
+          birthTime: "12:00",
+          timeZoneId: "Asia/Tokyo",
+          gender: "male",
+        },
+        context: { asOf: "2026-01-01", timeZone: "Asia/Tokyo" },
+        systemConfig: { sect: "research", rulesetVersion: "research-v1" },
+        options: { includeDebugTrace: true },
+      },
+      { solarTermStore: store, port, nowUtcMs: 0 },
+    );
+    const nodes = r.interactionRules.debugTrace?.nodes ?? [];
+    const timelineNode = nodes.find((n) => n.stepId === "resolveDynamicTimeline");
+    expect(timelineNode).toBeDefined();
+    expect(timelineNode?.result.startDayDiff).toBeTypeOf("number");
+    expect(timelineNode?.result.roundedStartAge).toBeTypeOf("number");
+  });
+
+  describe("research secondary daiun cases", () => {
+    it("DAIUN-S-001-normal-forward: 陽年干男性で順回り", () => {
+      const r = calculate(
+        {
+          user: {
+            birthDate: "2000-06-15",
+            birthTime: "12:00",
+            timeZoneId: "Asia/Tokyo",
+            gender: "male",
+          },
+          ...researchBase,
+        },
+        { solarTermStore: store, port, nowUtcMs: 0 },
+      );
+      expect(r.dynamicTimeline.daiun.direction).toBe("forward");
+      expect((r.dynamicTimeline.daiun.startDayDiff ?? -1) >= 0).toBe(true);
+    });
+
+    it("DAIUN-S-002-normal-backward: 陽年干女性で逆回り", () => {
+      const r = calculate(
+        {
+          user: {
+            birthDate: "2000-06-15",
+            birthTime: "12:00",
+            timeZoneId: "Asia/Tokyo",
+            gender: "female",
+          },
+          ...researchBase,
+        },
+        { solarTermStore: store, port, nowUtcMs: 0 },
+      );
+      expect(r.dynamicTimeline.daiun.direction).toBe("backward");
+      const phases = r.dynamicTimeline.daiun.phases;
+      expect(phases.length).toBeGreaterThan(1);
+      const p0 = phases[0]!.sexagenaryIndex;
+      const p1 = phases[1]!.sexagenaryIndex;
+      expect((p0 + 59) % 60).toBe(p1);
+    });
+
+    it("DAIUN-S-003-rounding-half-up: 端数処理は整数startAgeに反映", () => {
+      const r = calculate(
+        {
+          user: {
+            birthDate: "2000-06-15",
+            birthTime: "12:00",
+            timeZoneId: "Asia/Tokyo",
+            gender: "male",
+          },
+          ...researchBase,
+          options: { includeDebugTrace: true },
+        },
+        { solarTermStore: store, port, nowUtcMs: 0 },
+      );
+      const node = r.interactionRules.debugTrace?.nodes.find((n) => n.stepId === "resolveDynamicTimeline");
+      expect(node?.result.roundedStartAge).toBe(r.dynamicTimeline.daiun.startAge);
+    });
+
+    it("DAIUN-S-004-boundary-same-day: 境界日付でも起算日数は非負", () => {
+      const term = store.all.find((e) => e.termId === "lichun" && e.instantUtcMs > Date.UTC(2020, 0, 1));
+      expect(term).toBeDefined();
+      const boundaryBirthDate = port.utcMsToLocalDateString(term!.instantUtcMs, "Asia/Tokyo");
+      const r = calculate(
+        {
+          user: {
+            birthDate: boundaryBirthDate,
+            birthTime: "12:00",
+            timeZoneId: "Asia/Tokyo",
+            gender: "male",
+          },
+          ...researchBase,
+        },
+        { solarTermStore: store, port, nowUtcMs: 0 },
+      );
+      expect((r.dynamicTimeline.daiun.startDayDiff ?? -1) >= 0).toBe(true);
+    });
+
+    it("DAIUN-S-005-clamp-zero-eleven: startAgeは1..10にクランプされる", () => {
+      const r = calculate(
+        {
+          user: {
+            birthDate: "2000-01-01",
+            birthTime: "00:10",
+            timeZoneId: "Asia/Tokyo",
+            gender: "male",
+          },
+          ...researchBase,
+        },
+        { solarTermStore: store, port, nowUtcMs: 0 },
+      );
+      expect(r.dynamicTimeline.daiun.startAge).toBeGreaterThanOrEqual(1);
+      expect(r.dynamicTimeline.daiun.startAge).toBeLessThanOrEqual(10);
+    });
+  });
+
+  describe("research primary daiun slots (supervisor-confirmed pending)", () => {
+    it.todo("DAIUN-P-001-start-rule-l0: 起算規則のL0確定値で検証");
+    it.todo("DAIUN-P-002-direction-rule-l0: 順逆規則のL0確定値で検証");
+    it.todo("DAIUN-P-003-rounding-rule-l0: 丸め規則のL0確定値で検証");
+    it.todo("DAIUN-P-004-boundary-rule-l0: 境界例外のL0確定値で検証");
+    it.todo("DAIUN-P-005-end-to-end-l0: 監修ゴールデン入力で総合検証");
   });
 
   it("debugTrace は birthDate/birthTime の生値を保持しない", () => {
