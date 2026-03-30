@@ -51,6 +51,7 @@ export const Dict = {
       timeZone: DEFAULT_TIME_ZONE,
       sect: "takao",
       rulesetVersion: "mock-v1",
+      allowGohouInKaku: false,
     };
   },
 

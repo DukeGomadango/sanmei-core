@@ -67,8 +67,34 @@ export function CalculationTraceTabs({ data }: { data: CalculateResult | null | 
   ];
 
   return (
-    <section className="rounded-lg border border-border/90 bg-card p-5">
+    <section className="rounded-lg border border-border/90 bg-card p-5" id="section-trace">
       <h2 className="mb-4 text-base font-semibold">途中式・算出根拠</h2>
+      <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
+        構造化パネルへのジャンプ:{" "}
+        <a className="text-primary underline" href="#section-meta">
+          メタ
+        </a>
+        ・{" "}
+        <a className="text-primary underline" href="#section-insen">
+          陰占
+        </a>
+        ・{" "}
+        <a className="text-primary underline" href="#section-daiun">
+          大運
+        </a>
+        ・{" "}
+        <a className="text-primary underline" href="#section-annual">
+          年運
+        </a>
+        ・{" "}
+        <a className="text-primary underline" href="#section-isouhou">
+          位相
+        </a>
+        ・{" "}
+        <a className="text-primary underline" href="#section-kaku">
+          格法
+        </a>
+      </p>
       <div className="mb-4 flex flex-wrap gap-2">
         {labels.map((t) => (
           <button

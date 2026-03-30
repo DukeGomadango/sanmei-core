@@ -10,8 +10,6 @@ import { ErrorBanner } from "./widgets/ErrorBanner";
 import { pushToast, ToastHost } from "./widgets/ToastHost";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./components/ui/accordion";
 
-const rulesetOptions = ["mock-v1", "mock-internal-v2"] as const;
-
 export default function App() {
   const [controls, setControls] = useState(() => Dict.initialControls());
   const [birthTimeRequired, setBirthTimeRequired] = useState(false);
@@ -31,6 +29,7 @@ export default function App() {
         payload.context.asOf,
         payload.systemConfig.sect,
         payload.systemConfig.rulesetVersion,
+        payload.systemConfig.allowGohouInKaku,
       ] as const,
     };
   }, [controls]);
@@ -108,7 +107,6 @@ export default function App() {
                     onChangeControls={setControls}
                     onRun={handleRun}
                     sectOptions={["takao", "shugakuin"]}
-                    rulesetOptions={[...rulesetOptions]}
                     error={resultError}
                   />
                 </div>
@@ -126,7 +124,6 @@ export default function App() {
                 onChangeControls={setControls}
                 onRun={handleRun}
                 sectOptions={["takao", "shugakuin"]}
-                rulesetOptions={[...rulesetOptions]}
                 error={resultError}
               />
               <ErrorBanner error={resultError} />

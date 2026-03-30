@@ -8,5 +8,7 @@ export type ControlsState = {
   timeZone: string; // IANA tz
   sect: string;
   rulesetVersion: string;
+  /** Layer3b: 合法を格に含めるか（コア `systemConfig.allowGohouInKaku`） */
+  allowGohouInKaku: boolean;
 };
 

@@ -27,6 +27,7 @@ export function buildPayload(controls: ControlsState): CalculateInput {
     systemConfig: {
       sect: controls.sect,
       rulesetVersion: controls.rulesetVersion,
+      allowGohouInKaku: controls.allowGohouInKaku,
     },
     options: {
       // 管理者向け Playground は常に要求。公開可否は BFF が強制制御する。

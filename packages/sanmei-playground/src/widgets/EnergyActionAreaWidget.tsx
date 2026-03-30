@@ -69,8 +69,33 @@ export function EnergyActionAreaWidget({ energy }: { energy: EnergyData | null }
             fill="url(#actionAreaFill)"
           />
         </svg>
-        <div className="text-xs text-muted-foreground">
-          行動領域サイズ: {energy.actionAreaSize} / 面積比: {energy.actionAreaGeometry.areaRatioPermille}
+        <div className="space-y-2 text-xs">
+          <div className="text-muted-foreground">
+            行動領域サイズ: {energy.actionAreaSize} / 面積比: {energy.actionAreaGeometry.areaRatioPermille}
+          </div>
+          <div>
+            <span className="text-muted-foreground">totalEnergy: </span>
+            <span className="font-mono font-semibold text-foreground">{energy.totalEnergy}</span>
+          </div>
+          <div>
+            <div className="mb-1 text-muted-foreground">energyByElement</div>
+            <div className="grid grid-cols-5 gap-1 text-[10px]">
+              {(
+                [
+                  ["WOOD", "木"],
+                  ["FIRE", "火"],
+                  ["EARTH", "土"],
+                  ["METAL", "金"],
+                  ["WATER", "水"],
+                ] as const
+              ).map(([key, ja]) => (
+                <div key={key} className="rounded border border-border/70 bg-background/80 px-1 py-1 text-center">
+                  <div className="font-medium">{ja}</div>
+                  <div className="font-mono">{energy.energyByElement[key]}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>

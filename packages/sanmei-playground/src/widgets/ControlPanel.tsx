@@ -1,10 +1,18 @@
 import type { CalculateRequestError } from "../lib/api/calculateApi";
 import type { ControlsState } from "../lib/types";
+import { RULESET_SELECT_OPTIONS } from "../lib/rulesetUi";
 import type { Dispatch, SetStateAction } from "react";
+
+/** systemConfig.sect の表示ラベル（値は API と同一） */
+const SECT_OPTION_LABEL: Record<string, string> = {
+  takao: "takao（高尾流）",
+  shugakuin: "shugakuin（修学院流）",
+};
 import { Card, CardHeader, CardTitle } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Select } from "../components/ui/select";
 import { Button } from "../components/ui/button";
+import { buildTimeRequiredUserMessage } from "../lib/timeRequiredMessage";
 
 export function ControlPanel({
   controls,
@@ -12,7 +20,6 @@ export function ControlPanel({
   onChangeControls,
   onRun,
   sectOptions,
-  rulesetOptions,
   error,
   showHeader = true,
 }: {
@@ -21,12 +28,13 @@ export function ControlPanel({
   onChangeControls: Dispatch<SetStateAction<ControlsState>>;
   onRun: () => void | Promise<void>;
   sectOptions: string[];
-  rulesetOptions: string[];
   error: CalculateRequestError | null | undefined;
   showHeader?: boolean;
 }) {
   const timeRequiredMessage =
-    error?.code === "TIME_REQUIRED_FOR_SOLAR_TERM" ? error.message : undefined;
+    error?.code === "TIME_REQUIRED_FOR_SOLAR_TERM"
+      ? buildTimeRequiredUserMessage(error.message, error.details, controls.timeZone)
+      : undefined;
 
   const validationDetails = error?.code === "VALIDATION_ERROR" ? error.details : undefined;
 
@@ -109,7 +117,9 @@ export function ControlPanel({
                     }}
                   />
                   {timeRequiredMessage && (
-                    <div className="mt-1 text-xs text-amber-700">{timeRequiredMessage}</div>
+                    <div className="mt-1 whitespace-pre-wrap rounded-md border border-amber-200/90 bg-amber-50/90 p-2 text-xs text-amber-900">
+                      {timeRequiredMessage}
+                    </div>
                   )}
                   {fieldErrorMessages.birthTime && (
                     <span className="text-xs text-red-600">{fieldErrorMessages.birthTime}</span>
@@ -127,6 +137,13 @@ export function ControlPanel({
 
         <div className="space-y-3 border-t border-border/80 pt-4">
           <h4 className="text-sm font-semibold text-foreground">計算設定</h4>
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            研究用（<code className="font-mono text-[11px]">research-v1</code> など）は
+            <strong className="font-medium text-foreground/90">ルール版</strong>
+            のプルダウンにあります。
+            <strong className="font-medium text-foreground/90">学派（sect）</strong>
+            は高尾／修学院の切替のみです（別フィールド）。
+          </p>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <label className="flex flex-col gap-1.5 text-sm">
               <span className="text-sm font-medium">基準日（asOf）</span>
@@ -158,7 +175,7 @@ export function ControlPanel({
               >
                 {sectOptions.map((s) => (
                   <option key={s} value={s}>
-                    {s}
+                    {SECT_OPTION_LABEL[s] ?? s}
                   </option>
                 ))}
               </Select>
@@ -171,15 +188,41 @@ export function ControlPanel({
                 value={controls.rulesetVersion}
                 onChange={(e) => onChangeControls({ ...controls, rulesetVersion: e.target.value })}
               >
-                {rulesetOptions.map((r) => (
-                  <option key={r} value={r}>
-                    {r}
-                  </option>
-                ))}
+                {(["モック", "研究"] as const).map((group) => {
+                  const opts = RULESET_SELECT_OPTIONS.filter((o) => o.group === group);
+                  if (opts.length === 0) return null;
+                  return (
+                    <optgroup key={group} label={group}>
+                      {opts.map((r) => (
+                        <option key={r.value} value={r.value}>
+                          {r.label}
+                        </option>
+                      ))}
+                    </optgroup>
+                  );
+                })}
               </Select>
               {fieldErrorMessages.rulesetVersion && (
                 <span className="text-xs text-red-600">{fieldErrorMessages.rulesetVersion}</span>
               )}
+              <span className="text-xs text-muted-foreground" title="送信される systemConfig.rulesetVersion">
+                API 値: <code className="break-all font-mono text-[11px]">{controls.rulesetVersion}</code>
+              </span>
+            </label>
+
+            <label className="flex cursor-pointer items-start gap-2 md:col-span-2">
+              <input
+                type="checkbox"
+                className="mt-1 h-4 w-4 rounded border-border"
+                checked={controls.allowGohouInKaku}
+                onChange={(e) => onChangeControls({ ...controls, allowGohouInKaku: e.target.checked })}
+              />
+              <span className="text-sm leading-snug">
+                <span className="font-medium">格法: 合法を格候補に含める</span>
+                <span className="block text-xs text-muted-foreground">
+                  （<code className="font-mono">systemConfig.allowGohouInKaku</code>。research 系 ruleset の kaku 検証用）
+                </span>
+              </span>
             </label>
           </div>
         </div>

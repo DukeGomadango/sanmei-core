@@ -24,7 +24,21 @@ function partPos(part: string) {
   }
 }
 
-export function YousenWidget({ yousen, kyoki }: { yousen: YousenLayer2 | null; kyoki: Kyoki }) {
+function displayStarLabel(starId: string, starLabels: Record<string, string> | null | undefined): string {
+  const fromApi = starLabels?.[starId];
+  return fromApi !== undefined && fromApi.length > 0 ? fromApi : Dict.starLabel(starId);
+}
+
+export function YousenWidget({
+  yousen,
+  kyoki,
+  starLabels,
+}: {
+  yousen: YousenLayer2 | null;
+  kyoki: Kyoki;
+  /** 研究系など API `meta.display.starLabels`（部分集合） */
+  starLabels?: Record<string, string> | null;
+}) {
   const hasShadow = kyoki != null && typeof kyoki === "object" && (kyoki as { shadowYousen?: YousenLayer2 }).shadowYousen != null;
   const [useShadow, setUseShadow] = useState(false);
 
@@ -145,48 +159,48 @@ export function YousenWidget({ yousen, kyoki }: { yousen: YousenLayer2 | null; k
             {/* HEAD */}
             <div className="col-start-2 row-start-1">
               {mainByPart.get("HEAD") && (
-                <Badge className={`${mainBadgeClass} px-2.5 py-1 text-sm leading-tight text-center`}>{Dict.starLabel(mainByPart.get("HEAD")!)}</Badge>
+                <Badge className={`${mainBadgeClass} px-2.5 py-1 text-sm leading-tight text-center`}>{displayStarLabel(mainByPart.get("HEAD")!, starLabels)}</Badge>
               )}
             </div>
 
             {/* CHEST + YEAR_BRANCH */}
             <div className="col-start-2 row-start-2 flex flex-col items-center gap-1">
               {mainByPart.get("CHEST") && (
-                <Badge className={`${mainBadgeClass} border-2 border-sky-300 px-2.5 py-1 text-sm leading-tight text-center`}>{Dict.starLabel(mainByPart.get("CHEST")!)}</Badge>
+                <Badge className={`${mainBadgeClass} border-2 border-sky-300 px-2.5 py-1 text-sm leading-tight text-center`}>{displayStarLabel(mainByPart.get("CHEST")!, starLabels)}</Badge>
               )}
               {subByAnchor.get("YEAR_BRANCH") && (
-                <Badge className={`${subBadgeClass} px-2 py-0.5 text-xs leading-tight text-center`}>{Dict.starLabel(subByAnchor.get("YEAR_BRANCH")!)}</Badge>
+                <Badge className={`${subBadgeClass} px-2 py-0.5 text-xs leading-tight text-center`}>{displayStarLabel(subByAnchor.get("YEAR_BRANCH")!, starLabels)}</Badge>
               )}
             </div>
 
             {/* BELLY */}
             <div className="col-start-2 row-start-3">
               {mainByPart.get("BELLY") && (
-                <Badge className={`${mainBadgeClass} px-2.5 py-1 text-sm leading-tight text-center`}>{Dict.starLabel(mainByPart.get("BELLY")!)}</Badge>
+                <Badge className={`${mainBadgeClass} px-2.5 py-1 text-sm leading-tight text-center`}>{displayStarLabel(mainByPart.get("BELLY")!, starLabels)}</Badge>
               )}
             </div>
 
             {/* LEFT_HAND / RIGHT_HAND */}
             <div className="col-start-1 row-start-2">
               {mainByPart.get("LEFT_HAND") && (
-                <Badge className={`${mainBadgeClass} px-2.5 py-1 text-sm leading-tight text-center`}>{Dict.starLabel(mainByPart.get("LEFT_HAND")!)}</Badge>
+                <Badge className={`${mainBadgeClass} px-2.5 py-1 text-sm leading-tight text-center`}>{displayStarLabel(mainByPart.get("LEFT_HAND")!, starLabels)}</Badge>
               )}
             </div>
             <div className="col-start-3 row-start-2">
               {mainByPart.get("RIGHT_HAND") && (
-                <Badge className={`${mainBadgeClass} px-2.5 py-1 text-sm leading-tight text-center`}>{Dict.starLabel(mainByPart.get("RIGHT_HAND")!)}</Badge>
+                <Badge className={`${mainBadgeClass} px-2.5 py-1 text-sm leading-tight text-center`}>{displayStarLabel(mainByPart.get("RIGHT_HAND")!, starLabels)}</Badge>
               )}
             </div>
 
             {/* MONTH_BRANCH / DAY_BRANCH */}
             <div className="col-start-1 row-start-3">
               {subByAnchor.get("MONTH_BRANCH") && (
-                <Badge className={`${subBadgeClass} px-2 py-0.5 text-xs leading-tight text-center`}>{Dict.starLabel(subByAnchor.get("MONTH_BRANCH")!)}</Badge>
+                <Badge className={`${subBadgeClass} px-2 py-0.5 text-xs leading-tight text-center`}>{displayStarLabel(subByAnchor.get("MONTH_BRANCH")!, starLabels)}</Badge>
               )}
             </div>
             <div className="col-start-3 row-start-3">
               {subByAnchor.get("DAY_BRANCH") && (
-                <Badge className={`${subBadgeClass} px-2 py-0.5 text-xs leading-tight text-center`}>{Dict.starLabel(subByAnchor.get("DAY_BRANCH")!)}</Badge>
+                <Badge className={`${subBadgeClass} px-2 py-0.5 text-xs leading-tight text-center`}>{displayStarLabel(subByAnchor.get("DAY_BRANCH")!, starLabels)}</Badge>
               )}
             </div>
           </div>
