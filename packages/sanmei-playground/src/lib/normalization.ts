@@ -28,7 +28,10 @@ export function buildPayload(controls: ControlsState): CalculateInput {
       sect: controls.sect,
       rulesetVersion: controls.rulesetVersion,
     },
-    // options は未指定（必要になったら追加）
+    options: {
+      // 管理者向け Playground は常に要求。公開可否は BFF が強制制御する。
+      includeDebugTrace: true,
+    },
   };
 }
 

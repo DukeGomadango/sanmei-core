@@ -7,6 +7,7 @@ import { IsouhouWidget } from "./IsouhouWidget";
 import { TimelineWidget } from "./TimelineWidget";
 import { YousenWidget } from "./YousenWidget";
 import { TenchuSatsuStatusWidget } from "./TenchuSatsuStatusWidget";
+import { CalculationTraceTabs } from "./CalculationTraceTabs";
 
 type Props = {
   data: CalculateResult | null | undefined;
@@ -18,6 +19,8 @@ export function SaasBentoDashboard({ data }: Props) {
   const kyoki = data?.interactionRules.kyoki ?? null;
   const energy = data?.baseProfile.energyData ?? null;
   const isouhou = data?.interactionRules.isouhou ?? null;
+  const guardianDeities = data?.interactionRules.guardianDeities ?? null;
+  const kishin = data?.interactionRules.kishin ?? null;
   const daiun = data?.dynamicTimeline.daiun ?? null;
   const tenchu = data?.dynamicTimeline.tenchuSatsuStatus ?? null;
 
@@ -37,7 +40,7 @@ export function SaasBentoDashboard({ data }: Props) {
 
       <div className="md:col-span-8">
         <BentoTileWrapper tone="accent">
-          <IsouhouWidget isouhou={isouhou} />
+          <IsouhouWidget isouhou={isouhou} guardianDeities={guardianDeities} kishin={kishin} />
         </BentoTileWrapper>
       </div>
 
@@ -57,6 +60,10 @@ export function SaasBentoDashboard({ data }: Props) {
         <BentoTileWrapper>
           <TenchuSatsuStatusWidget tenchu={tenchu} />
         </BentoTileWrapper>
+      </div>
+
+      <div className="md:col-span-12">
+        <CalculationTraceTabs data={data} />
       </div>
     </div>
   );

@@ -58,9 +58,15 @@ export const Dict = {
   // mock-v1 の starId 形式（MA_a_b / SU_a_b）に基づく合成ラベル
   starLabel(starId: string): string {
     const m = /^MA_(\d+)_(\d+)$/.exec(starId);
-    if (m) return `主星 ${m[1]}-${m[2]}`;
+    if (m) {
+      const ord = Number(m[2]) + 1;
+      return `十大主星（候補${ord}）`;
+    }
     const s = /^SU_(\d+)_(\d+)$/.exec(starId);
-    if (s) return `従星 ${s[1]}-${s[2]}`;
+    if (s) {
+      const ord = Number(s[2]) + 1;
+      return `十二大従星（候補${ord}）`;
+    }
     return "星（未知）";
   },
 } as const;

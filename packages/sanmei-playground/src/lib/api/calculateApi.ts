@@ -22,9 +22,14 @@ export class CalculateRequestError extends Error {
 }
 
 export function calculateApi(payload: CalculateInput): Promise<CalculateResult> {
+  const debugTraceKey = import.meta.env.VITE_SANMEI_DEBUG_TRACE_KEY as string | undefined;
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (debugTraceKey && debugTraceKey.length > 0) {
+    headers["x-sanmei-debug-trace-key"] = debugTraceKey;
+  }
   return fetch("/api/v1/calculate", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(payload),
   }).then(async (res) => {
     const text = await res.text();
