@@ -67,6 +67,7 @@
 - `destinyBugs` の **`code` 最終名**と教材用語の対応（プレースホルダ: `SHUKUMEI_TENCHUSATSU_YEAR`、`SHUKUMEI_TENCHUSATSU_MONTH`、`IJOU_KANSHI_NORMAL`、`IJOU_KANSHI_DARK`＝**暗干支**）。
 - **`SHUKUMEI_TENCHUSATSU_MONTH`** を製品に載せるか（学説・教材により要否が分かれうる）。
 - **`energyData` の丸め**を常にエンジン固定にするか、`ruleset` に逃がすか（学派差の有無）。
+- **五行スケールの高次補正**（例: 気図法の 178 スケール、季節補正・従星点の反映）を `takao-v1` 等でどの ruleset 契約に切り出すか。現行は `energyByElement`（mock 重み集計）までを第一段階として固定。
 
 ---
 

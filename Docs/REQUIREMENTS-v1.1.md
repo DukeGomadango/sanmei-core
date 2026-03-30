@@ -185,7 +185,7 @@
 |----------|------|
 | `insen` | 陰占: **年柱・月柱・日柱の三柱のみ**の十干十二支。**時柱は算命学コアの出力に含めない**（リクエストの `birthTime` は暦境界用であり、時柱とは別物。[DOMAIN-GLOSSARY.md](./DOMAIN-GLOSSARY.md) §2.1）。Protobuf／OpenAPI 等でも **`timePillar`・`hourStem` 等のフィールドを定義しない**。節入りからの経過に基づく**蔵干（初元・中元・本元）**を `sect` ルールで特定。 |
 | `yousen` | 陽占: **十大主星**（5 箇所）、**十二大従星**（3 箇所）。部位は人体図座標または部位 ID で返す。 |
-| `energyData` | **Phase L2c**。数理法・行動領域。**入力**は位相法・虚気を**含まない**素の三柱＋蔵干（IMPLEMENTATION §2「Phase L2c」）。**契約**: `totalEnergy`、`actionAreaSize`（1〜4）、`actionAreaGeometry` を **Zod 固定**—幾何は **極座標（角度・度）と面積比**の正規化表現に限定。浮動小数はエンジン内で**固定丸め規則**のうえ整数／固定桁で返し、ゴールデンを安定させる。算法・重みは `ruleset`。位相後の数理は将来 **Layer3**（例: `shadowEnergyData`）で扱う。 |
+| `energyData` | **Phase L2c**。数理法・行動領域。**入力**は位相法・虚気を**含まない**素の三柱＋蔵干（IMPLEMENTATION §2「Phase L2c」）。**契約**: `totalEnergy`、`energyByElement`（`WOOD`/`FIRE`/`EARTH`/`METAL`/`WATER`）、`actionAreaSize`（1〜4）、`actionAreaGeometry` を **Zod 固定**—幾何は **極座標（角度・度）と面積比**の正規化表現に限定。浮動小数はエンジン内で**固定丸め規則**のうえ整数／固定桁で返し、ゴールデンを安定させる。算法・重みは `ruleset`。位相後の数理は将来 **Layer3**（例: `shadowEnergyData`）で扱う。 |
 | `destinyBugs` | **Phase L2c**。**出生時点で確定し生涯不変**の宿命系フラグのみ（例: 宿命天中殺・異常干支）。**年運／大運天中殺・スライド・`asOf` 依存**は `dynamicTimeline.tenchuSatsuStatus` に載せ、本フィールドには**含めない**。`code` は安定文字列（監修確定）。プレースホルダ例: `SHUKUMEI_TENCHUSATSU_YEAR`、`SHUKUMEI_TENCHUSATSU_MONTH`、`IJOU_KANSHI_NORMAL`、`IJOU_KANSHI_DARK`（暗干支。詳細は IMPLEMENTATION §2・OPEN-QUESTIONS）。 |
 | `familyNodes` | 六親法: **各ノードに干に加え、柱（年／月／日）および蔵干スロット（初元・中元・本元等）等の座標を必須**とする。干のみのフラットマップは採用しない（[OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) §11）。配列またはロールキー付きオブジェクトの形は Zod（`schemas/layer2.ts`）で固定する。 |
 
@@ -197,7 +197,7 @@
 
 | ブロック | 内容 |
 |----------|------|
-| `daiun` | `startAge`（立運年齢。例: 日数÷3 の**丸め規則は ruleset 明記**）、`phases[]`（10 年単位の干支＋星）、`currentPhase`（`asOf` で選択） |
+| `daiun` | `startAge`（立運年齢。例: 日数÷3 の**丸め規則は ruleset 明記**）、`phases[]`（10 年単位の干支＋星。拡張として `interactions?` を保持可）、`currentPhase`（`asOf` で選択） |
 | `annual` | 年運: `asOf` 年の干支・関連星 |
 | `monthly` | 月運: `asOf` 月の干支・関連星 |
 | `tenchuSatsuStatus` | 天中殺の稼働状況。大運天中殺の**スライド**は **JSON／DSL 化した `ruleset`** で定義し、API が解釈して**ゴールデン可能なフラグ・期間・スコア**を返す。**機械的条件の再計算をフロント専用ロジックに置かない**。問診に依る**ナラティブな説明**のみフロント／LLM の責務（API 出力と矛盾する上書きはしない）。詳細は [OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) §8。 |

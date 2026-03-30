@@ -219,7 +219,7 @@ flowchart LR
 
 - Orchestrator: [calculate.ts](../packages/sanmei-core/src/calculate.ts)— `CalculateInputSchema` → `requiresBirthTimeForAnySolarTermOnDate` → `resolveInsenWithDepth` → **`getBundledRuleset(rulesetVersion)`**（`mock-v1` / `mock-internal-v2` / `research-v1`）→ 蔵干・主星・従星・守護神／忌神・六親（`familyNodes` 座標付き）→ **L2c** `resolveEnergyData`／`resolveDestinyBugs` → **`dynamicTimeline`**（`.resolveDynamicTimeline`。`mock-*` は満年齢ベース、`research-v1` は大運R1: 順逆判定 + JDN日数差 + 3除算四捨五入 + 0/11補正）→ **Layer3a resolver** `applyLayer3aByRuleset`（`rulesetVersion` ディスパッチ。`research-v1` は位相法を返し、`mock-*` は noop）→ **Layer3b resolver** `applyLayer3bByRuleset`（`research-v1` は `kaku` を返却、`mock-*` は noop）。`user.timeZoneId` と `context.timeZone` の一致を要求（REQUIREMENTS の民用 TZ 基準）。
 - Ruleset: [bundledRulesets.ts](../packages/sanmei-core/src/layer2/bundledRulesets.ts)＋`bundledMockRulesetV1`（後方互換）、Zod は `schemas/rulesetMockV1.ts`（`BundledRulesetSchema`＝`mock-v1`／`mock-internal-v2`／`research-v1` の `z.union`、`timelineMock`、`meta.schemaRevision`、`energyWeights` 等）。欠セルは `RULESET_DATA_MISSING`。
-- レスポンス契約: `schemas/layer2.ts`（`baseProfile` は従来どおり＋**`dynamicTimeline`**（`daiun`／`annual` 等）。**`interactionRules`** に `isouhou`・`kyoki`・`resolutionMeta?`・`kaku?` を持つ；`guardianDeities`／`kishin` は五行コード列＝`Element` 数値）。
+- レスポンス契約: `schemas/layer2.ts`（`baseProfile` は従来どおり＋**`dynamicTimeline`**（`daiun`／`annual` 等）。`daiun.phases[]` は `interactions?`（phase 単位の位相法マトリクス表示用）を持ちうる。**`interactionRules`** に `isouhou`・`kyoki`・`resolutionMeta?`・`kaku?` を持つ；`guardianDeities`／`kishin` は五行コード列＝`Element` 数値）。
 - ゴールデン: `src/__fixtures__/golden_mock_v1/`（入力 JSON＋期待 JSON）。**追加手順（要約）**: 入力 JSON を追加 → `calculate` を固定 `nowUtcMs` で実行 → `CalculateResultSchema.safeParse` 通過を確認 → 期待値は `meta.calculatedAt`／必要なら `engineVersion` を [goldenHarness](../packages/sanmei-core/src/__tests__/goldenHarness.ts) で正規化してコミット。
 
 **未実装（別フェーズ）**
@@ -237,7 +237,7 @@ flowchart LR
 | `insen` | 三柱の器＋**蔵干（初元・中元・本元の採用）** |
 | `yousen` | **十大主星**（5 箇所）＋**十二大従星**（3 箇所） |
 | `familyNodes` | **六親（座標必須）**。[REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §6.2 は本表に従い座標付きを正とする（[OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) §11 と整合） |
-| `energyData` | **数理法・行動領域（L2c）**。入力は**位相法・虚気を加味しない**素の三柱＋蔵干（採用蔵干まで）のみ。幾何は **極座標（度×10 整数）**と**面積比（千分率整数）**。算法は `mock-v1` の `energyWeights`／`energyMock`（詳細は同節「Phase L2c」）。 |
+| `energyData` | **数理法・行動領域（L2c）**。入力は**位相法・虚気を加味しない**素の三柱＋蔵干（採用蔵干まで）のみ。`totalEnergy` に加え、五行別内訳 `energyByElement`（`WOOD`/`FIRE`/`EARTH`/`METAL`/`WATER`）を返す。幾何は **極座標（度×10 整数）**と**面積比（千分率整数）**。算法は `mock-v1` の `energyWeights`／`energyMock`（詳細は同節「Phase L2c」）。 |
 | `destinyBugs` | **出生時点で一生不変**の宿命系フラグ（L2c）。`destinyBugRules` 照合。**年運・大運天中殺・スライド**は [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) `dynamicTimeline.tenchuSatsuStatus` 側（[DOMAIN-GLOSSARY.md](./DOMAIN-GLOSSARY.md) §3.2）。 |
 
 守護神・忌神の**計算**は Layer2 の静的ルール内。**レスポンス**では [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §6.4 に従い **`interactionRules.guardianDeities` / `interactionRules.kishin`** に載せる（Orchestrator の組み立て。現状は L2a/b 直後に組み立て、`calculate` パイプライン上は **位相法より前**）。
@@ -254,6 +254,7 @@ flowchart LR
 
 - **Zod で厳格に固定**する（浮動小数のまま生返ししない）。
 - **幾何**: **各頂点の極座標（角度）**を **度×10 の整数**（`vertexAnglesDegTenths`）および**行動領域の面積比**を **千分率の整数**（`areaRatioPermille`）に集約。一般の二次メッシュ座標は L2c の契約外（将来拡張は別フィールド・別 `rulesetVersion` で検討）。
+- **五行内訳**: `energyByElement` は現行 ruleset の重みで集計した器データ（五行別の合計）を返す。第一段階では `sum(energyByElement) === totalEnergy` を保証し、画像系の高次スケール（例: 178）への正規化・補正式は別タスクで ruleset 拡張する。
 - **mock の頂点角度（実装計画に準拠）**: 宇宙盤の円周 360° を六十甲子 60 ステップに対応させる慣習（**1 ステップ 6°**）に合わせ、**年・月・日柱の六十甲子インデックス（0〜59）ごとに** `vertexAnglesDegTenths = index * 60` とする（UI 描画テストが本番近似に寄る）。
 - **面積比の算出**: 角度→単位円上の直交座標 `(cos θ, sin θ)` に変換し、**Shoelace 公式（靴ひもの公式）**で多角形面積を求める。辺長＋**ヘロンの公式**は `sqrt` 連鎖で誤差が増えやすいため L2c では用いない。最大面積（単位円に内接する正三角形の面積など）で除算して permille に**整数化**する。**オーバー時は 1000 クランプ**を検討。
 - **丸めとゴールデン**: 中間計算は浮動小数になりうるが、**レスポンスは整数のみ**。学派ごとに丸めが変わる場合は **後から `ruleset` メタ**へ移せるが、mock 段階ではエンジン固定でよい。
