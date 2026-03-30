@@ -38,7 +38,7 @@ flowchart TB
   dataJson[data/solar-terms/solar_terms.json]
   tsc[tsc dist]
   dev[開発者またはCI]
-  consumer[クライアント・Playground]
+  front[packages/sanmei-playground]
   py --> sky
   sky --> de421
   py --> dataJson
@@ -48,7 +48,7 @@ flowchart TB
   dev --> toolsDir
   dev --> pkg
   dev --> bff
-  consumer --> bff
+  front --> bff
 ```
 
 ### 節入りマスタのデータフロー
@@ -347,6 +347,7 @@ flowchart LR
 | 領域 | 主なファイル | 内容 |
 |------|----------------|------|
 | HTTP BFF | [packages/sanmei-bff/](../packages/sanmei-bff/)（[app.ts](../packages/sanmei-bff/src/app.ts)、[mapSanmeiErrorToHttp.ts](../packages/sanmei-bff/src/mapSanmeiErrorToHttp.ts)、[server.ts](../packages/sanmei-bff/src/server.ts)） | **Hono**。`POST /api/v1/calculate`・`GET /` 最小 Playground。[REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §7 で `SanmeiError`・`MALFORMED_JSON` を HTTP 化。Vitest は [src/__tests__/](../packages/sanmei-bff/src/__tests__/)（成功応答は `toMatchFileSnapshot`＋`meta` 正規化）。 |
+| Playground SPA | [packages/sanmei-playground/](../packages/sanmei-playground/) | 管理者用の Vite+React+TS SPA。Dumb UIで `POST /api/v1/calculate` の結果を可視化し、`error.code`/`details` を表示する。React Query の `queryKey` 依存同期を含む。 |
 | 公開 API | [index.ts](../packages/sanmei-core/src/index.ts) | 再エクスポート集約（`calculate`・`SanmeiError`・Layer2 Zod 型など）。 |
 | Orchestrator | [calculate.ts](../packages/sanmei-core/src/calculate.ts)、[schemas/calculateInput.ts](../packages/sanmei-core/src/schemas/calculateInput.ts)、[errors/sanmeiError.ts](../packages/sanmei-core/src/errors/sanmeiError.ts) | §2。TZ 要否→Layer1 深さ→mock ruleset。 |
 | Layer2 | [layer2/](../packages/sanmei-core/src/layer2/)、[schemas/layer2.ts](../packages/sanmei-core/src/schemas/layer2.ts)、[schemas/rulesetMockV1.ts](../packages/sanmei-core/src/schemas/rulesetMockV1.ts)、[src/data/rulesets/](../packages/sanmei-core/src/data/rulesets/) | 蔵干・主星・従星・守護神忌神・六親・**L2c**・**`resolveDynamicTimeline`**・**`applyLayer3aMock`**・[bundledRulesets.ts](../packages/sanmei-core/src/layer2/bundledRulesets.ts)。§2 参照 |
