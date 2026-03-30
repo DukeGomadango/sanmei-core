@@ -348,7 +348,7 @@ flowchart LR
 
 | 領域 | 主なファイル | 内容 |
 |------|----------------|------|
-| HTTP BFF | [packages/sanmei-bff/](../packages/sanmei-bff/)（[app.ts](../packages/sanmei-bff/src/app.ts)、[mapSanmeiErrorToHttp.ts](../packages/sanmei-bff/src/mapSanmeiErrorToHttp.ts)、[server.ts](../packages/sanmei-bff/src/server.ts)） | **Hono**。`POST /api/v1/calculate`・`GET /` 最小 Playground。[REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §7 で `SanmeiError`・`MALFORMED_JSON` を HTTP 化。`x-sanmei-debug-trace-key` と `SANMEI_DEBUG_TRACE_KEY` の一致時のみ `options.includeDebugTrace=true` を Core へ中継し、未許可時は `debugTrace` を返さない。Vitest は [src/__tests__/](../packages/sanmei-bff/src/__tests__/)（成功応答は `toMatchFileSnapshot`＋`meta` 正規化）。 |
+| HTTP BFF | [packages/sanmei-bff/](../packages/sanmei-bff/)（[app.ts](../packages/sanmei-bff/src/app.ts)、[mapSanmeiErrorToHttp.ts](../packages/sanmei-bff/src/mapSanmeiErrorToHttp.ts)、[server.ts](../packages/sanmei-bff/src/server.ts)） | **Hono**。`POST /api/v1/calculate`・`GET /` 最小 Playground。[REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §7 で `SanmeiError`・`MALFORMED_JSON` を HTTP 化。`options.includeDebugTrace=true` の中継は、**production では** `x-sanmei-debug-trace-key` と `SANMEI_DEBUG_TRACE_KEY` の一致時のみ許可、**非 production では**ヘッダ未指定でも許可。未許可時は `debugTrace` を返さない。Vitest は [src/__tests__/](../packages/sanmei-bff/src/__tests__/)（成功応答は `toMatchFileSnapshot`＋`meta` 正規化）。 |
 | Playground SPA | [packages/sanmei-playground/](../packages/sanmei-playground/) | 管理者用の Vite+React+TS SPA。SaaSレベルの Bento ダッシュボードで `POST /api/v1/calculate` の結果を可視化し、`error.code`/`details` を表示する（モバイルは `ControlPanel` を Accordion 折りたたみ）。React Query の `queryKey` 依存同期を含む。`CalculationTraceTabs`（Layer1/2/3 + Raw JSON）で `interactionRules.debugTrace` を表形式表示し、`TraceTransformer` で表示用 ViewModel に変換する。**UI運用メモ**: カード内余白は原則 `p-5`、タイトル下余白は `mb-4` を基準に揃える。タイムライン文言は `whitespace-nowrap` で単語途中改行を防ぐ。 |
 | 公開 API | [index.ts](../packages/sanmei-core/src/index.ts) | 再エクスポート集約（`calculate`・`SanmeiError`・Layer2 Zod 型など）。 |
 | Orchestrator | [calculate.ts](../packages/sanmei-core/src/calculate.ts)、[schemas/calculateInput.ts](../packages/sanmei-core/src/schemas/calculateInput.ts)、[errors/sanmeiError.ts](../packages/sanmei-core/src/errors/sanmeiError.ts) | §2。TZ 要否→Layer1 深さ→mock ruleset。 |
@@ -456,6 +456,7 @@ cd packages/sanmei-core && npm run build && npm run test
 cd packages/sanmei-bff && npm run build && npm test   # 事前にコア build 必須
 npm run dev -w @sanmei/sanmei-playground              # Playground 開発サーバ
 npm run build -w @sanmei/sanmei-playground            # Playground ビルド確認
+npm run dev -w @sanmei/sanmei-bff                     # Playground の /api プロキシ先（localhost:3000）
 ```
 
 ---
