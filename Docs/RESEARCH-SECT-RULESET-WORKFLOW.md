@@ -216,8 +216,20 @@
     locator: 十大主星算出解説
     quotation: 五行関係と陰陽一致で主星を導く
     confidence: LOW
-- status: PENDING-MEDIUM
-- notes: 実装モデルとして妥当だが、主星対応行列の中身は学派差が大きいため監修根拠で固定する。
+  - sourceId: SRC-SANMEIGAKU-ACADEMY-STARS-2018
+    type: paper
+    title: 算命学アカデミーオンライン｜十大主星と十二大従星の計算方法
+    locator: 十大主星節（干×干の表、0-origin 行列）
+    quotation: 十大主星は日干と蔵干を含めた他の干との関係で決まり、表（行列）で算出できる
+    confidence: MEDIUM
+  - sourceId: SRC-SHIZENHOU-TENMAINSTARS-2026
+    type: paper
+    title: 自然法算命学｜十大主星の見方
+    locator: 本文冒頭（相生相剋比和と陰陽和合/反発）
+    quotation: 日干と他の気の関係（相生相剋比和、陰陽）を十大主星に置換して判断する
+    confidence: MEDIUM
+- status: PENDING-VERIFICATION
+- notes: 「日干×対象干（五行＋陰陽）」の算出軸は独立2系統で再確認できた。行列セルの最終固定（特に流派差）は L0 根拠または監修メモ待ち。従星側突合手順・主星の第二ソースは [RESEARCH-STAR-MATRIX-DIFF-ITER28.md](./RESEARCH-STAR-MATRIX-DIFF-ITER28.md)。
 
 ### ruleId: research-sub-stars-daystem-branch-v1
 - domainArea: subordinate-stars
@@ -231,8 +243,86 @@
     locator: 算命学の命式説明部
     quotation: 日干と地支の関係で従星を読む枠組み
     confidence: LOW
-- status: PENDING-LOW
-- notes: 算出枠は妥当だが、出典強度が弱く他体系（十二運ロジック）との混線注意。監修資料で補強するまで固定しない。
+  - sourceId: SRC-SANMEIGAKU-ACADEMY-STARS-2018
+    type: paper
+    title: 算命学アカデミーオンライン｜十大主星と十二大従星の計算方法
+    locator: 十二大従星節（支×干の表、0-origin 行列）
+    quotation: 十二大従星は日干と地支の対応で算出し、行列化で機械判定できる
+    confidence: MEDIUM
+  - sourceId: SRC-OYAMA-JUNIDAIJUUSEI-TABLE-2026
+    type: paper
+    title: 小山清水大師｜十二大従星
+    locator: 本文冒頭と対応表
+    quotation: 十二大従星は生まれた日の干と年/月/日の地支を見て算出する
+    confidence: MEDIUM
+- status: PENDING-VERIFICATION
+- notes: 算出軸（日干×地支）とテーブル運用は独立2系統で一致。表記ゆれの正規化は **18.10.1** 固定。セル突合ログは [RESEARCH-STAR-MATRIX-DIFF-ITER28.md](./RESEARCH-STAR-MATRIX-DIFF-ITER28.md)。
+
+### ruleId: research-tenchu-b1-table-catalog-v1
+- domainArea: tenchu-b1
+- statement: 宿命天中殺（B1）は ruleset の表（年・月・日キー群）として保持し、出生時点で凍結した判定結果を返す。
+- inputs: insen.year/month/day pillar key, ruleset.destinyBugRules
+- expectedOutput: tenchuSatsuStatus.natal + destinyBugs snapshot
+- evidence:
+  - sourceId: SRC-SHIZENHOU-SHUKUMEICHUSATSU-2026
+    type: paper
+    title: 自然法算命学｜宿命中殺
+    locator: 宿命中殺の種類一覧
+    quotation: 生年中殺・生月中殺・生日中殺など宿命側の分類が存在する
+    confidence: MEDIUM
+  - sourceId: SRC-SANMEI-STOCK-TENCHUSATSU-INDEX-2026
+    type: paper
+    title: 算命学Stock｜天中殺
+    locator: 天中殺カテゴリ一覧（運命天中殺/宿命天中殺）
+    quotation: 宿命天中殺と運命天中殺のカテゴリ分離を確認できる
+    confidence: MEDIUM
+  - sourceId: SRC-SANMEI-STOCK-FATE-YEAR-2026
+    type: paper
+    title: 算命学Stock｜生年天中殺（`shukumeiTenchusatsuYear` 対応目安）
+    locator: https://sanmei-stock.com/basic/tenchusatsu/fate/year-of-birth_tenchusatsu/
+    quotation: 宿命天中殺配下の「生年」系個別ページが存在する
+    confidence: MEDIUM
+  - sourceId: SRC-SANMEI-STOCK-FATE-MONTH-2026
+    type: paper
+    title: 算命学Stock｜生月天中殺（`shukumeiTenchusatsuMonth` 対応目安）
+    locator: https://sanmei-stock.com/basic/tenchusatsu/fate/month-of-birth_tenchusatsu/
+    quotation: 宿命天中殺配下の「生月」系個別ページが存在する
+    confidence: MEDIUM
+  - sourceId: SRC-SANMEI-STOCK-FATE-DAY-2026
+    type: paper
+    title: 算命学Stock｜生日天中殺（`abnormalKanshiNormal` 対応目安）
+    locator: https://sanmei-stock.com/basic/tenchusatsu/fate/day-of-birth_tenchusatsu/
+    quotation: 宿命天中殺配下の「生日」系個別ページが存在する
+    confidence: MEDIUM
+  - sourceId: SRC-SANMEI-STOCK-FATE-EARTH-2026
+    type: paper
+    title: 算命学Stock｜日座天中殺（`abnormalKanshiDark` 対応目安・1:1 未確定）
+    locator: https://sanmei-stock.com/basic/tenchusatsu/fate/earth_tenchusatsu/
+    quotation: 宿命天中殺配下の日柱系個別ページが存在する
+    confidence: LOW
+- status: PENDING-VERIFICATION
+- notes: カテゴリ分離に加え、`destinyBugRules` の **4 機械キーそれぞれ**に二次ソース（Stock 個別ページ）を紐付け済み（Iteration 28）。**表の中身（どの干支キーが列挙されるか）**は版付き一次または監修メモが必要。機械キーと API の対応は **18.10.2**。
+
+### ruleId: research-tenchu-b2-slide-dsl-v1
+- domainArea: tenchu-b2
+- statement: 年運・大運天中殺のスライド/期間条件は DSL で ruleset 外部化し、計算結果は dynamic フラグへ機械出力する。
+- inputs: annual/daiun timeline, tenchuRules.b2
+- expectedOutput: tenchuSatsuStatus.dynamic (period/slide flags)
+- evidence:
+  - sourceId: SRC-SHIZENHOU-DAIUN-TENCHUSATSU-2026
+    type: paper
+    title: 自然法算命学｜大運天中殺
+    locator: 本文（大運天中殺の概念）
+    quotation: 大運天中殺という動態カテゴリが存在し、宿命側とは別に扱われる
+    confidence: MEDIUM
+  - sourceId: SRC-SANMEI-STOCK-TENCHUSATSU-INDEX-2026
+    type: paper
+    title: 算命学Stock｜天中殺
+    locator: 天中殺カテゴリ一覧（大運天中殺導線）
+    quotation: 天中殺に動態カテゴリ（大運）への導線がある
+    confidence: LOW
+- status: PENDING-MEDIUM
+- notes: 動態カテゴリの存在は確認できるが、スライド成立表・期間境界の if/then は未確定。`research-tenchu-b2-v1` は引き続き index 集合照合の足場として運用する。監修質問票は [OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) 論点8「B2 監修質問票」。
 
 ### ruleId: research-bodymap-node-topology-v1
 - domainArea: family-bodymap
@@ -1373,5 +1463,135 @@
 **残（文献・L0）**:
 - Iteration 25 項番 2〜4（上表）は未完了。アルゴリズム値の L0 確定は引き続き P0。
 
+### 18.9 Iteration 26（2026-03-31 / 主星・従星・天中殺ループ再開）
+
+**対象**:
+- `research-main-stars-vector-logic-v1`
+- `research-sub-stars-daystem-branch-v1`
+- 天中殺の B1/B2 を ruleId 分割して起票
+
+**実施**:
+- 算命学文脈に限定して公開情報を再取得（算命学アカデミー、自然法算命学、小山清水大師、算命学Stock）
+- 主星/従星は「概念説明」ではなく、行列化可能な記述（干×干、支×干）を優先抽出
+- 天中殺は「宿命カテゴリ（B1）」と「動態カテゴリ（B2）」の分離可否を確認
+
+**追加 sourceId（Iteration 26）**:
+- `SRC-SANMEIGAKU-ACADEMY-STARS-2018`
+- `SRC-SHIZENHOU-TENMAINSTARS-2026`
+- `SRC-OYAMA-JUNIDAIJUUSEI-TABLE-2026`
+- `SRC-SHIZENHOU-SHUKUMEICHUSATSU-2026`
+- `SRC-SHIZENHOU-DAIUN-TENCHUSATSU-2026`
+- `SRC-SANMEI-STOCK-TENCHUSATSU-INDEX-2026`
+
+**判定更新**:
+- `research-main-stars-vector-logic-v1`: `PENDING-MEDIUM` → `PENDING-VERIFICATION`
+- `research-sub-stars-daystem-branch-v1`: `PENDING-LOW` → `PENDING-VERIFICATION`
+- 新規起票:
+  - `research-tenchu-b1-table-catalog-v1`（`PENDING-MEDIUM`）
+  - `research-tenchu-b2-slide-dsl-v1`（`PENDING-MEDIUM`）
+
+**運用判断**:
+- 主星/従星は G0（`L2_SECONDARY`）へ近づいたが、行列セルの最終固定は `L0` 根拠待ち。
+- 天中殺はカテゴリ分離までは確認できた一方、B2 スライド条件の真理値表は依然未確定。
+- したがって、B2 は現行どおり `research-tenchu-b2-v1` の機械足場（index 集合照合）を維持する。
+
+**次ループ（Iteration 27）**:
+1. 主星/従星の表記揺れ（天禄/天緑、天恍/天洸）の正規化規則を起票
+2. B1 テーブル（`destinyBugRules` 各リスト）の sourceId・locator 対応表を作成
+3. B2 スライドの監修質問票（期間起算、境界、重複優先）を `OPEN-QUESTIONS` と連動で追加
+
+### 18.10 Iteration 27（2026-03-31 / 表記正規化・B1 対応表・B2 質問票）
+
+**対象**:
+- 研究用 `starLabels` への固有名取り込み時の表記ゆれ
+- `research-tenchu-b1-table-catalog-v1` の機械鍵 ↔ 文献ラベル対応
+- `research-tenchu-b2-slide-dsl-v1` の監修質問票（草案）
+
+#### 18.10.1 十大主星・十二大従星の表記正規化（research / `starLabels` 取り込み用）
+
+外部表・ブログから固有名をコピーする際、`starLabels` の**値**（および将来の監修カタログ）は次の **正規表記**に寄せる。`MA_*` / `SU_*` のキーは変更しない。
+
+| よくある表記 | 正規表記（本プロジェクト） | メモ |
+|--------------|---------------------------|------|
+| 天緑星 | 天禄星 | 「緑」は誤植・俗字の可能性（例: 小山清水大師サイトの表で確認）。**禄**に統一 |
+| 天洸星 | 天恍星 | アカデミー系は「天洸」、自然法算命学は「天恍」。漢字表記は**恍**へ寄せる |
+| 竜高星 | 龍高星 | 旧字体・サイト表記差。常用は**龍** |
+
+運用:
+- サイトによって **天極／天貴／天庫／天馳** と **天极／天贵／天库／天驰** が混在する。公開表セル突合（`researchStarMatrixDiff.test.ts`）では **後者へ寄せて**比較する。`starLabels` の最終字形は監修で別途固定する。
+- 新規ソースを取り込むときは上表を適用後、**出典側の原文表記**を `notes` または `sourceRevision` に残す。
+- `starLabels` の値が正規表記と異なる既存データは、ruleset の `sourceRevision` 上げと同時に一括置換する（CI の行列キー集合テストは不変）。
+
+#### 18.10.2 `destinyBugRules`（B1）とコード・API の対応表（v1 機械契約）
+
+`sanmei-core` は `mock-v1` 由来の **4 リスト**のみを B1 で参照する。監修文献の「生年中殺」等と突合するときは本表を正とする（一覧の**中身**は `rulesetVersion` ごとに差し替え）。
+
+| `ruleset.destinyBugRules` キー | 照合する柱キー | `resolveDestinyBugs` が付与する code | `tenchuSatsuStatus.natal` フィールド | 文献ラベルの目安（非拘束） |
+|--------------------------------|----------------|----------------------------------------|-------------------------------------|---------------------------|
+| `shukumeiTenchusatsuYear` | 年柱 `庚辰` 形式 | `SHUKUMEI_TENCHUSATSU_YEAR` | `listedInShukumeiTenchusatsuYear` | 算命学Stock: [生年天中殺](https://sanmei-stock.com/basic/tenchusatsu/fate/year-of-birth_tenchusatsu/)。自然法: 生年中殺 |
+| `shukumeiTenchusatsuMonth` | 月柱 同上 | `SHUKUMEI_TENCHUSATSU_MONTH` | `listedInShukumeiTenchusatsuMonth` | Stock: [生月天中殺](https://sanmei-stock.com/basic/tenchusatsu/fate/month-of-birth_tenchusatsu/)。自然法: 生月中殺 |
+| `abnormalKanshiNormal` | 日柱 同上 | `IJOU_KANSHI_NORMAL` | `listedInAbnormalKanshiNormal` | Stock: [生日天中殺](https://sanmei-stock.com/basic/tenchusatsu/fate/day-of-birth_tenchusatsu/) と概念近接。**真理値は監修** |
+| `abnormalKanshiDark` | 日柱 同上 | `IJOU_KANSHI_DARK` | `listedInAbnormalKanshiDark` | 「暗干支」系。Stock: [日座天中殺](https://sanmei-stock.com/basic/tenchusatsu/fate/earth_tenchusatsu/) 等との**1:1対応は未確定**（`PENDING`） |
+
+**次アクション（文献）**: 各行に `sourceId`・版・頁の `locator` を埋め、`research-tenchu-b1-table-catalog-v1` の `evidence` を増やす。
+
+#### 18.10.3 B2 スライド（監修質問票）
+
+本体は [OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) 論点 **8** 直下の「B2 監修質問票（草案）」に移した。
+
+**実施結果（Iteration 27）**:
+- 表記正規化表（18.10.1）を固定
+- B1 機械鍵対応表（18.10.2）を固定
+- B2 質問票を OPEN-QUESTIONS に起票
+
+**次ループ（Iteration 28）**:
+1. B1 各行へ `L0` locator を1件以上紐付け、`research-tenchu-b1-table-catalog-v1` を `PENDING-VERIFICATION` へ
+2. 主星・従星行列を公開表（アカデミー数値表 vs 別系統）でセル単位突合し、相違セルを issue 化
+3. B2 DSL の入力型草案（期間・`sexagenaryIndex` オフセット・干合条件の有無）を Zod コメント相当で `rulesetMockV1` にメモリンク
+
+### 18.11 Iteration 28（2026-03-31 / B1 二次紐付け・従星セル突合・B2 Zod メモ）
+
+**対象**:
+- `research-tenchu-b1-table-catalog-v1` の evidence 拡張と status 更新
+- 十二大従星の公開表セル突合ログ
+- `rulesetMockV1.ts` に B2 DSL 拡張の型メモ
+
+**実施**:
+- B1: `destinyBugRules` の 4 キーについて、算命学Stock の**宿命個別ページ URL**を `evidence` に追加（`abnormalKanshiDark` は対応目安である旨を `LOW` で明示）
+- 従星: [RESEARCH-STAR-MATRIX-DIFF-ITER28.md](./RESEARCH-STAR-MATRIX-DIFF-ITER28.md) にアカデミー×小山の突合手順と**確定相違セル**（手動）を記載。主星の全セル突合は Iteration 29 に延期
+- B2: `TenchuRulesB2Schema` 直上の JSDoc に、将来の DSL フィールド候補と [OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) 論点8へのリンクを追記
+
+**判定更新**:
+- `research-tenchu-b1-table-catalog-v1`: `PENDING-MEDIUM` → `PENDING-VERIFICATION`
+
+**追加 sourceId（Iteration 28）**:
+- `SRC-SANMEI-STOCK-FATE-YEAR-2026`
+- `SRC-SANMEI-STOCK-FATE-MONTH-2026`
+- `SRC-SANMEI-STOCK-FATE-DAY-2026`
+- `SRC-SANMEI-STOCK-FATE-EARTH-2026`
+
+**残（意図的）**:
+- B1 の **L0_PRIMARY_VERIFIED**（版・ページ単位の真理値表）は未取得
+- 従星 120 セル全件の自動突合は **Iteration 29（18.12）** で Vitest 化済み
+
+**次ループ（Iteration 29）**:
+1. 主星 10×10 の第二ソース固定とアカデミー数値表の全セル突合
+2. `researchStarMatrixDiff` を Vitest または `scripts/` で CI 化し、相違を本ファイルへレポート
+3. B1 各リストの座標付きゴールデン（research 専用フィクスチャ）
+
+### 18.12 Iteration 29（2026-03-31 / 従星 120 セル CI・主星内部整合）
+
+**実施**:
+- [researchStarMatrixDiff.test.ts](../packages/sanmei-core/src/layer2/researchStarMatrixDiff.test.ts): アカデミー主星の **数値×漢字** 全セル整合、**数値表の Latin 検証**、**算命学Z塾** の星名 1〜10 順と ID 基底名の突合、従星 **アカデミー×小山** 120 セル突合（正規化後 **116/120** 一致。既知 S1 差分 **4 セル**はテストの許容集合に明示。小山 **酉×甲** はサイト表との転記修正を fixture に反映）
+- [resolveTenchuSatsuStatusB1.test.ts](../packages/sanmei-core/src/layer2/resolveTenchuSatsuStatusB1.test.ts): 天中殺 B1 の **柱キー（`庚辰` 形式）** 照合ゴールデン（`destinyBugRules` を検証用に上書きした `mock-v1` 派生）
+- ログ更新: [RESEARCH-STAR-MATRIX-DIFF-ITER28.md](./RESEARCH-STAR-MATRIX-DIFF-ITER28.md) §3・§5
+
+**残（意図的）**:
+- 主星の **別サイト 10×10 漢字表** 全セル突合（公開転記ソースの選定待ちでも可）
+- 監修確定後、`destinyBugRules` **本文**と B1 ゴールデンの同期（現状は research バンドルの [researchDestinyBugRulesSubset.ts](../packages/sanmei-core/src/layer2/researchDestinyBugRulesSubset.ts) サブセット。`mock-v1.json` は空のまま）
+
+### 18.13 スプリント3（B2 本番スライド）— 状態
+
+- **現状**: `research-tenchu-b2-v1` の六十甲子 **index 集合**足場を維持（[OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) 論点8 質問票の回答・DSL 決定表化がクリティカルパス）。実装拡張は決定表 FIX 後。
 
 

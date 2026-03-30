@@ -32,8 +32,16 @@
 8. **天中殺の「スライド」と API の責務境界**（**採用方針の骨子**）  
    - **条件の外部化**: スライド成立条件はハードコードせず、**JSON またはドメイン向け DSL**で `ruleset` に版付きで保持する（無限 `if` 回避）。  
    - **機械部分は API が完結**: API コアは当該 `ruleset` を解釈し、**ゴールデンテスト可能な出力**（例: 機械的に確定する候補期間・上限ポテンシャル、`isShifted` 相当、スコア）を返す。**占断の数値・フラグに効く機械的条件の再適用をフロント専用ロジックに置かない**（実装二重化とテスト分裂を防ぐ）。  
-   - **鑑定実務との差**: 問診・生活状況に依る**ナラティブな「実際に稼働しているか」の説明**は API が持たず、フロント／LLM に委ねてよい。ただし **API が返した機械的结果と矛盾する上書き**（別の `isShifted` をクライアントだけで決める等）は行わない。  
+   - **鑑定実務との差**: 問診・生活状況に依る**ナラティブな「実際に稼働しているか」の説明**は API が持たず、フロント／LLM に委ねてよい。ただし **API が返した機械的結果と矛盾する上書き**（別の `isShifted` をクライアントだけで決める等）は行わない。  
    - **監修で確定すること**: 上記 DSL／ルール表の真理値、レスポンスに載せるフィールドの最小セット。[REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) の `tenchuSatsuStatus` 説明および [SECT-RULESET-MATRIX.template.md](./SECT-RULESET-MATRIX.template.md) の `isShifted` 行と整合させる。
+   - **追跡 ruleId（research）**: 宿命側は `research-tenchu-b1-table-catalog-v1`、動態側は `research-tenchu-b2-slide-dsl-v1` を起点に、B1 表の source 対応表と B2 スライド DSL を分離して進める（[RESEARCH-SECT-RULESET-WORKFLOW.md](./RESEARCH-SECT-RULESET-WORKFLOW.md) Iteration 26 以降）。B1 の機械キー対応表は同ドキュメント **18.10.2**；B1 の二次ページ紐付けは **18.11**。主星・従星の公開表セル突合は [RESEARCH-STAR-MATRIX-DIFF-ITER28.md](./RESEARCH-STAR-MATRIX-DIFF-ITER28.md)。
+   - **研究系の星名表示**: `meta.display.starLabels` の漢字は **L2_SECONDARY**（教材表ベース。`takao-v1` 監修星名の代替ではない）。[PLAN-RESEARCH-YOUSEN-AND-TENCHU.md](./PLAN-RESEARCH-YOUSEN-AND-TENCHU.md) §3.1。
+   - **B2 監修質問票（草案）**（`research-tenchu-b2-slide-dsl-v1` 向け。回答が揃うまで DSL 真理値は固定しない）:
+     - **年運天中殺**: 1 周期の長さ（干支ベースか暦年か）。「2 年連続」の境界は**立春**か**年干支変わり目（簡易）**か。
+     - **大運天中殺**: 「2 旬（20 年）連続」説を採用するか。`research` R1 の **10 年フェーズ**との整合（1 フェーズずれ／2 フェーズ連続の定義）。
+     - **スライド**: 成立条件（初旬・三旬の異常干支、干合、接運など）を**列挙可能な if/then**に落とせるか。複数候補が同時に成立したときの**優先度**。
+     - **B1 との重複**: 宿命フラグが既に立っている命式で、年運/大運 B2 を**上書きするか独立フラグか**（`tenchuSatsuStatus` のキー設計）。
+     - **欠損時**: `birthTime` 欠損・節入り当日のとき、B2 を `warning` のみにするか `continue` か（上記 **暦・時刻 1** の 422 契約と切り分け）。
 9. **虚気（`Kyoki`）**: 干合・月支条件・`shadowYousen` の生成条件を学派別に列挙。
 10. **格法・位相法**: `allowGohouInKaku` が効く範囲（半会・支合・方三位等の一覧と優先度）。
 11. **位相法の拡張集合**: `research` で扱う候補（干合・納音・律音・天剋地冲・大半会）を `kind` と `sourceLevel` 付きで分離管理するか。

@@ -67,6 +67,8 @@
 
 - 行列参照（ruleset）で決定する。
 - 語彙は算命学体系を採用し、他術体系の ID を持ち込まない。
+- **表示名**: 安定 ID（`MA_*` / `SU_*`）は ruleset バンドル内の **`starLabels`**（`packages/sanmei-core` の [researchStarLabels.ts](../packages/sanmei-core/src/layer2/researchStarLabels.ts) ＋ [researchStarTables.ts](../packages/sanmei-core/src/layer2/researchStarTables.ts)）で **220 キー全件**を生成し、行列セル値集合と一致させる。HTTP 応答では **`meta.display.starLabels`** に当該命式の主星5＋従星3に出た ID のみを載せる（採用: [PLAN-RESEARCH-YOUSEN-AND-TENCHU.md](./PLAN-RESEARCH-YOUSEN-AND-TENCHU.md) §3.1 **A1**）。研究系の値は **L2_SECONDARY**（アカデミー公開表ベースの漢字星名。監修 `takao-v1` とは別ライン）。
+- **固有名取り込み時の表記**: Web 資料の漢字ゆれ（例: 天禄/天緑、天恍/天洸、竜/龍）は [RESEARCH-SECT-RULESET-WORKFLOW.md](./RESEARCH-SECT-RULESET-WORKFLOW.md) **18.10.1** の正規化表に合わせる。公開表セル突合ログは [RESEARCH-STAR-MATRIX-DIFF-ITER28.md](./RESEARCH-STAR-MATRIX-DIFF-ITER28.md)。
 
 ### 4.3 守護神/忌神
 
@@ -78,6 +80,12 @@
 - 入力は **位相法・虚気を加味しない素の命式**（Layer1 + Layer2a/b の結果）に限定する。
 - Layer3a（位相法・虚気）の結果を L2c に逆流させない。
 - `research-v1` の暫定規約として、`energyData` の重みは `mock-v1` 相当の重み系を流用可とする（出典レベルは `L2/L1` 扱い）。
+
+### 4.5 天中殺（`dynamicTimeline.tenchuSatsuStatus`）
+
+- **B1**: `destinyBugRules` による宿命テーブル照合（年・月・日柱キーと `destinyBugs` スナップショット）。実装は [resolveTenchuSatsuStatus.ts](../packages/sanmei-core/src/layer2/resolveTenchuSatsuStatus.ts) を参照。JSON キー・`DestinyBugCode`・文献ラベルの対応は [RESEARCH-SECT-RULESET-WORKFLOW.md](./RESEARCH-SECT-RULESET-WORKFLOW.md) **18.10.2**。
+- **B2 DSL**（`ruleset.tenchuRules.b2`、`dslVersion: research-tenchu-b2-v1`）: 現時点では **年運の `sexagenaryIndex`** および **大運現在フェーズの `sexagenaryIndex`** が、ruleset に列挙した整数集合に含まれるかどうかの **機械照合のみ**。占術上の「天中殺期」の定義そのものではなく、**後から真理値表・スライド条件へ差し替え可能な足場**である。監修フローは [RESEARCH-SECT-RULESET-WORKFLOW.md](./RESEARCH-SECT-RULESET-WORKFLOW.md) §4。
+- 応答は `tenchuSatsuStatus.phase === "B2_DYNAMIC"` 時に `dynamic` オブジェクトを載せる。`meta.warnings` に B2 の限定事項を付与する。
 
 ---
 

@@ -14,6 +14,21 @@ npm test    # sanmei-core ビルド後、コア Test → BFF Test の順
 npm run build
 ```
 
+Playground を使った開発（推奨）:
+
+```bash
+# 1) core を先に build（playground / bff の型参照先）
+npm run build -w @sanmei/sanmei-core
+
+# 2) BFF 起動（http://localhost:3000）
+npm run dev -w @sanmei/sanmei-bff
+
+# 3) 別ターミナルで Playground 起動（http://localhost:5173）
+npm run dev -w @sanmei/sanmei-playground
+```
+
+Playground は `/api` を BFF（`localhost:3000`）へプロキシします。
+
 BFF 単体（例）:
 
 ```bash

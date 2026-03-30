@@ -203,7 +203,19 @@
 | `daiun` | `startAge`（立運年齢。例: 日数÷3 の**丸め規則は ruleset 明記**）、`phases[]`（10 年単位の干支＋星。拡張として `interactions?` を保持可）、`currentPhase`（`asOf` で選択） |
 | `annual` | 年運: `asOf` 年の干支・関連星 |
 | `monthly` | 月運: `asOf` 月の干支・関連星 |
-| `tenchuSatsuStatus` | 天中殺の稼働状況。大運天中殺の**スライド**は **JSON／DSL 化した `ruleset`** で定義し、API が解釈して**ゴールデン可能なフラグ・期間・スコア**を返す。**機械的条件の再計算をフロント専用ロジックに置かない**。問診に依る**ナラティブな説明**のみフロント／LLM の責務（API 出力と矛盾する上書きはしない）。詳細は [OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) §8。 |
+| `tenchuSatsuStatus` | 天中殺の稼働状況。大運天中殺の**スライド**は **JSON／DSL 化した `ruleset`** で定義し、API が解釈して**ゴールデン可能なフラグ・期間・スコア**を返す。**機械的条件の再計算をフロント専用ロジックに置かない**。問診に依る**ナラティブな説明**のみフロント／LLM の責務（API 出力と矛盾する上書きはしない）。詳細は [OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) §8。研究系の先行 DSL 断片として **`ruleset.tenchuRules.b2`**（`dslVersion: research-tenchu-b2-v1`：年運／大運現フェーズの六十甲子 **index 集合照合**）が [RESEARCH-SECT-SPEC.md](./RESEARCH-SECT-SPEC.md) §4.5・[IMPLEMENTATION.md](./IMPLEMENTATION.md) Layer2 節に記載される。 |
+
+#### 6.3.1 `tenchuSatsuStatus` 推奨キー（研究系・最小）
+
+クライアント・テストの安定化のため、研究 ruleset でオブジェクトを返すときは次を**推奨**する（追加キーは `passthrough` 等で許容可）。
+
+| キー | 意味 |
+|------|------|
+| `phase` | `"B1_NATAL_RULES_TABLE"` または B2 併用時 `"B2_DYNAMIC"` |
+| `sourceLevel` | 例: `L2_SECONDARY` |
+| `natal` | `yearPillarKey` / `monthPillarKey` / `dayPillarKey`（`庚辰` 形式）および `listedInShukumeiTenchusatsuYear` 等 4 つの boolean |
+| `destinyBugs` | `baseProfile.destinyBugs` と同一スナップショット（read-only 補助） |
+| `dynamic` | B2 のみ。**`phase` が B2 を含むとき**に `dslVersion`・年／大運 index・窓フラグ等（[RESEARCH-SECT-SPEC.md](./RESEARCH-SECT-SPEC.md) §4.5） |
 
 ### 6.4 `InteractionRules`
 
