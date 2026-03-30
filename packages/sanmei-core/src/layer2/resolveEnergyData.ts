@@ -1,4 +1,6 @@
 import type { Branch, Stem } from "../layer1/enums.js";
+import { Element } from "../layer1/enums.js";
+import { STEM_ELEMENT } from "../layer1/stemBranchTables.js";
 import type { InsenLayer2 } from "../schemas/layer2.js";
 import type { BundledRuleset } from "../schemas/rulesetMockV1.js";
 import { getStemCharFromId } from "./stemBranchKey.js";
@@ -20,6 +22,15 @@ function actionAreaSizeFromTotal(
   return 4;
 }
 
+function elementKeyFromStem(stem: Stem): "WOOD" | "FIRE" | "EARTH" | "METAL" | "WATER" {
+  const element = STEM_ELEMENT[stem];
+  if (element === Element.WOOD) return "WOOD";
+  if (element === Element.FIRE) return "FIRE";
+  if (element === Element.EARTH) return "EARTH";
+  if (element === Element.METAL) return "METAL";
+  return "WATER";
+}
+
 /** L2c: 素の三柱＋蔵干（採用干）のみ。位相・虚気は参照しない。 */
 export function resolveEnergyData(insen: InsenLayer2, ruleset: BundledRuleset) {
   const w = ruleset.energyWeights;
@@ -31,9 +42,19 @@ export function resolveEnergyData(insen: InsenLayer2, ruleset: BundledRuleset) {
     insen.month.zokan.activeStem as Stem,
     insen.day.zokan.activeStem as Stem,
   ];
+  const energyByElement = {
+    WOOD: 0,
+    FIRE: 0,
+    EARTH: 0,
+    METAL: 0,
+    WATER: 0,
+  };
   let totalEnergy = 0;
   for (const s of stems) {
-    totalEnergy += weightForStem(s, w);
+    const weight = weightForStem(s, w);
+    totalEnergy += weight;
+    const key = elementKeyFromStem(s);
+    energyByElement[key] += weight;
   }
   const actionAreaSize = actionAreaSizeFromTotal(totalEnergy, ruleset.energyMock.actionAreaThresholds);
   const vertexAnglesDegTenths = vertexAnglesDegTenthsForPillars(
@@ -44,6 +65,7 @@ export function resolveEnergyData(insen: InsenLayer2, ruleset: BundledRuleset) {
   const areaRatioPermille = areaRatioPermilleFromVertexTenths(vertexAnglesDegTenths);
   return {
     totalEnergy,
+    energyByElement,
     actionAreaSize,
     actionAreaGeometry: {
       vertexAnglesDegTenths,

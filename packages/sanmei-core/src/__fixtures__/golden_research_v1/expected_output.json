@@ -71,6 +71,13 @@
     ],
     "energyData": {
       "totalEnergy": 23,
+      "energyByElement": {
+        "WOOD": 10,
+        "FIRE": 0,
+        "EARTH": 0,
+        "METAL": 10,
+        "WATER": 3
+      },
       "actionAreaSize": 3,
       "actionAreaGeometry": {
         "vertexAnglesDegTenths": [960, 1080, 2400],
@@ -85,16 +92,188 @@
       "direction": "forward",
       "startDayDiff": 22,
       "phases": [
-        { "phaseIndex": 0, "sexagenaryIndex": 19, "spanYears": 10 },
-        { "phaseIndex": 1, "sexagenaryIndex": 20, "spanYears": 10 },
-        { "phaseIndex": 2, "sexagenaryIndex": 21, "spanYears": 10 },
-        { "phaseIndex": 3, "sexagenaryIndex": 22, "spanYears": 10 },
-        { "phaseIndex": 4, "sexagenaryIndex": 23, "spanYears": 10 },
-        { "phaseIndex": 5, "sexagenaryIndex": 24, "spanYears": 10 },
-        { "phaseIndex": 6, "sexagenaryIndex": 25, "spanYears": 10 },
-        { "phaseIndex": 7, "sexagenaryIndex": 26, "spanYears": 10 }
+        {
+          "phaseIndex": 0,
+          "sexagenaryIndex": 19,
+          "spanYears": 10,
+          "interactions": [
+            {
+              "kind": "SHIGO",
+              "targetPillar": "MONTH",
+              "fortuneType": "DAIUN",
+              "phaseIndex": 0,
+              "involved": ["未", "午"]
+            }
+          ]
+        },
+        {
+          "phaseIndex": 1,
+          "sexagenaryIndex": 20,
+          "spanYears": 10,
+          "interactions": [
+            {
+              "kind": "HANKAI",
+              "targetPillar": "YEAR",
+              "fortuneType": "DAIUN",
+              "phaseIndex": 1,
+              "involved": ["申", "辰"]
+            },
+            {
+              "kind": "HANKAI",
+              "targetPillar": "DAY",
+              "fortuneType": "DAIUN",
+              "phaseIndex": 1,
+              "involved": ["申", "辰"]
+            }
+          ]
+        },
+        {
+          "phaseIndex": 2,
+          "sexagenaryIndex": 21,
+          "spanYears": 10,
+          "interactions": [
+            {
+              "kind": "SHIGO",
+              "targetPillar": "YEAR",
+              "fortuneType": "DAIUN",
+              "phaseIndex": 2,
+              "involved": ["酉", "辰"]
+            },
+            {
+              "kind": "SHIGO",
+              "targetPillar": "DAY",
+              "fortuneType": "DAIUN",
+              "phaseIndex": 2,
+              "involved": ["酉", "辰"]
+            }
+          ]
+        },
+        {
+          "phaseIndex": 3,
+          "sexagenaryIndex": 22,
+          "spanYears": 10,
+          "interactions": [
+            {
+              "kind": "TAICHU",
+              "targetPillar": "YEAR",
+              "fortuneType": "DAIUN",
+              "phaseIndex": 3,
+              "involved": ["辰", "戌"]
+            },
+            {
+              "kind": "HANKAI",
+              "targetPillar": "MONTH",
+              "fortuneType": "DAIUN",
+              "phaseIndex": 3,
+              "involved": ["午", "戌"]
+            },
+            {
+              "kind": "TAICHU",
+              "targetPillar": "DAY",
+              "fortuneType": "DAIUN",
+              "phaseIndex": 3,
+              "involved": ["辰", "戌"]
+            }
+          ]
+        },
+        {
+          "phaseIndex": 4,
+          "sexagenaryIndex": 23,
+          "spanYears": 10,
+          "interactions": []
+        },
+        {
+          "phaseIndex": 5,
+          "sexagenaryIndex": 24,
+          "spanYears": 10,
+          "interactions": [
+            {
+              "kind": "HANKAI",
+              "targetPillar": "YEAR",
+              "fortuneType": "DAIUN",
+              "phaseIndex": 5,
+              "involved": ["子", "辰"]
+            },
+            {
+              "kind": "TAICHU",
+              "targetPillar": "MONTH",
+              "fortuneType": "DAIUN",
+              "phaseIndex": 5,
+              "involved": ["子", "午"]
+            },
+            {
+              "kind": "HANKAI",
+              "targetPillar": "DAY",
+              "fortuneType": "DAIUN",
+              "phaseIndex": 5,
+              "involved": ["子", "辰"]
+            }
+          ]
+        },
+        {
+          "phaseIndex": 6,
+          "sexagenaryIndex": 25,
+          "spanYears": 10,
+          "interactions": [
+            {
+              "kind": "HA",
+              "targetPillar": "YEAR",
+              "fortuneType": "DAIUN",
+              "phaseIndex": 6,
+              "involved": ["丑", "辰"]
+            },
+            {
+              "kind": "GAI",
+              "targetPillar": "MONTH",
+              "fortuneType": "DAIUN",
+              "phaseIndex": 6,
+              "involved": ["丑", "午"]
+            },
+            {
+              "kind": "HA",
+              "targetPillar": "DAY",
+              "fortuneType": "DAIUN",
+              "phaseIndex": 6,
+              "involved": ["丑", "辰"]
+            }
+          ]
+        },
+        {
+          "phaseIndex": 7,
+          "sexagenaryIndex": 26,
+          "spanYears": 10,
+          "interactions": [
+            {
+              "kind": "HANKAI",
+              "targetPillar": "MONTH",
+              "fortuneType": "DAIUN",
+              "phaseIndex": 7,
+              "involved": ["寅", "午"]
+            }
+          ]
+        }
       ],
-      "currentPhase": { "phaseIndex": 1, "sexagenaryIndex": 20, "spanYears": 10 }
+      "currentPhase": {
+        "phaseIndex": 1,
+        "sexagenaryIndex": 20,
+        "spanYears": 10,
+        "interactions": [
+          {
+            "kind": "HANKAI",
+            "targetPillar": "YEAR",
+            "fortuneType": "DAIUN",
+            "phaseIndex": 1,
+            "involved": ["申", "辰"]
+          },
+          {
+            "kind": "HANKAI",
+            "targetPillar": "DAY",
+            "fortuneType": "DAIUN",
+            "phaseIndex": 1,
+            "involved": ["申", "辰"]
+          }
+        ]
+      }
     },
     "annual": {
       "calendarYear": 2026,

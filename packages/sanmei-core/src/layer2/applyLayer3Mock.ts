@@ -1,7 +1,13 @@
 import { Branch, type Branch as BranchType } from "../layer1/enums.js";
 import { branchLabel } from "../layer1/stemBranchTables.js";
 import type { BundledRuleset } from "../schemas/rulesetMockV1.js";
-import type { DynamicTimeline, InsenLayer2, InteractionRulesLayer2, IsouhouEntry } from "../schemas/layer2.js";
+import type {
+  DynamicTimeline,
+  InsenLayer2,
+  InteractionRulesLayer2,
+  IsouhouEntry,
+  TimelineInteractionEntry,
+} from "../schemas/layer2.js";
 
 /**
  * Layer3a スタブ: 位相法・虚気は監修前プレースホルダ。ruleset で将来差し替え。
@@ -53,6 +59,13 @@ function includesPattern(counts: number[], pattern: number[]): boolean {
   return pattern.every((b) => counts[b] >= 1);
 }
 
+function includesPairPattern(a: number, b: number, pattern: number[]): boolean {
+  if (pattern.length !== 2) return false;
+  const [p0, p1] = pattern;
+  if (p0 === p1) return a === p0 && b === p1;
+  return (a === p0 && b === p1) || (a === p1 && b === p0);
+}
+
 function resolveResearchIsouhou(insen: InsenLayer2, ruleset: BundledRuleset): IsouhouEntry[] {
   const interaction = ruleset.interaction;
   if (!interaction) return [];
@@ -77,6 +90,39 @@ function resolveResearchIsouhou(insen: InsenLayer2, ruleset: BundledRuleset): Is
           ? { hasCentralBranch: branches.some((b) => isCentralBranch(b)) }
           : {}),
       } satisfies IsouhouEntry;
+    });
+
+  const priorityIndex = new Map(interaction.priorityOrder.map((kind, idx) => [kind, idx]));
+  return candidates.sort((a, b) => {
+    const pa = priorityIndex.get(a.kind) ?? 999;
+    const pb = priorityIndex.get(b.kind) ?? 999;
+    if (pa !== pb) return pa - pb;
+    return (a.involved ?? []).join("-").localeCompare((b.involved ?? []).join("-"), "ja");
+  });
+}
+
+export function resolveResearchTimelinePairInteractions(
+  fortuneBranch: BranchType,
+  targetBranch: BranchType,
+  targetPillar: "YEAR" | "MONTH" | "DAY",
+  phaseIndex: number,
+  ruleset: BundledRuleset,
+): TimelineInteractionEntry[] {
+  const interaction = ruleset.interaction;
+  if (!interaction) return [];
+  const enabled = new Set(interaction.enabledKinds);
+  const candidates = interaction.patterns
+    .filter((pattern) => enabled.has(pattern.kind))
+    .filter((pattern) => includesPairPattern(fortuneBranch, targetBranch, pattern.branches))
+    .map((pattern) => {
+      const branches = pattern.branches as BranchType[];
+      return {
+        kind: pattern.kind,
+        targetPillar,
+        fortuneType: "DAIUN" as const,
+        phaseIndex,
+        involved: branches.map((b) => branchLabel(b)),
+      } satisfies TimelineInteractionEntry;
     });
 
   const priorityIndex = new Map(interaction.priorityOrder.map((kind, idx) => [kind, idx]));

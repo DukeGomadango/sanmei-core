@@ -158,6 +158,21 @@ describe("calculate", () => {
     expect((got.dynamicTimeline.daiun.startDayDiff ?? -1) >= 0).toBe(true);
   });
 
+  it("research-v1 は大運フェーズごとに targetPillar 付き interactions を返す", () => {
+    const input = JSON.parse(readFileSync(join(researchGoldenDir, "calculate_input.json"), "utf-8"));
+    const got = calculate(input, { solarTermStore: store, port, nowUtcMs: 0 });
+    const phases = got.dynamicTimeline.daiun.phases;
+    expect(phases.length).toBeGreaterThan(0);
+    phases.forEach((phase) => {
+      expect(Array.isArray(phase.interactions)).toBe(true);
+      for (const item of phase.interactions ?? []) {
+        expect(item.phaseIndex).toBe(phase.phaseIndex);
+        expect(item.fortuneType).toBe("DAIUN");
+        expect(item.targetPillar).toMatch(/YEAR|MONTH|DAY/);
+      }
+    });
+  });
+
   it("UTC タイムゾーンで計算できる", () => {
     const r = calculate(
       {

@@ -1,10 +1,18 @@
 import { createRequire } from "node:module";
 import { ZodError } from "zod";
 import { CalculateInputSchema } from "./schemas/calculateInput.js";
-import type { CalculateResult, InsenLayer2, InteractionRulesLayer2, TraceNode } from "./schemas/layer2.js";
+import type {
+  CalculateResult,
+  DynamicTimeline,
+  InsenLayer2,
+  InteractionRulesLayer2,
+  TraceNode,
+} from "./schemas/layer2.js";
 import { SanmeiError, SanmeiErrorCode } from "./errors/sanmeiError.js";
 import { requiresBirthTimeForAnySolarTermOnDate } from "./layer1/calendar/calendarBoundary.js";
 import { resolveInsenWithDepth } from "./layer1/pillars.js";
+import type { Branch } from "./layer1/enums.js";
+import { indexToStemBranch } from "./layer1/sexagenary.js";
 import type { SolarTermStore } from "./layer1/solarTerms/store.js";
 import type { CalendarPort } from "./layer1/calendar/types.js";
 import type { BundledRuleset } from "./schemas/rulesetMockV1.js";
@@ -17,7 +25,7 @@ import { resolveFamilyNodes } from "./layer2/resolveFamilyNodes.js";
 import { resolveEnergyData } from "./layer2/resolveEnergyData.js";
 import { resolveDestinyBugs } from "./layer2/resolveDestinyBugs.js";
 import { resolveDynamicTimeline } from "./layer2/resolveDynamicTimeline.js";
-import { applyLayer3aByRuleset } from "./layer2/applyLayer3Mock.js";
+import { applyLayer3aByRuleset, resolveResearchTimelinePairInteractions } from "./layer2/applyLayer3Mock.js";
 import { applyLayer3bByRuleset } from "./layer2/applyLayer3b.js";
 
 const require = createRequire(import.meta.url);
@@ -52,6 +60,53 @@ function mapCalendarFailure<T>(timeZoneId: string, fn: () => T): T {
       cause: String(e),
     });
   }
+}
+
+function attachDaiunPhaseInteractions(
+  timeline: DynamicTimeline,
+  insen: InsenLayer2,
+  ruleset: BundledRuleset,
+): DynamicTimeline {
+  if (ruleset.meta.rulesetVersion !== "research-v1") return timeline;
+  const phases = timeline.daiun.phases.map((phase) => {
+    const fortune = indexToStemBranch(phase.sexagenaryIndex);
+    const interactions = [
+      ...resolveResearchTimelinePairInteractions(
+        fortune.branch,
+        insen.year.branch as Branch,
+        "YEAR",
+        phase.phaseIndex,
+        ruleset,
+      ),
+      ...resolveResearchTimelinePairInteractions(
+        fortune.branch,
+        insen.month.branch as Branch,
+        "MONTH",
+        phase.phaseIndex,
+        ruleset,
+      ),
+      ...resolveResearchTimelinePairInteractions(
+        fortune.branch,
+        insen.day.branch as Branch,
+        "DAY",
+        phase.phaseIndex,
+        ruleset,
+      ),
+    ];
+    return {
+      ...phase,
+      interactions,
+    };
+  });
+  const currentPhase = phases.find((p) => p.phaseIndex === timeline.daiun.currentPhase.phaseIndex) ?? phases[0];
+  return {
+    ...timeline,
+    daiun: {
+      ...timeline.daiun,
+      phases,
+      currentPhase: currentPhase!,
+    },
+  };
 }
 
 /**
@@ -339,6 +394,7 @@ export function calculate(rawInput: unknown, deps: CalculateDeps): CalculateResu
   interactionRules = applyLayer3bByRuleset(interactionRules, ruleset, {
     allowGohouInKaku: input.systemConfig.allowGohouInKaku,
   });
+  const dynamicTimelineWithInteractions = attachDaiunPhaseInteractions(dynamicTimeline, insenLayer2, ruleset);
   if (includeDebugTrace) {
     interactionRules.debugTrace = {
       traceVersion: 1,
@@ -375,7 +431,7 @@ export function calculate(rawInput: unknown, deps: CalculateDeps): CalculateResu
       energyData,
       destinyBugs,
     },
-    dynamicTimeline,
+    dynamicTimeline: dynamicTimelineWithInteractions,
     interactionRules,
   };
 }

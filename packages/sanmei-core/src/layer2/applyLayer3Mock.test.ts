@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getBundledRuleset } from "./bundledRulesets.js";
-import { applyLayer3aByRuleset, applyLayer3aMock } from "./applyLayer3Mock.js";
+import { applyLayer3aByRuleset, applyLayer3aMock, resolveResearchTimelinePairInteractions } from "./applyLayer3Mock.js";
 import type { InsenLayer2, InteractionRulesLayer2 } from "../schemas/layer2.js";
 
 const baseInteraction: InteractionRulesLayer2 = {
@@ -66,5 +66,18 @@ describe("applyLayer3aByRuleset", () => {
       insen: buildInsen(8, 0, 4),
     });
     expect(result).toEqual(applyLayer3aMock(baseInteraction, ruleset));
+  });
+});
+
+describe("resolveResearchTimelinePairInteractions", () => {
+  it("research-v1 で targetPillar 付きエントリを返す", () => {
+    const ruleset = getBundledRuleset("research-v1");
+    const entries = resolveResearchTimelinePairInteractions(8, 0, "DAY", 2, ruleset);
+    expect(entries.length).toBeGreaterThan(0);
+    entries.forEach((entry) => {
+      expect(entry.targetPillar).toBe("DAY");
+      expect(entry.fortuneType).toBe("DAIUN");
+      expect(entry.phaseIndex).toBe(2);
+    });
   });
 });

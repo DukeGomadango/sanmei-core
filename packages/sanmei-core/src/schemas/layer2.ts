@@ -74,6 +74,13 @@ export const ActionAreaGeometrySchema = z.object({
 
 export const EnergyDataSchema = z.object({
   totalEnergy: z.number().int(),
+  energyByElement: z.object({
+    WOOD: z.number().int().nonnegative(),
+    FIRE: z.number().int().nonnegative(),
+    EARTH: z.number().int().nonnegative(),
+    METAL: z.number().int().nonnegative(),
+    WATER: z.number().int().nonnegative(),
+  }),
   actionAreaSize: z.number().int().min(1).max(4),
   actionAreaGeometry: ActionAreaGeometrySchema,
 });
@@ -171,10 +178,19 @@ export const InteractionRulesLayer2Schema = z.object({
   debugTrace: DebugTraceSchema.optional(),
 });
 
+export const TimelineInteractionEntrySchema = z.object({
+  kind: z.string(),
+  targetPillar: z.enum(["YEAR", "MONTH", "DAY"]),
+  fortuneType: z.enum(["DAIUN"]),
+  phaseIndex: z.number().int().nonnegative(),
+  involved: z.array(z.string()).optional(),
+});
+
 export const DaiunPhaseSchema = z.object({
   phaseIndex: z.number().int().nonnegative(),
   sexagenaryIndex: z.number().int().min(0).max(59),
   spanYears: z.number().int().positive(),
+  interactions: z.array(TimelineInteractionEntrySchema).optional(),
 });
 
 export const DaiunTimelineSchema = z.object({
@@ -222,4 +238,5 @@ export type YousenLayer2 = z.infer<typeof YousenLayer2Schema>;
 export type FamilyNode = z.infer<typeof FamilyNodeSchema>;
 export type BaseProfileLayer2 = z.infer<typeof BaseProfileLayer2Schema>;
 export type InteractionRulesLayer2 = z.infer<typeof InteractionRulesLayer2Schema>;
+export type TimelineInteractionEntry = z.infer<typeof TimelineInteractionEntrySchema>;
 export type CalculateResult = z.infer<typeof CalculateResultSchema>;

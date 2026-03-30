@@ -57,12 +57,26 @@ describe("resolveEnergyData", () => {
     const e = resolveEnergyData(goldenInsen, bundledMockRulesetV1);
     expect(e).toEqual({
       totalEnergy: 23,
+      energyByElement: {
+        WOOD: 10,
+        FIRE: 0,
+        EARTH: 0,
+        METAL: 10,
+        WATER: 3,
+      },
       actionAreaSize: 3,
       actionAreaGeometry: {
         vertexAnglesDegTenths: [960, 1080, 2400],
         areaRatioPermille: 140,
       },
     });
+    const sumByElement =
+      e.energyByElement.WOOD +
+      e.energyByElement.FIRE +
+      e.energyByElement.EARTH +
+      e.energyByElement.METAL +
+      e.energyByElement.WATER;
+    expect(sumByElement).toBe(e.totalEnergy);
   });
 });
 
@@ -111,6 +125,7 @@ describe("CalculateResult Zod", () => {
         familyNodes: [],
         energyData: {
           totalEnergy: 0,
+          energyByElement: { WOOD: 0, FIRE: 0, EARTH: 0, METAL: 0, WATER: 0 },
           actionAreaSize: 1,
           actionAreaGeometry: { vertexAnglesDegTenths: [0, 0, 0], areaRatioPermille: 0 },
         },
