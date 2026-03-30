@@ -11,3 +11,9 @@ export const YEAR_PILLAR_ANCHOR_INDEX = 0;
  */
 /** 2024-02-10 甲辰 (index 40) で検証 */
 export const DAY_PILLAR_JDN_ADDEND = 49;
+
+/**
+ * 節入り当日のローカル暦日を「1日目」と数えるオフセット（IMPLEMENTATION §5.0）。
+ * displayDepth = (JDN_birth - JDN_term) + SOLAR_TERM_DAY_ZERO_INDEXING
+ */
+export const SOLAR_TERM_DAY_ZERO_INDEXING = 1;

@@ -10,6 +10,8 @@ import { gregorianToJulianDayNumber } from "./calendar/julian.js";
 import { indexToStemBranch } from "./sexagenary.js";
 import { monthStemFromYearAndBranch } from "./pillarRules.js";
 import type { CalendarPort } from "./calendar/types.js";
+import { SanmeiError, SanmeiErrorCode } from "../errors/sanmeiError.js";
+import { SOLAR_TERM_DAY_ZERO_INDEXING } from "./pillarConstants.js";
 
 export type Pillar = { stem: Stem; branch: Branch };
 
@@ -17,6 +19,14 @@ export type InsenThreePillars = {
   year: Pillar;
   month: Pillar;
   day: Pillar;
+};
+
+/** Layer1 確定結果 + 蔵干用表示深さ（IMPLEMENTATION §5.0） */
+export type ResolvedInsenWithDepth = InsenThreePillars & {
+  /** JDN_birth - JDN_term（暦日差） */
+  rawDelta: number;
+  /** 蔵干テーブルと照合する深さ */
+  displayDepth: number;
 };
 
 const MONTH_TERM_SET = new Set(MONTH_START_TERM_IDS);
@@ -64,13 +74,13 @@ export function monthPillarForInstant(
 }
 
 /**
- * 陰占三柱（Layer1）。`birthTime` が null のときローカル深夜 0:00 でインスタント化。
+ * 陰占三柱 + 表示深さ。`rawDelta < 0` のとき `SanmeiError` CALCULATION_ANOMALY。
  */
-export function resolveInsenThreePillars(
+export function resolveInsenWithDepth(
   input: { birthDate: string; birthTime: string | null; timeZoneId: string },
   store: SolarTermStore,
   port: CalendarPort,
-): InsenThreePillars {
+): ResolvedInsenWithDepth {
   const instantUtcMs = port.localWallTimeToUtcMs(
     input.birthDate,
     input.birthTime,
@@ -80,5 +90,35 @@ export function resolveInsenThreePillars(
   const year = yearPillarForSolarYear(solarYear);
   const month = monthPillarForInstant(store, instantUtcMs, year.stem);
   const day = dayPillarForLocalDate(input.birthDate);
-  return { year, month, day };
+
+  const e = store.monthSectionEntryAtOrBefore(instantUtcMs, MONTH_TERM_SET);
+  if (!e) throw new Error("could not resolve 節月 for depth (master range?)");
+  const termLocal = port.utcMsToLocalDateString(e.instantUtcMs, input.timeZoneId);
+  const { y: ty, m: tm, d: td } = parseYmd(termLocal);
+  const { y: by, m: bm, d: bd } = parseYmd(input.birthDate);
+  const JDN_term = gregorianToJulianDayNumber(ty, tm, td);
+  const JDN_birth = gregorianToJulianDayNumber(by, bm, bd);
+  const rawDelta = JDN_birth - JDN_term;
+  if (rawDelta < 0) {
+    throw new SanmeiError(
+      SanmeiErrorCode.CALCULATION_ANOMALY,
+      "Negative depth (rawDelta)",
+      { reason: "NEGATIVE_DEPTH", rawDelta, termLocal, birthDate: input.birthDate },
+    );
+  }
+  const displayDepth = rawDelta + SOLAR_TERM_DAY_ZERO_INDEXING;
+
+  return { year, month, day, rawDelta, displayDepth };
+}
+
+/**
+ * 陰占三柱（Layer1）。`birthTime` が null のときローカル深夜 0:00 でインスタント化。
+ */
+export function resolveInsenThreePillars(
+  input: { birthDate: string; birthTime: string | null; timeZoneId: string },
+  store: SolarTermStore,
+  port: CalendarPort,
+): InsenThreePillars {
+  const r = resolveInsenWithDepth(input, store, port);
+  return { year: r.year, month: r.month, day: r.day };
 }

@@ -5,7 +5,12 @@ import { dirname, join } from "node:path";
 import { Stem, Branch } from "./enums.js";
 import { gregorianToJulianDayNumber } from "./calendar/julian.js";
 import { DAY_PILLAR_JDN_ADDEND } from "./pillarConstants.js";
-import { dayPillarForLocalDate, resolveInsenThreePillars, yearPillarForSolarYear } from "./pillars.js";
+import {
+  dayPillarForLocalDate,
+  resolveInsenThreePillars,
+  resolveInsenWithDepth,
+  yearPillarForSolarYear,
+} from "./pillars.js";
 import { SolarTermStore } from "./solarTerms/store.js";
 import type { SolarTermsFile } from "./solarTerms/types.js";
 import { createJodaCalendarPort } from "./calendar/jodaAdapter.js";
@@ -46,6 +51,17 @@ describe("insen three pillars", () => {
     expect(r.year.stem).toBeGreaterThanOrEqual(0);
     expect(r.month.stem).toBeGreaterThanOrEqual(0);
     expect(r.day.stem).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe("resolveInsenWithDepth", () => {
+  it("displayDepth は rawDelta + SOLAR_TERM_DAY_ZERO_INDEXING と一致", () => {
+    const r = resolveInsenWithDepth(
+      { birthDate: "2000-06-15", birthTime: "12:00", timeZoneId: "Asia/Tokyo" },
+      store,
+      port,
+    );
+    expect(r.displayDepth).toBe(r.rawDelta + 1);
   });
 });
 
