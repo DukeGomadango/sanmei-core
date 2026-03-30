@@ -11,6 +11,8 @@
 | [OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) | 占い師／監修者による確定待ちの論点一覧 |
 | [PHASE2-RULESET-AND-DAIUN.md](./PHASE2-RULESET-AND-DAIUN.md) | **フェーズ2**（`takao-v1`・大運本算法・監修ゴールデン）の実装ロードマップ正本。フロント並行可の整理あり |
 | [SECT-RULESET-MATRIX.template.md](./SECT-RULESET-MATRIX.template.md) | 学派差分を表形式で固定するテンプレート |
+| [RESEARCH-SECT-RULESET-WORKFLOW.md](./RESEARCH-SECT-RULESET-WORKFLOW.md) | `sect: research` を立てるときの調査・採用判定・実装ゲート（出典必須、語彙混線防止） |
+| [RESEARCH-SECT-SPEC.md](./RESEARCH-SECT-SPEC.md) | `sect: research` の単一仕様書（出典レベル、位相法、蔵干/二十八元、未確定領域、テスト方針） |
 | [`.cursor/rules`](../.cursor/rules) | **Cursor Project Rules**（アーキテクチャ・TS/Python・ドメイン要点。詳細は各 `.mdc` と本フォルダの md を正とする） |
 | [AGENTS.md](../AGENTS.md) | Cursor / Agent 向けの短い作業フロー（※ 本 `.mdc` が正本） |
 | [sanmei-commits.mdc](../.cursor/rules/sanmei-commits.mdc) | **コミット / PR タイトル**: Conventional Commits の型 ＋ 日本語要約 |
