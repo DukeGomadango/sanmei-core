@@ -8,7 +8,7 @@
 ## 1. 目的と適用範囲
 
 - 目的: 主流派（`takao` 等）から独立した検証用流派として、Layer1〜Layer3 の計算仕様を一気通貫で固定する。
-- 適用: `systemConfig.sect = "research"` かつ `rulesetVersion = "research-v1"`。
+- 適用: `systemConfig.sect = "research"` かつ `rulesetVersion = "research-v1"`（基準）または **`"research-experimental-v1"`**（**拡展位相法5種**付きの並行バンドル。L1/L2/大運R1 は `research-v1` と同一、Layer3a が `isouhouExtended` を統合。`calculate.meta.warnings` に L2 注記）。
 - 非目的: 主流派の監修済み仕様を上書きしない。`research` を既定値にしない。
 
 ---

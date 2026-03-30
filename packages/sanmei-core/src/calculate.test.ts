@@ -150,6 +150,27 @@ describe("calculate", () => {
     expect(normalizeResultMeta(got, { calculatedAt: "1970-01-01T00:00:00.000Z" })).toEqual(expected);
   });
 
+  it("research-experimental-v1 は baseProfile を research-v1 と同一に保ち meta.warnings を返す", () => {
+    const input = JSON.parse(readFileSync(join(researchGoldenDir, "calculate_input.json"), "utf-8"));
+    const baseline = calculate(input, { solarTermStore: store, port, nowUtcMs: 0 });
+    const got = calculate(
+      {
+        ...input,
+        systemConfig: { ...input.systemConfig, rulesetVersion: "research-experimental-v1" },
+      },
+      { solarTermStore: store, port, nowUtcMs: 0 },
+    );
+    expect(CalculateResultSchema.safeParse(got).success).toBe(true);
+    expect(got.baseProfile).toEqual(baseline.baseProfile);
+    expect(got.meta.warnings?.some((w) => w.includes("research-experimental-v1"))).toBe(true);
+    expect(got.interactionRules.resolutionMeta?.ruleSetId).toBe("research-experimental-v1");
+    expect(
+      getBundledRuleset("research-experimental-v1").interaction?.kaku?.candidateRules.some(
+        (r) => r.id === "KAKU_TENKOKUCHICHU",
+      ),
+    ).toBe(true);
+  });
+
   it("research-v1 の大運は direction と startDayDiff を返す", () => {
     const input = JSON.parse(readFileSync(join(researchGoldenDir, "calculate_input.json"), "utf-8"));
     const got = calculate(input, { solarTermStore: store, port, nowUtcMs: 0 });

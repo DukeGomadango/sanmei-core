@@ -101,6 +101,13 @@
     ],
     "energyData": {
       "totalEnergy": 23,
+      "energyByElement": {
+        "WOOD": 10,
+        "FIRE": 0,
+        "EARTH": 0,
+        "METAL": 10,
+        "WATER": 3
+      },
       "actionAreaSize": 3,
       "actionAreaGeometry": {
         "vertexAnglesDegTenths": [

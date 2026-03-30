@@ -224,6 +224,8 @@ export const CalculateMetaSchema = z.object({
   rulesetVersion: z.string(),
   sect: z.string(),
   calculatedAt: z.string(),
+  /** 監修前アルゴリズム・ruleset の注意喚起（任意） */
+  warnings: z.array(z.string()).optional(),
 });
 
 export const CalculateResultSchema = z.object({

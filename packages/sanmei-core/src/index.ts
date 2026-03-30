@@ -6,6 +6,7 @@ export { YinYang, Element, Stem, Branch } from "./layer1/enums.js";
 export * from "./layer1/stemBranchTables.js";
 export * from "./layer1/wuxingRelations.js";
 export * from "./layer1/kango.js";
+export * from "./layer1/stemPairInteractions.js";
 export * from "./layer1/sexagenary.js";
 export * from "./layer1/pillarConstants.js";
 export * from "./layer1/pillarRules.js";
@@ -58,6 +59,8 @@ export {
   type RulesetMockV1,
   type BundledRuleset,
   type BundledRulesetVersion,
+  type IsouhouExtendedKind,
+  type IsouhouExtendedRules,
 } from "./schemas/rulesetMockV1.js";
 export { bundledMockRulesetV1 } from "./layer2/bundledMockRuleset.js";
 export { getBundledRuleset, isBundledRulesetVersion } from "./layer2/bundledRulesets.js";

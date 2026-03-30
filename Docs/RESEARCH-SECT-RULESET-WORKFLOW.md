@@ -1356,10 +1356,22 @@
 - `Docs/SECT-RULESET-MATRIX.template.md` の locator 行を Iteration 24 反映に更新
 - `Docs/OPEN-QUESTIONS.md` に初期割当を明文化
 
-**次ループ（Iteration 25）**:
-1. `P0` の2種について、高尾学館出版物案内から巻候補を特定
-2. 書誌だけでなく、可能なら目次断片の取得
-3. `research-isouhou-scope-boundary-v1` の監修質問票を分離起票
+**次ループ（Iteration 25）**（一部をコード先行で実施）:
+1. ~~`research-experimental-v1` バンドルと Layer3a/3b/timeline 実装~~（2026-03-31 実装済・`IMPLEMENTATION.md` §2 参照）
+2. `P0` の2種について、高尾学館出版物案内から巻候補を特定
+3. 書誌だけでなく、可能なら目次断片の取得
+4. `research-isouhou-scope-boundary-v1` の監修質問票を分離起票
+
+### 18.8 Iteration 25（2026-03-31 / `research-experimental-v1` 実装）
+
+**実施（コード）**:
+- `rulesetVersion: research-experimental-v1` を `getBundledRuleset` に追加（`isouhouExtended`・`locatorPriority`・`KAKU_TENKOKUCHICHU` 試作格）
+- Layer3a: 拡張5種の命式検出、基準8種優先の統合ソート、`layer1/stemPairInteractions.ts`（冲・天剋干）
+- 大運フェーズ `interactions`: `scopePolicy=NATAL_AND_TIMELINE` 時のみ拡張ペアを `mergeTimelineBaseAndExtended` でマージ（`research-v1` の単独ソート順は維持）
+- `calculate` の `meta.warnings` に experimental 注意書き
+
+**残（文献・L0）**:
+- Iteration 25 項番 2〜4（上表）は未完了。アルゴリズム値の L0 確定は引き続き P0。
 
 
 

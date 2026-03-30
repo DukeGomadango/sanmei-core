@@ -67,6 +67,45 @@ describe("applyLayer3aByRuleset", () => {
     });
     expect(result).toEqual(applyLayer3aMock(baseInteraction, ruleset));
   });
+
+  it("research-experimental-v1 で KANGO（干合）と TENKOKUCHICHU（天剋地冲）を検出する", () => {
+    const ruleset = getBundledRuleset("research-experimental-v1");
+    const insen: InsenLayer2 = {
+      year: {
+        stem: 0,
+        branch: 0,
+        zokan: { zoukanShogen: 0, zoukanChugen: 1, zoukanHongen: 2, activeSlot: "ZOUKAN_SHOGEN", activeStem: 0 },
+      },
+      month: {
+        stem: 6,
+        branch: 6,
+        zokan: { zoukanShogen: 0, zoukanChugen: 1, zoukanHongen: 2, activeSlot: "ZOUKAN_SHOGEN", activeStem: 0 },
+      },
+      day: {
+        stem: 1,
+        branch: 1,
+        zokan: { zoukanShogen: 0, zoukanChugen: 1, zoukanHongen: 2, activeSlot: "ZOUKAN_SHOGEN", activeStem: 0 },
+      },
+      displayDepth: 1,
+      rawDelta: 1,
+    };
+    const result = applyLayer3aByRuleset(baseInteraction, ruleset, { insen });
+    expect(result.isouhou.some((x) => x.kind === "KANGO")).toBe(true);
+    expect(result.isouhou.some((x) => x.kind === "TENKOKUCHICHU")).toBe(true);
+    expect(result.resolutionMeta?.ruleSetId).toBe("research-experimental-v1");
+  });
+
+  it("research-experimental-v1 と research-v1 で基準8種が同順なら、拡張のみが追記される", () => {
+    const baseRuleset = getBundledRuleset("research-v1");
+    const expRuleset = getBundledRuleset("research-experimental-v1");
+    const insen = buildInsen(8, 0, 4);
+    const base = applyLayer3aByRuleset(baseInteraction, baseRuleset, { insen });
+    const exp = applyLayer3aByRuleset(baseInteraction, expRuleset, { insen });
+    const baseKinds = base.isouhou.map((x) => x.kind).join("|");
+    const expHead = exp.isouhou.slice(0, base.isouhou.length).map((x) => x.kind).join("|");
+    expect(expHead).toBe(baseKinds);
+    expect(exp.isouhou.length).toBeGreaterThanOrEqual(base.isouhou.length);
+  });
 });
 
 describe("resolveResearchTimelinePairInteractions", () => {

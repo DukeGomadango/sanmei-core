@@ -105,7 +105,10 @@ export function resolveDynamicTimeline(
   solarTermStore: SolarTermStore,
   port: CalendarPort,
 ): DynamicTimeline {
-  const isResearch = ruleset.meta.rulesetVersion === "research-v1" && ruleset.researchDaiun !== undefined;
+  const isResearch =
+    (ruleset.meta.rulesetVersion === "research-v1" ||
+      ruleset.meta.rulesetVersion === "research-experimental-v1") &&
+    ruleset.researchDaiun !== undefined;
   const tm = ruleset.timelineMock;
   const span = tm.phaseSpanYears;
   const age = calendarAgeLocalYmd(user.birthDate, context.asOf);

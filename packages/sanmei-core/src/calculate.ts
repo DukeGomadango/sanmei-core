@@ -11,7 +11,7 @@ import type {
 import { SanmeiError, SanmeiErrorCode } from "./errors/sanmeiError.js";
 import { requiresBirthTimeForAnySolarTermOnDate } from "./layer1/calendar/calendarBoundary.js";
 import { resolveInsenWithDepth } from "./layer1/pillars.js";
-import type { Branch } from "./layer1/enums.js";
+import type { Branch, Stem } from "./layer1/enums.js";
 import { indexToStemBranch } from "./layer1/sexagenary.js";
 import type { SolarTermStore } from "./layer1/solarTerms/store.js";
 import type { CalendarPort } from "./layer1/calendar/types.js";
@@ -25,7 +25,12 @@ import { resolveFamilyNodes } from "./layer2/resolveFamilyNodes.js";
 import { resolveEnergyData } from "./layer2/resolveEnergyData.js";
 import { resolveDestinyBugs } from "./layer2/resolveDestinyBugs.js";
 import { resolveDynamicTimeline } from "./layer2/resolveDynamicTimeline.js";
-import { applyLayer3aByRuleset, resolveResearchTimelinePairInteractions } from "./layer2/applyLayer3Mock.js";
+import {
+  applyLayer3aByRuleset,
+  mergeTimelineBaseAndExtended,
+  resolveResearchTimelineExtendedPairInteractions,
+  resolveResearchTimelinePairInteractions,
+} from "./layer2/applyLayer3Mock.js";
 import { applyLayer3bByRuleset } from "./layer2/applyLayer3b.js";
 
 const require = createRequire(import.meta.url);
@@ -67,10 +72,11 @@ function attachDaiunPhaseInteractions(
   insen: InsenLayer2,
   ruleset: BundledRuleset,
 ): DynamicTimeline {
-  if (ruleset.meta.rulesetVersion !== "research-v1") return timeline;
+  const v = ruleset.meta.rulesetVersion;
+  if (v !== "research-v1" && v !== "research-experimental-v1") return timeline;
   const phases = timeline.daiun.phases.map((phase) => {
     const fortune = indexToStemBranch(phase.sexagenaryIndex);
-    const interactions = [
+    const baseInteractions = [
       ...resolveResearchTimelinePairInteractions(
         fortune.branch,
         insen.year.branch as Branch,
@@ -93,6 +99,42 @@ function attachDaiunPhaseInteractions(
         ruleset,
       ),
     ];
+    const extInteractions =
+      v === "research-experimental-v1"
+        ? [
+            ...resolveResearchTimelineExtendedPairInteractions(
+              fortune.stem as Stem,
+              fortune.branch as Branch,
+              insen.year.stem as Stem,
+              insen.year.branch as Branch,
+              "YEAR",
+              phase.phaseIndex,
+              ruleset,
+            ),
+            ...resolveResearchTimelineExtendedPairInteractions(
+              fortune.stem as Stem,
+              fortune.branch as Branch,
+              insen.month.stem as Stem,
+              insen.month.branch as Branch,
+              "MONTH",
+              phase.phaseIndex,
+              ruleset,
+            ),
+            ...resolveResearchTimelineExtendedPairInteractions(
+              fortune.stem as Stem,
+              fortune.branch as Branch,
+              insen.day.stem as Stem,
+              insen.day.branch as Branch,
+              "DAY",
+              phase.phaseIndex,
+              ruleset,
+            ),
+          ]
+        : [];
+    const interactions =
+      extInteractions.length > 0
+        ? mergeTimelineBaseAndExtended(baseInteractions, extInteractions, ruleset)
+        : baseInteractions;
     return {
       ...phase,
       interactions,
@@ -360,7 +402,11 @@ export function calculate(rawInput: unknown, deps: CalculateDeps): CalculateResu
     ),
   );
   if (includeDebugTrace) {
-    const researchRuleId = ruleset.meta.rulesetVersion === "research-v1" ? ruleset.researchDaiun?.ruleIds.start ?? null : null;
+    const researchRuleId =
+      ruleset.meta.rulesetVersion === "research-v1" ||
+      ruleset.meta.rulesetVersion === "research-experimental-v1"
+        ? (ruleset.researchDaiun?.ruleIds.start ?? null)
+        : null;
     traceNodes.push({
       phase: "LAYER3",
       stepId: "resolveDynamicTimeline",
@@ -404,12 +450,20 @@ export function calculate(rawInput: unknown, deps: CalculateDeps): CalculateResu
 
   const calculatedAt = new Date(deps.nowUtcMs ?? Date.now()).toISOString();
 
+  const metaWarnings: string[] =
+    ruleset.meta.rulesetVersion === "research-experimental-v1"
+      ? [
+          "ruleset research-experimental-v1: 拡展位相法は L2_SECONDARY（監修前）。isouhouExtended / locatorPriority を参照。",
+        ]
+      : [];
+
   return {
     meta: {
       engineVersion: packageVersion,
       rulesetVersion: input.systemConfig.rulesetVersion,
       sect: input.systemConfig.sect,
       calculatedAt,
+      ...(metaWarnings.length > 0 ? { warnings: metaWarnings } : {}),
     },
     baseProfile: {
       insen: {

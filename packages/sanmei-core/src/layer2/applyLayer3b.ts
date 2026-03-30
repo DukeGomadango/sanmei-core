@@ -98,6 +98,7 @@ function applyLayer3bResearch(
 
 const resolverByRulesetVersion = {
   "research-v1": applyLayer3bResearch,
+  "research-experimental-v1": applyLayer3bResearch,
 } as const;
 
 export function applyLayer3bByRuleset(

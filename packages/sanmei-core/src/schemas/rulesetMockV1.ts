@@ -104,6 +104,39 @@ export const IsouhouKindSchema = z.enum([
   "HA",
 ]);
 
+/** 研究流派 experimental：基本8種に加える拡張位相法 */
+export const IsouhouExtendedKindSchema = z.enum([
+  "KANGO",
+  "NACHION",
+  "RITSUON",
+  "TENKOKUCHICHU",
+  "DAIHANKAI",
+]);
+
+export const IsouhouAnyKindSchema = z.union([IsouhouKindSchema, IsouhouExtendedKindSchema]);
+
+export const IsouhouExtendedRulesSchema = z.object({
+  enabledKinds: z.array(IsouhouExtendedKindSchema),
+  priorityOrder: z.array(IsouhouExtendedKindSchema),
+  scopePolicy: z.enum(["NATAL_3_ONLY", "NATAL_AND_TIMELINE"]),
+  conflictPolicy: z
+    .object({
+      /** true のとき基本8種を拡張5種より常に先にソート（既定想定） */
+      baseKindsFirst: z.boolean(),
+    })
+    .optional(),
+  sourceLevel: z.string().optional(),
+  priorityVersion: z.string().optional(),
+});
+
+export const LocatorPriorityEntrySchema = z.object({
+  kind: z.string().min(1),
+  tier: z.enum(["P0", "P1"]),
+  owner: z.string().optional(),
+  due: z.string().nullable().optional(),
+  lastChecked: z.string().nullable().optional(),
+});
+
 export const InteractionPatternSchema = z.object({
   kind: IsouhouKindSchema,
   branches: z.array(z.number().int().min(0).max(11)).min(2).max(3),
@@ -118,6 +151,8 @@ export const InteractionRulesetSchema = z.object({
   kyoki: z.object({
     featureEnabled: z.boolean(),
   }),
+  isouhouExtended: IsouhouExtendedRulesSchema.optional(),
+  locatorPriority: z.array(LocatorPriorityEntrySchema).optional(),
   kaku: z
     .object({
       candidateRules: z.array(
@@ -126,7 +161,7 @@ export const InteractionRulesetSchema = z.object({
           label: z.string().min(1),
           priority: z.number().int(),
           tags: z.array(z.string()).optional(),
-          requiresIsouhouKindsAny: z.array(IsouhouKindSchema).optional(),
+          requiresIsouhouKindsAny: z.array(IsouhouAnyKindSchema).optional(),
           requiresKyokiShadow: z.boolean().optional(),
         }),
       ),
@@ -184,6 +219,12 @@ export const RulesetResearchV1MetaSchema = z.object({
   schemaRevision: z.number().int().nonnegative(),
 });
 
+export const RulesetResearchExperimentalV1MetaSchema = z.object({
+  rulesetVersion: z.literal("research-experimental-v1"),
+  description: z.string(),
+  schemaRevision: z.number().int().nonnegative(),
+});
+
 /**
  * 研究流派の契約準備バンドル。
  * M1 では本文を mock-v1 互換で保持し、M2 以降で interaction ブロック等を段階追加する。
@@ -198,15 +239,38 @@ export const RulesetResearchV1Schema = z
     }),
   );
 
+/**
+ * research-v1 に拡展位相法（isouhouExtended）を載せた並行バンドル。`research-v1` の互換は別キーで固定。
+ */
+export const RulesetResearchExperimentalV1Schema = z
+  .object({
+    meta: RulesetResearchExperimentalV1MetaSchema,
+  })
+  .merge(
+    rulesetBodySchema.extend({
+      interaction: InteractionRulesetSchema.extend({
+        isouhouExtended: IsouhouExtendedRulesSchema,
+      }),
+    }),
+  );
+
 export const BundledRulesetSchema = z.union([
   RulesetMockV1Schema,
   RulesetMockInternalV2Schema,
   RulesetResearchV1Schema,
+  RulesetResearchExperimentalV1Schema,
 ]);
 
 export type RulesetMockV1 = z.infer<typeof RulesetMockV1Schema>;
 export type BundledRuleset = z.infer<typeof BundledRulesetSchema>;
+export type IsouhouExtendedKind = z.infer<typeof IsouhouExtendedKindSchema>;
+export type IsouhouExtendedRules = z.infer<typeof IsouhouExtendedRulesSchema>;
 
 /** サポートするバンドル版（`RULESET_VERSION_UNSUPPORTED` 判定用） */
-export const BUNDLED_RULESET_VERSIONS = ["mock-v1", "mock-internal-v2", "research-v1"] as const;
+export const BUNDLED_RULESET_VERSIONS = [
+  "mock-v1",
+  "mock-internal-v2",
+  "research-v1",
+  "research-experimental-v1",
+] as const;
 export type BundledRulesetVersion = (typeof BUNDLED_RULESET_VERSIONS)[number];
