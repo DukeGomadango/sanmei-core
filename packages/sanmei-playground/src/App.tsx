@@ -4,16 +4,11 @@ import type { CalculateResult } from "@sanmei/sanmei-core";
 import { calculateApi, type CalculateRequestError } from "./lib/api/calculateApi";
 import { buildPayload } from "./lib/normalization";
 import { Dict } from "./lib/dictionaries";
-import { BentoGrid } from "./widgets/BentoGrid";
 import { ControlPanel } from "./widgets/ControlPanel";
-import { InsenWidget } from "./widgets/InsenWidget";
-import { YousenWidget } from "./widgets/YousenWidget";
-import { EnergyActionAreaWidget } from "./widgets/EnergyActionAreaWidget";
-import { IsouhouWidget } from "./widgets/IsouhouWidget";
-import { TimelineWidget } from "./widgets/TimelineWidget";
-import { TenchuSatsuStatusWidget } from "./widgets/TenchuSatsuStatusWidget";
+import { SaasBentoDashboard } from "./widgets/SaasBentoDashboard";
 import { ErrorBanner } from "./widgets/ErrorBanner";
 import { pushToast, ToastHost } from "./widgets/ToastHost";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./components/ui/accordion";
 
 const rulesetOptions = ["mock-v1", "mock-internal-v2"] as const;
 
@@ -79,36 +74,73 @@ export default function App() {
     pushToast("計算エンジン内部エラーが発生しました");
   }, [resultError]);
 
+  const handleRun = async () => {
+    setHasRun(true);
+    setBirthTimeRequired(false);
+    const out = await query.refetch();
+    if (out.error?.code === "TIME_REQUIRED_FOR_SOLAR_TERM") {
+      setBirthTimeRequired(true);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <ToastHost />
-      <div className="mx-auto max-w-6xl p-4">
-        <h1 className="mb-4 text-2xl font-semibold">sanmei-playground</h1>
-        <ErrorBanner error={resultError} />
-        <ControlPanel
-          controls={controls}
-          birthTimeRequired={birthTimeRequired}
-          onChangeControls={setControls}
-          onRun={async () => {
-            setHasRun(true);
-            setBirthTimeRequired(false);
-            const out = await query.refetch();
-            if (out.error?.code === "TIME_REQUIRED_FOR_SOLAR_TERM") {
-              setBirthTimeRequired(true);
-            }
-          }}
-          sectOptions={["takao", "shugakuin"]}
-          rulesetOptions={[...rulesetOptions]}
-          error={resultError}
-        />
-        <BentoGrid>
-          <InsenWidget insen={query.data?.baseProfile.insen ?? null} />
-          <YousenWidget yousen={query.data?.baseProfile.yousen ?? null} kyoki={query.data?.interactionRules.kyoki ?? null} />
-          <EnergyActionAreaWidget energy={query.data?.baseProfile.energyData ?? null} />
-          <IsouhouWidget isouhou={query.data?.interactionRules.isouhou ?? null} />
-          <TimelineWidget daiun={query.data?.dynamicTimeline.daiun ?? null} />
-          <TenchuSatsuStatusWidget tenchu={query.data?.dynamicTimeline.tenchuSatsuStatus ?? null} />
-        </BentoGrid>
+      <div className="mx-auto max-w-[1280px] px-4 py-6 md:px-6 md:py-8">
+        <header className="mb-6 border-b border-border/80 pb-4">
+          <h1 className="text-2xl font-semibold tracking-tight">sanmei-playground</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            左側で条件を入力して実行すると、右側に陽占・陰占・行動領域などの結果が表示されます。
+          </p>
+        </header>
+
+        <div className="mb-4 md:hidden">
+          <ErrorBanner error={resultError} />
+          <Accordion type="single" collapsible defaultValue="api">
+            <AccordionItem value="api">
+              <AccordionTrigger value="api">API入力</AccordionTrigger>
+              <AccordionContent value="api">
+                <div className="mt-1">
+                  <ControlPanel
+                    showHeader={false}
+                    controls={controls}
+                    birthTimeRequired={birthTimeRequired}
+                    onChangeControls={setControls}
+                    onRun={handleRun}
+                    sectOptions={["takao", "shugakuin"]}
+                    rulesetOptions={[...rulesetOptions]}
+                    error={resultError}
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+
+        <div className="hidden gap-6 md:grid md:grid-cols-12 md:items-start">
+          <aside className="md:col-span-4 lg:col-span-3">
+            <div className="sticky top-4 space-y-4">
+              <ControlPanel
+                controls={controls}
+                birthTimeRequired={birthTimeRequired}
+                onChangeControls={setControls}
+                onRun={handleRun}
+                sectOptions={["takao", "shugakuin"]}
+                rulesetOptions={[...rulesetOptions]}
+                error={resultError}
+              />
+              <ErrorBanner error={resultError} />
+            </div>
+          </aside>
+
+          <main className="md:col-span-8 lg:col-span-9">
+            <SaasBentoDashboard data={query.data} />
+          </main>
+        </div>
+
+        <div className="space-y-4 md:hidden">
+          <SaasBentoDashboard data={query.data} />
+        </div>
       </div>
     </div>
   );

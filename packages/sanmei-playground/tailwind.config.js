@@ -1,11 +1,9 @@
-import type { Config } from "tailwindcss";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default {
-  // Monorepo 環境で cwd がずれても確実に対象ファイルを解決する
   content: [path.join(__dirname, "index.html"), path.join(__dirname, "src/**/*.{ts,tsx}")],
   darkMode: ["class"],
   theme: {
@@ -46,5 +44,5 @@ export default {
     },
   },
   plugins: [],
-} satisfies Config;
+};
 

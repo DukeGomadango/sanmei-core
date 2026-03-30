@@ -5,32 +5,47 @@ type DaiunTimeline = DynamicTimeline["daiun"];
 export function TimelineWidget({ daiun }: { daiun: DaiunTimeline | null }) {
   if (!daiun) {
     return (
-      <section className="rounded-lg border bg-card p-4">
-        <h3 className="mb-3 text-base font-semibold">大運</h3>
-        <div className="text-sm text-muted-foreground">応答を待っています</div>
+      <section className="min-h-56 rounded-lg bg-card p-5">
+        <h3 className="mb-4 text-base font-semibold">大運</h3>
+        <div className="text-sm text-muted-foreground">実行すると大運タイムラインを表示します</div>
       </section>
     );
   }
 
+  const lastIdx = daiun.phases.length - 1;
+
   return (
-    <section className="rounded-lg border bg-card p-4">
-      <h3 className="mb-3 text-base font-semibold">大運</h3>
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {daiun.phases.map((p) => {
+    <section className="min-h-56 rounded-lg bg-card p-5">
+      <h3 className="mb-4 text-base font-semibold">大運</h3>
+      <div className="flex items-center overflow-x-auto pb-2">
+        <div className="flex items-center gap-4 px-1">
+        {daiun.phases.map((p, idx) => {
           const isCurrent = p.phaseIndex === daiun.currentPhase.phaseIndex;
+          const startAge = daiun.startAge + p.phaseIndex * p.spanYears;
           return (
-            <div
-              key={p.phaseIndex}
-              className={`min-w-[7.5rem] rounded-md border p-2 ${isCurrent ? "bg-blue-50 border-blue-200" : "bg-white/10"}`}
-            >
-              <div className="text-xs text-muted-foreground">phase</div>
-              <div className="text-sm font-semibold">{p.phaseIndex}</div>
-              <div className="mt-1 text-[11px] text-muted-foreground">
-                startAge: {daiun.startAge + p.phaseIndex * p.spanYears}
+            <div key={p.phaseIndex} className="flex shrink-0 items-center gap-3">
+              {/* dot */}
+              <div className="relative flex flex-col items-center">
+                <div
+                  className={[
+                    "rounded-full border",
+                    isCurrent ? "h-4 w-4 border-sky-400 bg-sky-100 shadow-sm" : "h-3 w-3 border-slate-300 bg-white/20",
+                  ].join(" ")}
+                />
+                <div className={`mt-2 whitespace-nowrap text-[11px] ${isCurrent ? "text-sky-900 font-semibold" : "text-muted-foreground"}`}>
+                  フェーズ {p.phaseIndex}
+                </div>
+                <div className={`whitespace-nowrap text-[11px] ${isCurrent ? "text-sky-900/80" : "text-muted-foreground/80"}`}>
+                  {startAge}歳〜
+                </div>
               </div>
+
+              {/* connector */}
+              {idx !== lastIdx && <div className={`h-px w-6 ${isCurrent ? "bg-sky-300/80" : "bg-slate-200/70"}`} />}
             </div>
           );
         })}
+        </div>
       </div>
     </section>
   );

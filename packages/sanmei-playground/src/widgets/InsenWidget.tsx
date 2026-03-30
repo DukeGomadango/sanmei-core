@@ -4,9 +4,10 @@ import { stemColorClasses, stemLabel, branchLabel } from "../lib/dictionaries";
 export function InsenWidget({ insen }: { insen: InsenLayer2 | null }) {
   if (!insen) {
     return (
-      <div className="rounded-lg border bg-card p-4">
-        <div className="text-sm text-muted-foreground">Insen（陰占）を表示します</div>
-      </div>
+      <section className="min-h-56 rounded-lg bg-card p-5">
+        <h3 className="mb-4 text-base font-semibold">陰占（命式）</h3>
+        <div className="text-sm text-muted-foreground">実行すると陰占（命式）を表示します</div>
+      </section>
     );
   }
 
@@ -17,19 +18,19 @@ export function InsenWidget({ insen }: { insen: InsenLayer2 | null }) {
   ] as const;
 
   return (
-    <section className="rounded-lg border bg-card p-4">
-      <h3 className="mb-3 text-base font-semibold">陰占（命式）</h3>
-      <div className="grid grid-cols-3 gap-2">
+    <section className="min-h-56 rounded-lg bg-card p-5">
+      <h3 className="mb-4 text-base font-semibold">陰占（命式）</h3>
+      <div className="grid grid-cols-3 gap-3">
         {pillars.map((p) => {
           const c = stemColorClasses(p.pillar.stem);
           return (
-            <div key={p.label} className={`rounded-md border p-2 ${c.border} ${c.bg}`}>
-              <div className="text-xs text-muted-foreground">{p.label}</div>
-              <div className={`text-lg font-semibold ${c.text}`}>
+            <div key={p.label} className={`rounded-md border border-l-4 p-2.5 pl-3 ${c.border} ${c.bg}`}>
+              <div className="text-xs font-medium text-muted-foreground">{p.label}柱</div>
+              <div className={`mt-0.5 text-lg font-semibold ${c.text}`}>
                 {stemLabel(p.pillar.stem)}{branchLabel(p.pillar.branch)}
               </div>
               <div className="mt-1 text-[11px] text-muted-foreground">
-                depth: {insen.displayDepth}
+                表示深度: {insen.displayDepth}
               </div>
             </div>
           );

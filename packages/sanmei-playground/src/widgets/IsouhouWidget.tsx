@@ -5,26 +5,26 @@ type IsouhouEntry = InteractionRulesLayer2["isouhou"][number];
 export function IsouhouWidget({ isouhou }: { isouhou: IsouhouEntry[] | null }) {
   if (!isouhou) {
     return (
-      <section className="rounded-lg border bg-card p-4">
-        <h3 className="mb-3 text-base font-semibold">位相法</h3>
-        <div className="text-sm text-muted-foreground">応答を待っています</div>
+      <section className="min-h-24 rounded-lg bg-card p-5">
+        <h3 className="mb-4 text-base font-semibold">位相法</h3>
+        <div className="text-sm text-muted-foreground">実行すると位相法の結果を表示します</div>
       </section>
     );
   }
 
   return (
-    <section className="rounded-lg border bg-card p-4">
-      <h3 className="mb-3 text-base font-semibold">位相法</h3>
+    <section className="min-h-24 rounded-lg bg-card p-5">
+      <h3 className="mb-4 text-base font-semibold">位相法</h3>
       {isouhou.length === 0 ? (
         <div className="text-sm text-muted-foreground">該当なし</div>
       ) : (
         <div className="flex flex-col gap-2">
           {isouhou.map((e, idx) => (
-            <div key={`${e.kind}:${idx}`} className="rounded-md border p-2">
+            <div key={`${e.kind}:${idx}`} className="rounded-md border border-border/80 bg-background/60 p-2">
               <div className="flex items-center justify-between gap-2">
                 <div className="text-sm font-medium">{e.kind}</div>
                 {typeof e.strength === "number" && (
-                  <div className="text-xs text-muted-foreground">strength: {e.strength}</div>
+                  <div className="text-xs text-muted-foreground">強度: {e.strength}</div>
                 )}
               </div>
               {typeof e.strength === "number" && (
