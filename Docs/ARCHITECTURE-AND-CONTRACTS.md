@@ -40,7 +40,7 @@
 
 ### 2.4 `sanmei-core` と HTTP／BFF の責務分界
 
-- **コア**（`packages/sanmei-core/src/calculate.ts` オーケストレータを含む）は、生の出生ペイロードと **`systemConfig.sect` / `systemConfig.rulesetVersion`（必須）**、節入りマスタを用いて**境界計算、（現状 mock のみ）Layer2、`dynamicTimeline`（mock）、Layer3a スタブ**まで完結させる。`TIME_REQUIRED_FOR_SOLAR_TERM` 等は**型付きドメインエラー**（`SanmeiError`、`code` 一覧は [IMPLEMENTATION.md](./IMPLEMENTATION.md) §5.0.1）としてコアが送出しうる。
+- **コア**（`packages/sanmei-core/src/calculate.ts` オーケストレータを含む）は、生の出生ペイロードと **`systemConfig.sect` / `systemConfig.rulesetVersion`（必須）**、節入りマスタを用いて**境界計算、Layer2、`dynamicTimeline`（mock）、Layer3a/Layer3b**まで完結させる。`mock-*` ruleset は Layer3 を noop で返し、`research-v1` は位相法・格法を返す。`TIME_REQUIRED_FOR_SOLAR_TERM` 等は**型付きドメインエラー**（`SanmeiError`、`code` 一覧は [IMPLEMENTATION.md](./IMPLEMENTATION.md) §5.0.1）としてコアが送出しうる。
 - **BFF／HTTP 層**は上記エラー＋不正 JSON を [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §7 の **HTTP（400 / 422 / 500）と `code`** に**マップ**する。呼び出し側に「節入り判定を行ってからコアへ渡せ」と**天文学ロジックを要求しない**（二重実装と逸脱の防止）。
 - Layer2 の純関数・リゾルバは、**既に確定した三柱＋深さ**などを入力とし、テストで暦をモックしない方針と整合する。詳細は [IMPLEMENTATION.md](./IMPLEMENTATION.md) §2・§5.0。
 

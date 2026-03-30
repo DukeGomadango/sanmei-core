@@ -7,7 +7,7 @@ alwaysApply: true
 
 ## リポジトリの骨格
 
-- **計算コア**: `packages/sanmei-core`（Layer1 ＋ **Layer2 mock（L2a–c）** ＋ **`dynamicTimeline` mock** ＋ **Layer3a スタブ**・`calculate` オーケストレータ。本番 `ruleset` 拡張は別フェーズ）。
+- **計算コア**: `packages/sanmei-core`（Layer1 ＋ **Layer2 mock（L2a–c）** ＋ **`dynamicTimeline` mock** ＋ **Layer3a/Layer3b（research-v1 実装済・resolverディスパッチ）**・`calculate` オーケストレータ。本番監修 `ruleset` 拡張は別フェーズ）。
 - **HTTP BFF**: `packages/sanmei-bff`（Hono・`POST /api/v1/calculate`・要件 §7 のエラーマップ・最小 Playground）。
 - **管理者 Playground（フロント）**: `packages/sanmei-playground`（Vite+React 管理者用 SPA）。
 - **フェーズ2（計画）**: `takao-v1`・大運本算法・監修ゴールデン → **`Docs/PHASE2-RULESET-AND-DAIUN.md`** を正本（詳細はルールに書かない）。

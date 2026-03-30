@@ -516,7 +516,7 @@
 ### 11.5 境界
 
 - Layer3a: 位相法成立判定と `interactionRules.isouhou` 生成まで
-- Layer3b: `allowGohouInKaku` を使った格法反映（R1 では未実装）
+- Layer3b: `allowGohouInKaku` を使った格法反映（R1 最小実装済み。`kaku.candidates/resolved/suppressed`）
 
 ### 11.6 蔵干日数 R1-subset（草案）
 

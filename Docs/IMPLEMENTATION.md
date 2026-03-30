@@ -372,10 +372,10 @@ flowchart LR
 
 ### 4.1 `ruleset`（mock）データ
 
-- **配置（ソース）**: `packages/sanmei-core/src/data/rulesets/*.json`（`mock-v1.json`、`mock-internal-v2.json`＝レジストリ検証用・本文は mock と同形）。`research-v1` は M1 では `mock-v1` 本文を流用し、レジストリで `meta.rulesetVersion` を `research-v1` として束ねる。
+- **配置（ソース）**: `packages/sanmei-core/src/data/rulesets/*.json`（`mock-v1.json`、`mock-internal-v2.json`＝レジストリ検証用・本文は mock と同形）。`research-v1` は現状レジストリ構築で `mock-v1` 本文を基底にしつつ、`interaction`（位相法・格法）契約を上書き注入して束ねる。
 - **ビルド後**: `packages/sanmei-core/dist/data/rulesets/*.json`（`npm run build` 内の [copy-rulesets.mjs](../packages/sanmei-core/scripts/copy-rulesets.mjs) が `src/data/rulesets` の **全 `.json`** をミラー）。
 - **取り込み**: 節入りと異なり **fs ランタイム読込は使わず** `import` バンドル（[bundledRulesets.ts](../packages/sanmei-core/src/layer2/bundledRulesets.ts)、後方互換 [bundledMockRuleset.ts](../packages/sanmei-core/src/layer2/bundledMockRuleset.ts)）。
-- **Zod**: `BundledRulesetSchema`＝`z.union`（将来 **discriminatedUnion** 布石）。`mock-v1` の **`meta.schemaRevision`** は **2**（`timelineMock` 追加）。`research-v1` は契約準備段階として同等本文を受理する。
+- **Zod**: `BundledRulesetSchema`＝`z.union`（将来 **discriminatedUnion** 布石）。`mock-v1` の **`meta.schemaRevision`** は **2**（`timelineMock` 追加）。`research-v1` は Layer3a/3b 契約（`interaction.patterns` / `interaction.kaku`）を含む実装段階。
 - **L2c**: `energyWeights`・`energyMock`・`destinyBugRules` を同一 JSON に載せる。**中身を変えたら** `schemaRevision` を上げ、**ゴールデン**と Zod を同期する。
 - **`timelineMock`**: 大運 mock（`fixedStartAge`・`phaseSpanYears`・`firstPhaseSexagenaryIndex` 等）。厳密な節入り境界は監修版で拡張。
 
