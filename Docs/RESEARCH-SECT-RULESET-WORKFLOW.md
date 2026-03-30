@@ -744,4 +744,270 @@
 3. 2段構成（中元なし）の支は `middle=null` と明示
 4. 出典ごとの差分は `sourceRevision` に記録し、値は ruleset 側で単一化
 
+---
+
+## 17. 大運本算法リサーチ・スプリント（実行版）
+
+本節は `Docs/PHASE2-RULESET-AND-DAIUN.md` の「本番実装前に仕様を詰める」方針を、`research` 運用に落とした実行手順である。
+
+### 17.1 目的
+
+- 大運本算法の未確定点（起算・順逆行・端数・例外）を、`ruleId` 単位で追跡可能にする。
+- 公開Web探索の追加ではなく、監修質問票と一次資料 locator 収集へ重心を移す。
+- `L2` 実験値と `L0` 確定値を混線させず、`takao-v1` 実装へ橋渡しする。
+
+### 17.2 対象 `ruleId`
+
+- `research-daiun-start-rule-v1`
+- `research-daiun-direction-rule-v1`
+- `research-daiun-rounding-rule-v1`
+- `research-daiun-boundary-exception-v1`
+
+### 17.3 質問票テンプレート（監修向け）
+
+```md
+### ruleId: research-daiun-start-rule-v1
+- question: 大運の起算点は何を基準に取るか
+- choices: [節入り差分基準, 別基準]
+- requiredInput: birthDate, birthTime?, context.timeZone
+- expectedDecision: if/then で記述
+- evidenceLocator: 版・巻・ページ
+- sourceLevelTarget: L0_PRIMARY_VERIFIED
+
+### ruleId: research-daiun-direction-rule-v1
+- question: 順逆行の判定軸（性別、陰陽、その他）
+- choices: [A案, B案, 監修定義]
+- requiredInput: gender, dayStem, yearStem?
+- expectedDecision: if/then で記述
+- evidenceLocator: 版・巻・ページ
+- sourceLevelTarget: L0_PRIMARY_VERIFIED
+
+### ruleId: research-daiun-rounding-rule-v1
+- question: 起算年齢の端数処理（切上げ/切捨て/四捨五入）
+- choices: [ceil, floor, round, 監修定義]
+- requiredInput: dayDiff, divisor
+- expectedDecision: 計算式で記述
+- evidenceLocator: 版・巻・ページ
+- sourceLevelTarget: L0_PRIMARY_VERIFIED
+
+### ruleId: research-daiun-boundary-exception-v1
+- question: 境界時刻・同日節入り・birthTime欠損時の扱い
+- choices: [例外A, 例外B, 監修定義]
+- requiredInput: birthDate, birthTime?, solarTerms, context.timeZone
+- expectedDecision: error/warning/continue の分岐
+- evidenceLocator: 版・巻・ページ
+- sourceLevelTarget: L0_PRIMARY_VERIFIED
+```
+
+### 17.4 ゴールデンケース雛形（research）
+
+- 最低 5 ケースを固定する（通常、境界、逆行、端数、例外）。
+- ケースごとに `sourceLevel` と `sourceId` を持たせる。
+- 期待値は以下を最低限含める:
+  - `dynamicTimeline.daiun.startAge`
+  - `dynamicTimeline.daiun.direction`
+  - `dynamicTimeline.daiun.phases[0]`
+  - `meta.warnings[]`
+
+### 17.5 完了条件（このスプリント）
+
+1. 4つの `ruleId` すべてに質問票が埋まっている  
+2. 5ケース以上のゴールデン雛形が作成済み  
+3. 各ルールに `sourceLevel` と `sourceRevision` の初期値がある  
+4. `L2` と `L0` の昇格条件がケース単位で追跡可能  
+
+### 17.6 実行順（1サイクル）
+
+1. 質問票を更新（未回答欄を明示）  
+2. 取得済み出典に locator を付与  
+3. ケース期待を `secondary` と `primary` に分離  
+4. `status` を `PENDING-*` / `ADOPTED-*` で再判定  
+5. 差分を `RESEARCH-SECT-SPEC.md` に同期  
+
+### 17.7 Iteration 11（2026-03-31 / 大運キックオフ）
+
+**対象**:
+- `research-daiun-start-rule-v1`
+- `research-daiun-direction-rule-v1`
+- `research-daiun-rounding-rule-v1`
+- `research-daiun-boundary-exception-v1`
+
+**実施**:
+- 算命学文脈での公開情報探索（大運起算・順逆行・端数・境界）
+- 既採用系ソース（算命学Stock）の本文抽出
+- 一次資料導線（高尾学館出版物案内・CiNii書誌）の再確認
+- 四柱推命/八字系ノイズの除外判定
+
+**追加 sourceId（Iteration 11）**:
+- `SRC-SANMEI-STOCK-CALC-METHOD`  
+  - URL: `https://sanmei-stock.com/output-propositions/calculation-method/`
+  - 用途: 大運の順逆判定、`3`除算、丸め規則（高尾式/朱学院式比較）
+- `SRC-SANMEI-STOCK-FORMULAS-MISMATCH`  
+  - URL: `https://sanmei-stock.com/prior-knowledge/formulas-do-not-match/`
+  - 用途: 流派差（節入り日カウント差、丸め差）の説明
+- `SRC-TAKAOGAKKAN-BOOKS-2026`（再確認）
+- `SRC-CINII-GENTEN-BD14772324`（再確認）
+
+**ルール別の暫定判定（Iteration 11 時点）**:
+- `research-daiun-start-rule-v1`: `PENDING-MEDIUM`
+  - 根拠: 2次情報で「順回り=次節入日数/逆回り=前節入日数」の記述を確認
+  - 不足: 独立2系統の算命学ソース、または監修一次本文
+- `research-daiun-direction-rule-v1`: `PENDING-LOW`
+  - 根拠: 本文内に順逆の分岐説明はあるが、学派固定の一次裏付けが不足
+  - 不足: 高尾学館教材・原典本文での判定軸確定
+- `research-daiun-rounding-rule-v1`: `PENDING-MEDIUM`
+  - 根拠: 「高尾式=四捨五入」「朱学院式=切り上げ」の比較記述を確認
+  - 不足: 監修一次資料での丸め規則の固定
+- `research-daiun-boundary-exception-v1`: `PENDING-MEDIUM`
+  - 根拠: 節入り当日を含む/含まない差が実例付きで記述
+  - 不足: 本番採用時の例外優先順位（warning/error/continue）の監修決定
+
+**除外（混線防止）**:
+- 中国語圏の八字/命理サイト群（順逆行・起運説明）は `research` 根拠から除外
+- 四柱推命主体で算命学語彙が薄いページは `sourceLevel` 判定に使わない
+
+**今回の成果（実行可能化）**:
+1. 大運4ルールの `ruleId` ごとに初期 `status` を付与  
+2. 実装に使える候補式（順逆・3除算・丸め）を if/then 化可能な粒度で抽出  
+3. 一次資料導線（高尾学館出版物・原典書誌）を再固定  
+
+**次ループ（Iteration 12）でやること**:
+1. 監修質問票へ「A/B選択肢」ではなく「最終採用値」欄を追加  
+2. 5ケースの大運ゴールデン雛形を `secondary` と `primary` に分離して起票  
+3. `research-daiun-direction-rule-v1` を優先して独立2系統の算命学ソースを追加探索  
+4. `L0` 昇格条件（版・巻・ページ）のチェック項目をケース単位に紐づけ  
+
+### 17.8 Iteration 12（2026-03-31 / 質問票の確定欄追加）
+
+**実施**:
+- `17.3` の質問票を「選択肢」中心から「最終採用値」記録型へ拡張
+- `ruleId` ごとに `finalDecision` / `decisionStatus` / `adoptedBy` を追加
+- `L0` 到達時にそのまま ruleset へ移植できる形式に整形
+
+**質問票フィールド（追加）**:
+- `finalDecision`: 実装で使う最終値（if/then 文字列可）
+- `decisionStatus`: `UNSET` / `PROVISIONAL` / `CONFIRMED`
+- `adoptedBy`: `research-only` / `mainstream`
+- `appliesFrom`: `rulesetVersion`（例: `research-v1.1`）
+
+**運用判断**:
+- `decisionStatus=PROVISIONAL` でも `research-only` なら実装候補として扱う
+- `mainstream` へ昇格するには `CONFIRMED` + `L0_PRIMARY_VERIFIED` を必須
+
+### 17.9 Iteration 13（2026-03-31 / 大運ゴールデン雛形5件）
+
+**実施**:
+- 大運ルール検証用ケースを `secondary` / `primary` に分離起票
+- まず `secondary` に 5 ケースを固定し、`primary` は空スロットのみ確保
+
+**secondary ケース雛形（5件）**:
+1. `DAIUN-S-001-normal-forward`  
+   - 目的: 陽年干×男性（順回り）で startAge と phase 遷移を確認
+2. `DAIUN-S-002-normal-backward`  
+   - 目的: 陰年干×男性（逆回り）で前節入基準を確認
+3. `DAIUN-S-003-rounding-half-up`  
+   - 目的: `3`除算の四捨五入（高尾式想定）を確認
+4. `DAIUN-S-004-boundary-same-day`  
+   - 目的: 節入り当日のカウント差（含む/含まない）を警告付きで確認
+5. `DAIUN-S-005-clamp-zero-eleven`  
+   - 目的: 0歳運→1歳運、11歳運→10歳運の補正を確認
+
+**primary スロット（予約）**:
+- `DAIUN-P-001` 〜 `DAIUN-P-005`（監修確定後にのみ期待値を投入）
+
+### 17.10 Iteration 14（2026-03-31 / 実装可能判定）
+
+**判定対象**:
+- `research-daiun-start-rule-v1`
+- `research-daiun-direction-rule-v1`
+- `research-daiun-rounding-rule-v1`
+- `research-daiun-boundary-exception-v1`
+
+**判定結果（research 限定）**:
+- `research-daiun-start-rule-v1`: `ADOPTED-R1-SECONDARY`
+- `research-daiun-direction-rule-v1`: `ADOPTED-R1-SECONDARY`
+- `research-daiun-rounding-rule-v1`: `ADOPTED-R1-SECONDARY`
+- `research-daiun-boundary-exception-v1`: `ADOPTED-R1-SECONDARY`
+
+**採用した暫定決定表（R1）**:
+- 順逆行:
+  - 年干が陽: 男性=順回り, 女性=逆回り
+  - 年干が陰: 男性=逆回り, 女性=順回り
+- 起算:
+  - 順回り: `nextTermDayDiff / 3` を使用
+  - 逆回り: `prevTermDayDiff / 3` を使用
+- 丸め:
+  - R1 は四捨五入（高尾式想定）を採用
+  - 派生流派差（切り上げ）は分岐オプションとして保持
+- 補正:
+  - 算出 0 は 1歳運へ補正
+  - 算出 11 は 10歳運へ補正
+
+**制約（重要）**:
+- 上記は `research-v1` の実験実装に限る
+- `sourceLevel` は `L2_SECONDARY` のまま据え置き
+- `takao` 系への反映は禁止（`L0` 到達後のみ）
+
+**実装可能化の結論**:
+- `research` に限り、大運本算法の最小実装（R1）に着手可能
+- 本採用へ必要な残課題は「一次本文または監修メモでの丸め・境界優先順位確定」
+
+### 17.11 Iteration 15（2026-03-31 / R1 実装反映）
+
+**実施**:
+- `research-v1` 用の `researchDaiun` 契約を ruleset schema に追加
+- `bundledRulesets` の `research-v1` 合成に `researchDaiun` を注入
+- `resolveDynamicTimeline` に research 分岐を実装
+  - 順逆判定（年干陰陽 × 性別）
+  - 起算日数（順=次節入、逆=前節入）をローカル暦日 JDN 差で算出
+  - `3`除算の四捨五入 + `0->1` / `11->10` 補正
+  - 月柱干支 index を起点に `forward:+1` / `backward:-1` で初旬を決定
+- `DaiunTimelineSchema` に `direction` / `startDayDiff` を追加
+- `debugTrace` に `startDayDiff` / `roundedStartAge` を追加
+
+**テスト結果**:
+- `npm test -w @sanmei/sanmei-core` ✅
+- `npm run build -w @sanmei/sanmei-core` ✅
+
+**反映結果**:
+- `research-v1` は R1 大運本算法で計算される
+- `mock-v1` / `mock-internal-v2` は既存 `timelineMock` 挙動を維持
+
+### 17.12 Iteration 16（2026-03-31 / secondary 5ケースをテスト固定）
+
+**実施**:
+- `calculate.test.ts` に `DAIUN-S-001` 〜 `DAIUN-S-005` を追加
+- 各ケースは「完全ゴールデン一致」ではなく、R1で崩れてはいけない判定軸を固定:
+  - S-001: 順回り判定
+  - S-002: 逆回り判定 + backward 境界遷移
+  - S-003: 端数処理反映（trace の `roundedStartAge`）
+  - S-004: 節入り境界日で `startDayDiff >= 0`
+  - S-005: `startAge` が `1..10` クランプ
+
+**テスト結果**:
+- `npm test -w @sanmei/sanmei-core` ✅（50 tests）
+- `npm run build -w @sanmei/sanmei-core` ✅
+
+**運用判断**:
+- `secondary` は回帰検知を優先し、監修確定前の過剰固定は避ける
+- `primary` は引き続き監修確定後にケース化する
+
+### 17.13 Iteration 17（2026-03-31 / primary 予約スロットをテスト化）
+
+**実施**:
+- `calculate.test.ts` に `DAIUN-P-001` 〜 `DAIUN-P-005` を `it.todo` で追加
+- 監修値未確定の現段階で、実行可能テストへは昇格させず「差し込み口」を固定
+
+**追加した予約スロット**:
+1. `DAIUN-P-001-start-rule-l0`
+2. `DAIUN-P-002-direction-rule-l0`
+3. `DAIUN-P-003-rounding-rule-l0`
+4. `DAIUN-P-004-boundary-rule-l0`
+5. `DAIUN-P-005-end-to-end-l0`
+
+**運用判断**:
+- `primary` は `L0_PRIMARY_VERIFIED` 到達後に `todo` を通常テストへ昇格する
+- 昇格時は `sourceId` / `locator`（版・巻・ページ）を各ケースに紐づける
+
+
 

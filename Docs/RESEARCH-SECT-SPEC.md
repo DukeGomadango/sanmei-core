@@ -225,6 +225,7 @@
 - `allowGohouInKaku` の格法反映境界
 - 蔵干閾値の `L0` 確定
 - 二十八元配置の `L0` 確定
+- 大運本算法（起算・順逆行・端数処理）の `L0` 確定
 
 ロードマップ:
 1. `L2/L1` 実装を先行
@@ -233,11 +234,115 @@
 
 ---
 
-## 12. 実装チェックリスト
+## 12. 大運本算法（research での扱い）
+
+### 12.1 目的
+
+- `research` では「大運本算法そのもの」を独立ルールとして扱い、位相法・蔵干と同じ `sourceLevel` 運用に乗せる。
+- 本節は `takao-v1` 本番実装の前段として、仕様収束を早めるための research 側アンカーとする。
+
+### 12.2 ルールID（固定）
+
+- `research-daiun-start-rule-v1`（起算規則）
+- `research-daiun-direction-rule-v1`（順逆行規則）
+- `research-daiun-rounding-rule-v1`（端数・丸め規則）
+- `research-daiun-boundary-exception-v1`（境界例外）
+
+### 12.3 最低入力と期待出力
+
+- 入力: `birthDate`, `birthTime?`, `gender`, `context.timeZone`, `sect`, `rulesetVersion`, `nowUtcMs`
+- 期待出力（最低）:
+  - `dynamicTimeline.daiun.startAge`
+  - `dynamicTimeline.daiun.direction`
+  - `dynamicTimeline.daiun.phases[]`（開始年齢・干支インデックス）
+  - `meta.warnings[]`（`sourceLevel < L0` の場合）
+
+### 12.4 検証ポリシー（L2→L0）
+
+- `L2_SECONDARY`: 独立2系統一致で `research` 限定運用可。
+- `L1_PRIMARY_IDENTIFIED`: 版・巻・書誌を特定し、質問票へ locator を記録する。
+- `L0_PRIMARY_VERIFIED`: 一次本文（版・ページ付き）または監修メモで値を確定し、主流派昇格可。
+
+### 12.5 大運専用ゴールデン（研究系）
+
+- `secondary`（実験）と `primary`（確定）を分離し、同名ケースの上書きを禁止する。
+- `secondary` の期待値更新は可だが、`primary` は監修差分レビューなしに更新しない。
+- `research` の暫定値を `takao` 系の期待値へコピーしない。
+
+### 12.6 現在地（Iteration 11 時点）
+
+- `research-daiun-start-rule-v1`: `PENDING-MEDIUM`
+- `research-daiun-direction-rule-v1`: `PENDING-LOW`
+- `research-daiun-rounding-rule-v1`: `PENDING-MEDIUM`
+- `research-daiun-boundary-exception-v1`: `PENDING-MEDIUM`
+
+注:
+- 上記は `L2/L1` の実験運用ステータスであり、主流派昇格には `L0_PRIMARY_VERIFIED` を必須とする。
+- 具体根拠と sourceId は `RESEARCH-SECT-RULESET-WORKFLOW.md` の Iteration 11 を正とする。
+
+### 12.7 更新（Iteration 14 時点）
+
+- `research-daiun-start-rule-v1`: `ADOPTED-R1-SECONDARY`
+- `research-daiun-direction-rule-v1`: `ADOPTED-R1-SECONDARY`
+- `research-daiun-rounding-rule-v1`: `ADOPTED-R1-SECONDARY`
+- `research-daiun-boundary-exception-v1`: `ADOPTED-R1-SECONDARY`
+
+暫定決定表（R1）:
+- 順逆行: 年干陰陽 × 性別で判定（陽年男/陰年女=順、陰年男/陽年女=逆）
+- 起算: 順は次節入日数、逆は前節入日数を `3` で除算
+- 丸め: 四捨五入（`research-v1` R1）
+- 補正: `0 -> 1歳運`, `11 -> 10歳運`
+
+制約:
+- `sourceLevel` は `L2_SECONDARY`。主流派昇格は不可。
+- 本番 `takao` 反映には `L0_PRIMARY_VERIFIED`（一次本文または監修メモ）を必須とする。
+
+### 12.8 実装反映（Iteration 15 時点）
+
+- `research-v1` の `dynamicTimeline.daiun` は R1 本算法を使用する。
+- 返却項目:
+  - `startAge`
+  - `direction`（`forward` / `backward`）
+  - `startDayDiff`（起算日数）
+  - `phases[]` / `currentPhase`
+- 計算根拠:
+  - 起算日数はローカル暦日の JDN 差分で算出
+  - `debugTrace` に `startDayDiff` と `roundedStartAge` を記録
+- `mock-v1` / `mock-internal-v2` は従来の `timelineMock` ロジックを維持する。
+
+### 12.9 secondary ケース固定（Iteration 16 時点）
+
+- `DAIUN-S-001` 〜 `DAIUN-S-005` をテストに実装済み
+- `secondary` の固定対象:
+  - 順逆判定
+  - backward 境界遷移
+  - 端数処理反映
+  - 節入り境界日の非負日数
+  - `startAge` クランプ（`1..10`）
+- `primary` ケースは監修確定まで予約状態を維持する。
+
+### 12.10 primary 予約スロット（Iteration 17 時点）
+
+- `DAIUN-P-001` 〜 `DAIUN-P-005` を `it.todo` で追加し、受け皿を固定した。
+- 予約スロットの対象:
+  - 起算規則（L0）
+  - 順逆規則（L0）
+  - 丸め規則（L0）
+  - 境界例外（L0）
+  - 監修E2E（L0）
+- 昇格条件:
+  - `L0_PRIMARY_VERIFIED` の根拠（`sourceId` + `locator`）が揃っていること
+  - 監修期待値レビューを通過していること
+
+---
+
+## 13. 実装チェックリスト
 
 - [ ] `ruleset` に `sourceLevel/sourceId/sourceRevision` を追加
 - [ ] 位相法 `kind` と組合せ表を JSON 化
 - [ ] 蔵干閾値テーブルを JSON 化（正規化済み）
+- [ ] 大運本算法の質問票（起算・順逆行・端数・例外）を作成
+- [ ] 大運ゴールデン（`secondary` / `primary`）を分離定義
 - [ ] `meta` 警告（`sourceLevel < L0`）を返す
 - [ ] `secondary` テストを追加
 - [ ] `SECT-RULESET-MATRIX` と同期

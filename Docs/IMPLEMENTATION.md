@@ -217,7 +217,7 @@ flowchart LR
 
 **実装済み（Layer2 / Phase L2a＋L2b＋L2c、mock のみ）**
 
-- Orchestrator: [calculate.ts](../packages/sanmei-core/src/calculate.ts)— `CalculateInputSchema` → `requiresBirthTimeForAnySolarTermOnDate` → `resolveInsenWithDepth` → **`getBundledRuleset(rulesetVersion)`**（`mock-v1` / `mock-internal-v2` / `research-v1`）→ 蔵干・主星・従星・守護神／忌神・六親（`familyNodes` 座標付き）→ **L2c** `resolveEnergyData`／`resolveDestinyBugs` → **`dynamicTimeline`**（`.resolveDynamicTimeline`、mock・満年齢ベースの `currentPhase`）→ **Layer3a resolver** `applyLayer3aByRuleset`（`rulesetVersion` ディスパッチ。`research-v1` は位相法を返し、`mock-*` は noop）→ **Layer3b resolver** `applyLayer3bByRuleset`（`research-v1` は `kaku` を返却、`mock-*` は noop）。`user.timeZoneId` と `context.timeZone` の一致を要求（REQUIREMENTS の民用 TZ 基準）。
+- Orchestrator: [calculate.ts](../packages/sanmei-core/src/calculate.ts)— `CalculateInputSchema` → `requiresBirthTimeForAnySolarTermOnDate` → `resolveInsenWithDepth` → **`getBundledRuleset(rulesetVersion)`**（`mock-v1` / `mock-internal-v2` / `research-v1`）→ 蔵干・主星・従星・守護神／忌神・六親（`familyNodes` 座標付き）→ **L2c** `resolveEnergyData`／`resolveDestinyBugs` → **`dynamicTimeline`**（`.resolveDynamicTimeline`。`mock-*` は満年齢ベース、`research-v1` は大運R1: 順逆判定 + JDN日数差 + 3除算四捨五入 + 0/11補正）→ **Layer3a resolver** `applyLayer3aByRuleset`（`rulesetVersion` ディスパッチ。`research-v1` は位相法を返し、`mock-*` は noop）→ **Layer3b resolver** `applyLayer3bByRuleset`（`research-v1` は `kaku` を返却、`mock-*` は noop）。`user.timeZoneId` と `context.timeZone` の一致を要求（REQUIREMENTS の民用 TZ 基準）。
 - Ruleset: [bundledRulesets.ts](../packages/sanmei-core/src/layer2/bundledRulesets.ts)＋`bundledMockRulesetV1`（後方互換）、Zod は `schemas/rulesetMockV1.ts`（`BundledRulesetSchema`＝`mock-v1`／`mock-internal-v2`／`research-v1` の `z.union`、`timelineMock`、`meta.schemaRevision`、`energyWeights` 等）。欠セルは `RULESET_DATA_MISSING`。
 - レスポンス契約: `schemas/layer2.ts`（`baseProfile` は従来どおり＋**`dynamicTimeline`**（`daiun`／`annual` 等）。**`interactionRules`** に `isouhou`・`kyoki`・`resolutionMeta?`・`kaku?` を持つ；`guardianDeities`／`kishin` は五行コード列＝`Element` 数値）。
 - ゴールデン: `src/__fixtures__/golden_mock_v1/`（入力 JSON＋期待 JSON）。**追加手順（要約）**: 入力 JSON を追加 → `calculate` を固定 `nowUtcMs` で実行 → `CalculateResultSchema.safeParse` 通過を確認 → 期待値は `meta.calculatedAt`／必要なら `engineVersion` を [goldenHarness](../packages/sanmei-core/src/__tests__/goldenHarness.ts) で正規化してコミット。
@@ -332,7 +332,7 @@ flowchart LR
 - **L2a（済）**: ruleset 取り込み、Zod、従星、守護神／忌神→`interactionRules`、ゴールデン土台、`mock-v1` のみ。
 - **L2b（済）**: Layer1 深さ、蔵干、十大主星（上表）、`familyNodes`（座標必須）。※ ruleset は引き続き `mock-v1` のみ。
 - **L2c（済・mock）**: `energyData`・`destinyBugs`。`mock-v1` の `schemaRevision` は **2**（`timelineMock` 追加時にインクリメント）。
-- **DynamicTimeline（済・mock）**: `resolveDynamicTimeline`・`timelineMock`（満年齢による `currentPhase`／`annual` のプレースホルダ）。要件の細部は [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §6.3。
+- **DynamicTimeline（research R1 実装済）**: `resolveDynamicTimeline`。`mock-v1`/`mock-internal-v2` は `timelineMock` の満年齢ベースを維持。`research-v1` は `researchDaiun` ルールで `direction`・`startDayDiff` を返し、起算日数は **ローカル暦日 JDN 差**で算出する。デバッグ時は `debugTrace` に `startDayDiff`・`roundedStartAge` を記録。要件の細部は [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §6.3。
 - **Layer3a（M2）**: `applyLayer3aByRuleset`（resolver ディスパッチ）。`research-v1` は ruleset の `interaction`（`patterns`/`priorityOrder`）で `isouhou` を判定、`HANKAI` に `hasCentralBranch` を付与、`kyoki` は gate で `null` 維持。`mock-v1` / `mock-internal-v2` は `applyLayer3aMock` の noop を維持。
 - **Layer3b（M3）**: `applyLayer3bByRuleset`（resolver ディスパッチ）。`research-v1` は `kaku.candidates[]`（全件）→ `kaku.resolved[]` / `kaku.suppressed[]` を返し、`allowGohouInKaku` を反映。`kaku.meta` に `allowGohouInKakuApplied` / `evaluateShadowProfileApplied` を保持。`mock-v1` / `mock-internal-v2` は noop を維持。
 - **フェーズ2（計画・未完了）**: 本番 `takao-v1` バンドル・大運本算法・監修ゴールデン。**手順・前提の正本は [PHASE2-RULESET-AND-DAIUN.md](./PHASE2-RULESET-AND-DAIUN.md)**（フロント開発は BFF 契約＋ mock で並行可）。
@@ -372,7 +372,7 @@ flowchart LR
 
 ### 4.1 `ruleset`（mock）データ
 
-- **配置（ソース）**: `packages/sanmei-core/src/data/rulesets/*.json`（`mock-v1.json`、`mock-internal-v2.json`＝レジストリ検証用・本文は mock と同形）。`research-v1` は現状レジストリ構築で `mock-v1` 本文を基底にしつつ、`interaction`（位相法・格法）契約を上書き注入して束ねる。
+- **配置（ソース）**: `packages/sanmei-core/src/data/rulesets/*.json`（`mock-v1.json`、`mock-internal-v2.json`＝レジストリ検証用・本文は mock と同形）。`research-v1` はレジストリ構築で `mock-v1` 本文を基底にしつつ、`interaction`（位相法・格法）に加えて `researchDaiun`（大運R1契約）を上書き注入して束ねる。
 - **ビルド後**: `packages/sanmei-core/dist/data/rulesets/*.json`（`npm run build` 内の [copy-rulesets.mjs](../packages/sanmei-core/scripts/copy-rulesets.mjs) が `src/data/rulesets` の **全 `.json`** をミラー）。
 - **取り込み**: 節入りと異なり **fs ランタイム読込は使わず** `import` バンドル（[bundledRulesets.ts](../packages/sanmei-core/src/layer2/bundledRulesets.ts)、後方互換 [bundledMockRuleset.ts](../packages/sanmei-core/src/layer2/bundledMockRuleset.ts)）。
 - **Zod**: `BundledRulesetSchema`＝`z.union`（将来 **discriminatedUnion** 布石）。`mock-v1` の **`meta.schemaRevision`** は **2**（`timelineMock` 追加）。`research-v1` は Layer3a/3b 契約（`interaction.patterns` / `interaction.kaku`）を含む実装段階。
