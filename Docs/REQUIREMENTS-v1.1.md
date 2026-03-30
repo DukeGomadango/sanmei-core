@@ -150,7 +150,7 @@
 
 | フィールド | 説明 |
 |------------|------|
-| `includeDebugTrace` | `true` のときのみ詳細トレースを返す（本番は認証・ロール制限推奨）。 |
+| `includeDebugTrace` | `true` のときのみ詳細トレースを要求できる。BFF は認証/ロール（または管理者キー）で許可された場合のみ Core へ `true` を中継し、それ以外は `false` を強制する。 |
 
 ---
 
@@ -213,7 +213,7 @@
 | `guardianDeities` | 守護神（有利五行の配列等） |
 | `kishin` | 忌神（避ける五行の配列等） |
 | `priorityResolution` | 競合時のスコアリング結果（§8） |
-| `debugTrace` | `includeDebugTrace` 時のみ。中間計算・参照した節入り時刻 ID 等 |
+| `debugTrace` | `includeDebugTrace` かつ BFF で許可された場合のみ。`traceVersion` と `nodes[]`（`phase`, `stepId`, `ruleId`, `inputs`, `result`, `reasonCode`）を返す。 |
 
 ---
 
