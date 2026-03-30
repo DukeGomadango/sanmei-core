@@ -36,6 +36,12 @@
    - **監修で確定すること**: 上記 DSL／ルール表の真理値、レスポンスに載せるフィールドの最小セット。[REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) の `tenchuSatsuStatus` 説明および [SECT-RULESET-MATRIX.template.md](./SECT-RULESET-MATRIX.template.md) の `isShifted` 行と整合させる。
 9. **虚気（`Kyoki`）**: 干合・月支条件・`shadowYousen` の生成条件を学派別に列挙。
 10. **格法・位相法**: `allowGohouInKaku` が効く範囲（半会・支合・方三位等の一覧と優先度）。
+11. **位相法の拡張集合**: `research` で扱う候補（干合・納音・律音・天剋地冲・大半会）を `kind` と `sourceLevel` 付きで分離管理するか。
+12. **位相法の適用スコープ**: 命式内判定と、命式×大運/年運のクロス判定をどの層（Layer3a/3b）で処理するか。
+13. **高尾系一次 locator の回収運用**: 拡張位相法ごとに `volume/chapter/page/quotation` を必須化し、`L0_PRIMARY_VERIFIED` 昇格条件にする。
+14. **locator 進捗管理**: `PENDING-LOCATOR` のまま長期滞留しないよう、`owner/due/lastChecked` を最低メタとして持つ。
+15. **priority 運用（P0/P1）**: `P0` は実装ブロッカー、`P1` は改善追跡。`P0` は `lastChecked` が14日以上空いたら再探索を起票する。  
+    **拡張位相法の初期割当（Iteration 24）**: `P0` は `TENKOKUCHICHU` / `DAIHANKAI` のみ。`P1` は `KANGO` / `NACHION` / `RITSUON`。
 
 ---
 

@@ -1009,5 +1009,357 @@
 - `primary` は `L0_PRIMARY_VERIFIED` 到達後に `todo` を通常テストへ昇格する
 - 昇格時は `sourceId` / `locator`（版・巻・ページ）を各ケースに紐づける
 
+---
+
+## 18. 高次補正・詳細位相法リサーチループ（実行版）
+
+### 18.1 Iteration 18（2026-03-31 / P0キックオフ）
+
+**対象**:
+- 位相法の拡張集合（既存8種の外側）
+- 位相法の適用スコープ（命式内のみか、動態連携まで含むか）
+- `kyoki` / `allowGohouInKaku` の再探索可否判定
+
+**実施**:
+- 高尾系導線を優先して公開情報を再探索
+- 既存採用ソース（`sanmei-stock` / `自然法算命学`）の位相法カテゴリを再抽出
+- 一次導線として書誌情報を再取得（古書導線）
+- 四柱推命・八字の混線ソースを除外
+
+**追加 sourceId（Iteration 18）**:
+- `SRC-SANMEI-STOCK-TOPOLOGY-INDEX-2026`
+  - URL: `https://sanmei-stock.com/category/basic/yin/topology/`
+  - 用途: 位相法の拡張カテゴリ候補（方三位・大半会・律音・納音・天剋地冲）の抽出
+- `SRC-SHIZENHOU-ISOUHOU-OVERVIEW-2026`
+  - URL: `https://xn--ltrs4nlq4a.jp/%E7%AE%97%E5%91%BD%E5%AD%A6%E3%82%92%E5%AD%A6%E3%81%B6/%E7%AE%97%E5%91%BD%E5%AD%A6%E7%84%A1%E6%96%99%E8%AC%9B%E5%BA%A7/%E5%91%BD%E5%BC%8F%E3%81%AE%E8%A6%8B%E6%96%B9/%E9%99%B0%E5%8D%A0/%E4%BD%8D%E7%9B%B8%E6%B3%95`
+  - 用途: 位相法上位カテゴリ（合法/散法の文脈）と関連項目の再確認
+- `SRC-KOSHO-SANMEIGAKU5-TAKAO-ENTRY-2026`
+  - URL: `https://www.kosho.or.jp/products/detail.php?product_id=490683627`
+  - 用途: `算命学（5）大運と位相法` の書誌導線補強（`L1_PRIMARY_IDENTIFIED` 補助）
+
+**ルール候補（初期）**:
+- `research-isouhou-extended-taxonomy-v1`
+  - statement: 位相法の拡張候補（`KANGO`, `NACHION`, `RITSUON`, `TENKOKUCHICHU`, `DAIHANKAI`）を `research` 専用の候補集合として保持する
+  - status: `PENDING-MEDIUM`
+  - sourceLevel: `L2_SECONDARY` 相当（公開解説ベース）
+  - notes: `research-v1` 契約（既存8種）へ直投入はせず、`research-v1.1` 以降の feature gate 候補として分離
+- `research-isouhou-scope-boundary-v1`
+  - statement: 位相法の適用範囲を「命式内判定」「命式×大運」「命式×年運」の3層に分離し、レイヤ責務（L3a/L3b）を固定する
+  - status: `PENDING-HIGH`
+  - sourceLevel: `L2_SECONDARY`（実装要件起点）
+  - notes: 既存 `dynamicTimeline` 連携と競合しないよう、resolver 入力契約を先に固定する
+- `research-kyoki-trigger-guard-v2`
+  - statement: `kyoki` は算命学一次または監修メモの条件確定まで新規トリガ追加を禁止し、shadow返却契約のみ維持する
+  - status: `PENDING-HIGH`
+  - sourceLevel: `L3_UNVERIFIED`（条件本体）
+  - notes: 八字・四柱推命由来の干合条件を混入させない安全弁ルール
+- `research-allowgohou-kaku-boundary-v2`
+  - statement: `allowGohouInKaku` の作用対象を `GOHOU` タグ候補 suppress 判定のみに限定し、位相法拡張集合とは直結させない
+  - status: `PENDING-HIGH`
+  - sourceLevel: `L2_SECONDARY`（現行仕様準拠）
+  - notes: 格法への取り込みは `L0` 根拠獲得後に段階開放
+
+**判定**:
+- 位相法の「拡張候補の存在」は `L2` で収集可能。
+- ただし個別真理値（成立表・優先度・抑制条件）の固定は `L0` 不足のため未到達。
+- `kyoki` 条件と `allowGohouInKaku` 拡張は、今回も `L0` 導線不足により採用保留。
+
+**次ループ（Iteration 19）**:
+1. `research-isouhou-extended-taxonomy-v1` の各 `kind` について、最低2系統の算命学ソース一致を確認
+2. `research-isouhou-scope-boundary-v1` を resolver 契約（入力/出力/優先度）に落とす
+3. 高尾系一次資料の locator（巻・章・頁）を質問票形式で穴埋めする
+
+### 18.2 Iteration 19（2026-03-31 / 拡張 kind の2系統照合）
+
+**対象**:
+- `research-isouhou-extended-taxonomy-v1`（`KANGO`, `NACHION`, `RITSUON`, `TENKOKUCHICHU`, `DAIHANKAI`）
+- `research-isouhou-scope-boundary-v1` の if/then 化
+
+**実施**:
+- `sanmei-stock` の拡張位相法個別ページを取得し、各 `kind` の成立条件を抽出
+- `自然法算命学` の位相法一覧で同カテゴリの存在を照合
+- 四柱推命/八字中心ページを除外したまま、算命学文脈で一致確認
+
+**追加 sourceId（Iteration 19）**:
+- `SRC-SANMEI-STOCK-KANGO-2026`
+  - URL: `https://sanmei-stock.com/applied/resonance/`
+  - 用途: `KANGO` の成立ペア（甲己/乙庚/丙辛/丁壬/戊癸）と作用記述
+- `SRC-SANMEI-STOCK-NACHION-2026`
+  - URL: `https://sanmei-stock.com/basic/yin/topology/equals-and-conflicts/`
+  - 用途: `NACHION`（同一天干 + 地支対冲）の条件記述
+- `SRC-SANMEI-STOCK-RITSUON-2026`
+  - URL: `https://sanmei-stock.com/basic/yin/topology/strong-equal-sign/`
+  - 用途: `RITSUON`（同干支一致）の条件記述
+- `SRC-SANMEI-STOCK-TENKOKUCHICHU-2026`
+  - URL: `https://sanmei-stock.com/basic/yin/topology/attacks-and-opposition/`
+  - 用途: `TENKOKUCHICHU`（天干同陰陽相剋 + 地支対冲）の条件記述
+- `SRC-SANMEI-STOCK-DAIHANKAI-2026`
+  - URL: `https://sanmei-stock.com/basic/yin/topology/inter-dimensional_fusion/`
+  - 用途: `DAIHANKAI`（同一天干 + 地支半会）の条件記述
+
+**照合結果（カテゴリ存在）**:
+- `自然法算命学` 位相法一覧に、`干合` / `納音` / `律音` / `大半会` / `天剋地冲` のカテゴリが列挙されることを確認
+- `sanmei-stock` 側で各カテゴリの個別定義ページを取得
+- 以上により、**カテゴリ存在レベル**では独立2系統一致を確認
+
+**ルール判定更新**:
+- `research-isouhou-extended-taxonomy-v1`
+  - status: `ADOPTED-R1-SECONDARY`
+  - sourceLevel: `L2_SECONDARY`
+  - 採用範囲: `kind` のカタログ登録まで（真理値固定は除く）
+  - 制約: `research-v1` の既存8種ロジックを置換しない。`research-v1.1` 以降の feature gate 前提。
+- `research-isouhou-scope-boundary-v1`
+  - status: `PENDING-HIGH`
+  - sourceLevel: `L2_SECONDARY`
+  - if/then 草案:
+    - if `scope = natalOnly` then L3a は命式内ペア/トリプルのみ評価
+    - if `scope = natalXTimeline` then L3a は命式×大運/年運のクロス判定を追加
+    - if L3b 格法評価 then `allowGohouInKaku` は `GOHOU` suppress 判定のみ適用
+  - 不足: 高尾系一次資料での scope 正当化（巻・章・頁）
+
+**運用判断**:
+- 拡張 `kind` は「存在カタログ」としては `L2` 採用可能。
+- ただし成立表・優先度・抑制条件（resolver 真理値）は未確定のため、`PENDING` のまま別レーン管理する。
+- `kyoki` 条件本体は引き続き `L3_UNVERIFIED` を維持。
+
+**次ループ（Iteration 20）**:
+1. 拡張 `kind` ごとに「成立条件の最小 if/then」と「除外条件」を分離記述
+2. `research-isouhou-scope-boundary-v1` を `SECT-RULESET-MATRIX` の行定義に同期
+3. 高尾系一次資料 locator の質問票（巻・章・頁）を `OPEN-QUESTIONS` 連動で作成
+
+### 18.3 Iteration 20（2026-03-31 / 最小 if/then と locator 質問票）
+
+**対象**:
+- `research-isouhou-extended-taxonomy-v1` の最小判定式
+- `research-isouhou-scope-boundary-v1` の適用境界
+- 高尾系 `L0` 取得に向けた locator 質問票
+
+**最小 if/then（draft, L2）**:
+
+1) `KANGO`
+- if `pair(stemA, stemB)` in `{甲己,乙庚,丙辛,丁壬,戊癸}` then `kind=KANGO`
+- else not成立
+- 除外条件:
+  - `sect != research` では適用しない
+  - `rulesetVersion=research-v1` では feature gate が `false` なら評価しない
+
+2) `NACHION`
+- if `stemA == stemB` and `branchPair` is opposition (`TAICHU`) then `kind=NACHION`
+- else not成立
+- 除外条件:
+  - 対冲判定が未成立なら不成立
+  - 命式内3柱以外の比較は `scope` 許可時のみ
+
+3) `RITSUON`
+- if `stemA == stemB` and `branchA == branchB` then `kind=RITSUON`
+- else not成立
+- 除外条件:
+  - 同一干支の重複検知は「柱組み合わせ1回のみ」カウント
+
+4) `TENKOKUCHICHU`
+- if `stemPair` is same-polarity overcoming and `branchPair` is opposition (`TAICHU`) then `kind=TENKOKUCHICHU`
+- else not成立
+- 除外条件:
+  - `stemPair` の相剋判定が ruleset 未定義なら評価保留
+
+5) `DAIHANKAI`
+- if `stemA == stemB` and `branchPair` in `HANKAI` then `kind=DAIHANKAI`
+- else not成立
+- 除外条件:
+  - `HANKAI` 判定が未成立なら不成立
+
+**scope 境界（resolver 草案）**:
+- `natalOnly`: 命式内（年/月/日）組み合わせのみ評価
+- `natalXTimeline`: 命式×大運/年運を追加評価
+- `timelineOnly`: 現時点では未採用（誤検知リスク高）
+
+**locator 質問票（高尾系一次, draft）**:
+```md
+### ruleId: research-isouhou-extended-taxonomy-v1
+- sourceTarget: 原典算命学大系 or 高尾学館教材
+- kind: KANGO / NACHION / RITSUON / TENKOKUCHICHU / DAIHANKAI
+- volume:
+- chapter:
+- pageStart:
+- pageEnd:
+- quotation:
+- decisionStatus: UNSET
+- sourceLevelTarget: L0_PRIMARY_VERIFIED
+```
+
+**運用判断**:
+- 拡張5種は「最小 if/then」の形に落とし込めたため、実装前レビュー可能な状態へ前進。
+- ただし `stemPair` の厳密相剋判定テーブルと、timeline 連携時の重複解消規則は未確定。
+
+**次ループ（Iteration 21）**:
+1. 拡張5種の競合解消ルール（同時成立時の suppress/priority）を定義
+2. `OPEN-QUESTIONS` に locator 質問票運用の明文化を追加
+3. 高尾系一次導線で巻・章・頁の実値回収を開始
+
+### 18.4 Iteration 21（2026-03-31 / 競合解消ルールの草案化）
+
+**対象**:
+- 拡張5種（`KANGO`, `NACHION`, `RITSUON`, `TENKOKUCHICHU`, `DAIHANKAI`）の同時成立処理
+- 既存8種との優先関係
+
+**競合解消ルール（draft）**:
+
+1) 基本方針
+- `research-v1` 既存8種（基本位相法）を主系列とし、拡張5種は副系列として扱う
+- 同一ペア/同一トリプルで基本位相法と拡張位相法が同時成立した場合、**基本位相法を優先**
+
+2) 拡張5種内の暫定優先度
+1. `TENKOKUCHICHU`
+2. `DAIHANKAI`
+3. `RITSUON`
+4. `NACHION`
+5. `KANGO`
+
+3) suppress 条件（最小）
+- if `RITSUON` and `NACHION` are同時成立 then keep `RITSUON`, suppress `NACHION`
+- if `TENKOKUCHICHU` and (`NACHION` or `KANGO`) are同時成立 then keep `TENKOKUCHICHU`, suppress others
+- if `DAIHANKAI` and `KANGO` are同時成立 then keep both（系列が異なるため共存）
+
+4) 出力契約
+- `interactionRules.isouhouExtended.candidates[]` に全候補を保持
+- `interactionRules.isouhouExtended.resolved[]` に採用結果を保持
+- `interactionRules.isouhouExtended.suppressed[]` に抑制理由を保持
+
+**状態更新**:
+- `research-isouhou-extended-conflict-priority-v1` を新規候補として登録
+  - status: `PENDING-HIGH`
+  - sourceLevel: `L2_SECONDARY`
+  - notes: 現段階は resolver 安定化目的の暫定規則。`L0` で再評価必須。
+
+**次ループ（Iteration 22）**:
+1. 高尾系一次資料 locator 実値（巻・章・頁）の回収ログを起票
+2. `research-isouhou-extended-conflict-priority-v1` の監修質問票を追加
+3. `SECT-RULESET-MATRIX` の備考へ競合規則の暫定リンクを追記
+
+### 18.5 Iteration 22（2026-03-31 / locator 回収ログ起票）
+
+**対象**:
+- 高尾系一次導線の `locator` 実値回収
+- 監修質問票の運用開始
+
+**実施**:
+- 公開Webから高尾学館の出版導線を再確認
+- `算命学（5）大運と位相法` の書誌導線を再確認
+- 拡張5種に対して `locator` 回収ログを起票
+
+**locator 回収ログ（初期）**:
+
+| kind | sourceTarget | volume | chapter | pageStart-pageEnd | 状態 | 備考 |
+|---|---|---|---|---|---|---|
+| `KANGO` | 高尾学館教材 / 原典算命学大系 | 未取得 | 未取得 | 未取得 | `PENDING-LOCATOR` | 公開Webで本文断片未到達 |
+| `NACHION` | 高尾学館教材 / 原典算命学大系 | 未取得 | 未取得 | 未取得 | `PENDING-LOCATOR` | カテゴリ存在のみ確認済み |
+| `RITSUON` | 高尾学館教材 / 原典算命学大系 | 未取得 | 未取得 | 未取得 | `PENDING-LOCATOR` | カテゴリ存在のみ確認済み |
+| `TENKOKUCHICHU` | 高尾学館教材 / 原典算命学大系 | 未取得 | 未取得 | 未取得 | `PENDING-LOCATOR` | カテゴリ存在のみ確認済み |
+| `DAIHANKAI` | 高尾学館教材 / 原典算命学大系 | 未取得 | 未取得 | 未取得 | `PENDING-LOCATOR` | カテゴリ存在のみ確認済み |
+
+**監修質問票（運用テンプレート）**:
+```md
+### ruleId: research-isouhou-extended-taxonomy-v1
+- kind:
+- sourceTarget: 高尾学館教材 / 原典算命学大系
+- volume:
+- chapter:
+- pageStart:
+- pageEnd:
+- quotation:
+- ifThenConfirmed:
+- exceptionRule:
+- decisionStatus: UNSET
+- adoptedBy: research-only
+- sourceLevelTarget: L0_PRIMARY_VERIFIED
+```
+
+**運用判断**:
+- `L2` の実装前提（カテゴリ・最小 if/then・競合草案）は維持。
+- `L0` 昇格レーンは、`PENDING-LOCATOR` を解消しない限り進めない。
+
+**次ループ（Iteration 23）**:
+1. `PENDING-LOCATOR` の進捗管理カラム（owner/due/lastChecked）を追加
+2. 監修質問票に `priority`（P0/P1）を追加
+3. `OPEN-QUESTIONS` に回収ログ運用ルールを同期
+
+### 18.6 Iteration 23（2026-03-31 / locator 進捗メタ運用）
+
+**対象**:
+- `PENDING-LOCATOR` 管理の運用強化
+- 監修質問票の優先度運用
+
+**実施**:
+- locator 回収ログに `owner/due/lastChecked` カラムを追加
+- 監修質問票に `priority`（`P0` / `P1`）を追加
+- `P0` を「実装進行を止める依存論点」、`P1` を「拡張改善論点」と定義
+
+**locator 回収ログ（更新）**:
+
+| kind | priority | sourceTarget | volume | chapter | pageStart-pageEnd | 状態 | owner | due | lastChecked | 備考 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `KANGO` | `P1` | 高尾学館教材 / 原典算命学大系 | 未取得 | 未取得 | 未取得 | `PENDING-LOCATOR` | `research-team` | `2026-04-15` | `2026-03-31` | 虚気接続は本体未確定のため当面P1 |
+| `NACHION` | `P1` | 高尾学館教材 / 原典算命学大系 | 未取得 | 未取得 | 未取得 | `PENDING-LOCATOR` | `research-team` | `2026-04-15` | `2026-03-31` | カテゴリ存在のみ確認済み |
+| `RITSUON` | `P1` | 高尾学館教材 / 原典算命学大系 | 未取得 | 未取得 | 未取得 | `PENDING-LOCATOR` | `research-team` | `2026-04-15` | `2026-03-31` | カテゴリ存在のみ確認済み |
+| `TENKOKUCHICHU` | `P0` | 高尾学館教材 / 原典算命学大系 | 未取得 | 未取得 | 未取得 | `PENDING-LOCATOR` | `research-team` | `2026-04-15` | `2026-03-31` | 大運連携説明が厚いためL0先行 |
+| `DAIHANKAI` | `P0` | 高尾学館教材 / 原典算命学大系 | 未取得 | 未取得 | 未取得 | `PENDING-LOCATOR` | `research-team` | `2026-04-15` | `2026-03-31` | 半会依存かつ拡張中核のためL0先行 |
+
+**監修質問票（更新テンプレート）**:
+```md
+### ruleId: research-isouhou-extended-taxonomy-v1
+- priority: P0 or P1（下表の kind ごとにセット）
+- kind:
+- sourceTarget: 高尾学館教材 / 原典算命学大系
+- volume:
+- chapter:
+- pageStart:
+- pageEnd:
+- quotation:
+- ifThenConfirmed:
+- exceptionRule:
+- decisionStatus: UNSET
+- adoptedBy: research-only
+- sourceLevelTarget: L0_PRIMARY_VERIFIED
+```
+
+**運用ルール（追記）**:
+- `priority=P0`: 未解決だと `research-v1.1` 実装着手を停止する論点
+- `priority=P1`: 実装後改善として並行追跡する論点
+- `lastChecked` が 14 日以上更新されない `P0` は再探索を自動起票する
+
+**次ループ（Iteration 24）**:
+1. `SECT-RULESET-MATRIX` に `P0/P1` 優先度メモを追加
+2. 拡張5種の `priority` 初期値を定義（`TENKOKUCHICHU/DAIHANKAI` を P0 想定）
+3. `OPEN-QUESTIONS` に 14 日ルールを同期
+
+### 18.7 Iteration 24（2026-03-31 / locator priority 初期値確定）
+
+**対象**:
+- 拡張5種の `priority` 初期割当
+- `SECT-RULESET-MATRIX` / `OPEN-QUESTIONS` との同期
+
+**実施**:
+- locator 回収ログに `priority` 列を追加
+- `P0` を **2種に限定**（過剰ブロックを避ける）
+- 監修質問票テンプレの `priority` を kind 毎可変に修正
+
+**初期割当（確定）**:
+- `P0`: `TENKOKUCHICHU`, `DAIHANKAI`
+- `P1`: `KANGO`, `NACHION`, `RITSUON`
+
+**採用理由（弊害回避）**:
+- `TENKOKUCHICHU` は大運・年運クロスと結びつく説明が厚く、`scope` 確定前に実装すると resolver 契約が不安定になりやすい
+- `DAIHANKAI` は `HANKAI` 依存の拡張中核で、半会テーブル改定の波及が大きい
+- `KANGO` は `kyoki` 接続が議論の中心だが、`kyoki` 本体が `L3_UNVERIFIED` のため、当面は `P1` で並行追跡
+
+**同期結果**:
+- `Docs/SECT-RULESET-MATRIX.template.md` の locator 行を Iteration 24 反映に更新
+- `Docs/OPEN-QUESTIONS.md` に初期割当を明文化
+
+**次ループ（Iteration 25）**:
+1. `P0` の2種について、高尾学館出版物案内から巻候補を特定
+2. 書誌だけでなく、可能なら目次断片の取得
+3. `research-isouhou-scope-boundary-v1` の監修質問票を分離起票
+
 
 
