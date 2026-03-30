@@ -42,3 +42,8 @@ export function getBranchIdFromChar(char: string): Branch {
   }
   return i as Branch;
 }
+
+/** 年・月・日柱などを ruleset 照合用の干支キー（例: 甲子）にする */
+export function pillarStemBranchKey(stem: Stem, branch: Branch): string {
+  return getStemCharFromId(stem) + getBranchCharFromId(branch);
+}

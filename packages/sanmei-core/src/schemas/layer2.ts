@@ -49,10 +49,43 @@ export const FamilyNodeSchema = z.object({
   location: FamilyLocationSchema,
 });
 
+export const DestinyBugCodeSchema = z.enum([
+  "SHUKUMEI_TENCHUSATSU_YEAR",
+  "SHUKUMEI_TENCHUSATSU_MONTH",
+  "IJOU_KANSHI_NORMAL",
+  "IJOU_KANSHI_DARK",
+]);
+
+export type DestinyBugCode = z.infer<typeof DestinyBugCodeSchema>;
+
+/** リゾルバは重複を付与し得る。JSON 応答は初出順のユニーク配列に正規化する。 */
+export const DestinyBugsSchema = z
+  .array(DestinyBugCodeSchema)
+  .transform((a) => [...new Set(a)] as DestinyBugCode[]);
+
+export const ActionAreaGeometrySchema = z.object({
+  vertexAnglesDegTenths: z.tuple([
+    z.number().int(),
+    z.number().int(),
+    z.number().int(),
+  ]),
+  areaRatioPermille: z.number().int().min(0).max(1000),
+});
+
+export const EnergyDataSchema = z.object({
+  totalEnergy: z.number().int(),
+  actionAreaSize: z.number().int().min(1).max(4),
+  actionAreaGeometry: ActionAreaGeometrySchema,
+});
+
+export type EnergyData = z.infer<typeof EnergyDataSchema>;
+
 export const BaseProfileLayer2Schema = z.object({
   insen: InsenLayer2Schema,
   yousen: YousenLayer2Schema,
   familyNodes: z.array(FamilyNodeSchema),
+  energyData: EnergyDataSchema,
+  destinyBugs: DestinyBugsSchema,
 });
 
 export const InteractionRulesLayer2Schema = z.object({
