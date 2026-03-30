@@ -5,6 +5,6 @@
 作業の流れの要約:
 
 1. **着手前**: `Docs/IMPLEMENTATION.md`（§・システム図）→ 必要なら `DOMAIN-GLOSSARY.md`。
-2. **完了時**: コードと一緒に **該当する `Docs/*.md` と `.cursor/rules`** を更新する（チェックリストは `Docs/IMPLEMENTATION.md` §7）。
+2. **完了時**: コードと一緒に **該当する `Docs/*.md` と `.cursor/rules`** を更新する。手順の**正本**は `Docs/IMPLEMENTATION.md` **§7**（§7.1 運用・§7.2 項目・**§7.3 節目**で全件レビュー）。エージェントは完了報告に §7.2 の**該当項目**を短く列挙する。
 
 人間向けの PR では `.github/pull_request_template.md` を参照。

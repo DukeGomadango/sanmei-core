@@ -4,7 +4,7 @@
 
 | 文書 | 内容 |
 |------|------|
-| [IMPLEMENTATION.md](./IMPLEMENTATION.md) | **実装の現状**（ディレクトリマップ・データパイプライン・保守チェックリスト）。仕様と差分が出たらここかコードを更新する |
+| [IMPLEMENTATION.md](./IMPLEMENTATION.md) | **実装の現状**（ディレクトリマップ・データパイプライン・**§7 ドキュメント／ルール更新チェックリスト**）。仕様と差分が出たらここかコードを更新する |
 | [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) | **メイン要件定義**（API、データ構造、学派、節入り、テスト、NFR） |
 | [ARCHITECTURE-AND-CONTRACTS.md](./ARCHITECTURE-AND-CONTRACTS.md) | Monorepo、Protobuf/JSON、バージョン、ゴールデンテスト、節入りマスタ・時刻補正の方針、Rust 移行 |
 | [DOMAIN-GLOSSARY.md](./DOMAIN-GLOSSARY.md) | **3層ドメイン辞書**（Primitives / Core / Dynamic）、型・算出パターン・`ruleset` との分担 |

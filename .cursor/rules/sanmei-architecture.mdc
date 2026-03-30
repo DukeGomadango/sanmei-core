@@ -32,3 +32,8 @@ alwaysApply: false
 ## 契約
 
 - Layer1 の入力・出力の機械検証は **Zod**（`packages/sanmei-core/src/schemas/`）。Protobuf は将来フェーズ。`Docs/ARCHITECTURE-AND-CONTRACTS.md` を正とする。
+
+## ドキュメント同期（節目）
+
+- **日常の PR**: `Docs/IMPLEMENTATION.md` §7.1・§7.2。層・`ruleset` パス・Orchestrator 記述を変えたら **本ファイル**と §3・§4 の矛盾がないか確認する。
+- **§7.3 の節目**（新 Layer・本番 ruleset・契約方式変更など）では、§7.2 全項目と **`.cursor/rules` の短文**が正本と一致しているかまで見る（長文化は `Docs` 側）。

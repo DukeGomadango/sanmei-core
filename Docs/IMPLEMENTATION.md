@@ -381,16 +381,38 @@ cd packages/sanmei-core && npm run build && npm run test
 
 ---
 
-## 7. 更新チェックリスト（コピー用）
+## 7. ドキュメント・ルール更新チェックリスト
 
-- [ ] 新規エントリポイント・ファイルを §3 に追加した
-- [ ] **システム図**（Mermaid）を依存・フロー変更に合わせた
-- [ ] 節入りの年範囲・生成手順を §4 と突き合わせた
-- [ ] 公開するアルゴリズム前提（§5）をコード・要件の両方で矛盾なくした
-- [ ] 新しい学び・バグ修正で**契約・境界が変わった**場合は [DOMAIN-GLOSSARY.md](./DOMAIN-GLOSSARY.md) / [OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) / [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) の該当箇所を更新した
-- [ ] **次フェーズ**（Layer2+、Proto、別パッケージ）に進む場合は [ARCHITECTURE-AND-CONTRACTS.md](./ARCHITECTURE-AND-CONTRACTS.md) と `.cursor/rules`（特に `sanmei-architecture.mdc`）を矛盾なくした
-- [ ] Layer2 用の **mock `ruleset`・`rulesetMockV1` Zod・内部整合ゴールデン・Layer1 の深さ契約・`SanmeiError`** を本文（§2・§5）とコード・テストの実態で揃えた
-- [ ] [Docs/README.md](./README.md) の索引から本書が辿れる
+### 7.1 運用（毎 PR・エージェントのタスク完了時）
+
+**目的**: CI がドキュメントを検証しないため、**コードと `Docs/`・`.cursor/rules` のズレをマージ前に止血**する。
+
+1. **§7.2 を上から目視**し、今回の変更に**該当する項目**について、同じ PR（同一セッション）で正本を更新する。該当なしの項目は PR 本文で「§7.2: 該当なし（例: §4 は節入りを触っていない）」と書いてよい。
+2. **`.github/pull_request_template.md`** のドキュメント欄を埋める（人間向け PR）。エージェントはタスク完了報告に、**触った §7.2 項目**を短く列挙する。
+3. **「ドキュメントは後で」禁止**。次セッションに回すと索引・ルールの誤誘導が再発する（プロジェクトルールの原則）。
+
+### 7.2 項目一覧（該当するものを満たす）
+
+- [ ] 新規エントリポイント・ファイルを §3 に追加した（該当時）
+- [ ] **システム図**（Mermaid）を依存・フロー変更に合わせた（該当時）
+- [ ] 節入りの年範囲・生成手順を §4 と突き合わせた（`tools/` または `data/solar-terms` を変えたとき）
+- [ ] 公開するアルゴリズム前提（§5）をコード・要件の両方で矛盾なくした（該当時）
+- [ ] **契約・用語・境界**が変わったら [DOMAIN-GLOSSARY.md](./DOMAIN-GLOSSARY.md) / [OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) / [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) の該当箇所を更新した（該当時）
+- [ ] **アーキテクチャ・Proto／契約・フェーズ**を変えたら [ARCHITECTURE-AND-CONTRACTS.md](./ARCHITECTURE-AND-CONTRACTS.md) を更新した（該当時）
+- [ ] **Layer2 系**（`ruleset` 配置・Zod・ゴールデン・深さ・`SanmeiError` 等）を §2・§5 とコードで揃えた（該当時。変更がなければスキップ可）
+- [ ] [Docs/README.md](./README.md) の索引から本書が辿れる（索引やパスを変えたとき）
+
+### 7.3 節目（マイルストーン）— 全件レビュー＋ルールの短文化
+
+以下のような**節目**を含む PR では、§7.2 の**すべて**について「要更新／該当なし／既に最新」を確認し、PR で明示する。また **`.cursor/rules/sanmei-project.mdc`（リポジトリ骨格）**と **`sanmei-architecture.mdc`（層・パス禁則）**が正本ドキュメントと矛盾していれば、**同じ PR または直続 PR**で直す（長文は Docs 側、ルールにはパス・禁則のみ）。
+
+| 節目の例 |
+|----------|
+| 新 Layer・サブパッケージ・`calculate` 公開契約の変更 |
+| 節入りマスタの生成手順・同梱パス・年範囲の変更 |
+| SSOT を Proto／OpenAPI に切り替える等、契約方式の変更 |
+| 監修 `ruleset` の本番取り込み（`mock-v1` 以外の版を正式サポートし始める） |
+| エージェントが同じ前提ミスを繰り返す（再発防止をルールに 1〜3 行追加） |
 
 ---
 
