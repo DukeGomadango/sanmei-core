@@ -143,7 +143,7 @@
 |------------|------|------|
 | `sect` | **はい**（コア `calculate` 経路） | 学派。 |
 | `allowGohouInKaku` | いいえ | 格法判定に位相法（半会等）を含めるか。 |
-| `rulesetVersion` | **はい**（コア `calculate` 経路） | クライアントが期待するルール版。未サポートなら §7。Phase L2a 実装時は `mock-v1` のみの場合あり（[IMPLEMENTATION.md](./IMPLEMENTATION.md) §2）。 |
+| `rulesetVersion` | **はい**（コア `calculate` 経路） | クライアントが期待するルール版。未サポートなら §7。バンドル済みは `mock-v1`・`mock-internal-v2`（検証用）等（[IMPLEMENTATION.md](./IMPLEMENTATION.md) §2・§4.1）。 |
 | `clientRulesetHint` | いいえ | 将来の A/B やデバッグ用。 |
 
 #### `options`
@@ -161,7 +161,7 @@
 ```json
 {
   "meta": {
-    "engineVersion": "0.1.0",
+    "engineVersion": "0.2.0",
     "rulesetVersion": "2026.03.1",
     "sect": "takao",
     "calculatedAt": "2026-03-28T03:00:00Z"

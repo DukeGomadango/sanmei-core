@@ -1,10 +1,10 @@
 import type { Branch, Stem } from "../layer1/enums.js";
 import type { InsenLayer2 } from "../schemas/layer2.js";
-import type { RulesetMockV1 } from "../schemas/rulesetMockV1.js";
+import type { BundledRuleset } from "../schemas/rulesetMockV1.js";
 import { getStemCharFromId } from "./stemBranchKey.js";
 import { areaRatioPermilleFromVertexTenths, vertexAnglesDegTenthsForPillars } from "./l2cGeometry.js";
 
-function weightForStem(stem: Stem, weights: RulesetMockV1["energyWeights"]): number {
+function weightForStem(stem: Stem, weights: BundledRuleset["energyWeights"]): number {
   const ch = getStemCharFromId(stem);
   return weights[ch as keyof typeof weights];
 }
@@ -21,7 +21,7 @@ function actionAreaSizeFromTotal(
 }
 
 /** L2c: 素の三柱＋蔵干（採用干）のみ。位相・虚気は参照しない。 */
-export function resolveEnergyData(insen: InsenLayer2, ruleset: RulesetMockV1) {
+export function resolveEnergyData(insen: InsenLayer2, ruleset: BundledRuleset) {
   const w = ruleset.energyWeights;
   const stems: Stem[] = [
     insen.year.stem as Stem,

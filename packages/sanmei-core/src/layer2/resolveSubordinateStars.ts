@@ -1,5 +1,5 @@
 import type { Branch, Stem } from "../layer1/enums.js";
-import type { RulesetMockV1 } from "../schemas/rulesetMockV1.js";
+import type { BundledRuleset } from "../schemas/rulesetMockV1.js";
 import { SanmeiError, SanmeiErrorCode } from "../errors/sanmeiError.js";
 import { getBranchCharFromId, getStemCharFromId } from "./stemBranchKey.js";
 
@@ -8,7 +8,7 @@ export function resolveSubordinateStars(
   yearBranch: Branch,
   monthBranch: Branch,
   dayBranch: Branch,
-  ruleset: RulesetMockV1,
+  ruleset: BundledRuleset,
 ): { yearBranch: string; monthBranch: string; dayBranch: string } {
   const d = getStemCharFromId(dayStem);
   const pick = (b: Branch, label: string) => {

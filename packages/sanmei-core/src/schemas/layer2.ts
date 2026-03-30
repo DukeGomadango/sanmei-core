@@ -88,10 +88,57 @@ export const BaseProfileLayer2Schema = z.object({
   destinyBugs: DestinyBugsSchema,
 });
 
+export const IsouhouEntrySchema = z.object({
+  kind: z.string(),
+  strength: z.number().optional(),
+  involved: z.array(z.string()).optional(),
+  scope: z.string().optional(),
+});
+
+export type IsouhouEntry = z.infer<typeof IsouhouEntrySchema>;
+
 export const InteractionRulesLayer2Schema = z.object({
   guardianDeities: z.array(z.number().int().min(0).max(4)),
   kishin: z.array(z.number().int().min(0).max(4)),
+  isouhou: z.array(IsouhouEntrySchema),
+  kyoki: z
+    .object({
+      shadowYousen: YousenLayer2Schema.optional(),
+    })
+    .nullable(),
+  priorityResolution: z.unknown().optional(),
+  debugTrace: z.unknown().optional(),
 });
+
+export const DaiunPhaseSchema = z.object({
+  phaseIndex: z.number().int().nonnegative(),
+  sexagenaryIndex: z.number().int().min(0).max(59),
+  spanYears: z.number().int().positive(),
+});
+
+export const DaiunTimelineSchema = z.object({
+  startAge: z.number().int().nonnegative(),
+  phases: z.array(DaiunPhaseSchema),
+  currentPhase: DaiunPhaseSchema,
+});
+
+export const AnnualTimelineSchema = z.object({
+  calendarYear: z.number().int(),
+  sexagenaryIndex: z.number().int().min(0).max(59),
+  relatedStarId: z.string(),
+});
+
+export const DynamicTimelineSchema = z.object({
+  daiun: DaiunTimelineSchema,
+  annual: AnnualTimelineSchema,
+  monthly: z.record(z.string(), z.unknown()).optional(),
+  tenchuSatsuStatus: z.record(z.string(), z.unknown()).optional(),
+});
+
+export type DaiunPhase = z.infer<typeof DaiunPhaseSchema>;
+export type DaiunTimeline = z.infer<typeof DaiunTimelineSchema>;
+export type AnnualTimeline = z.infer<typeof AnnualTimelineSchema>;
+export type DynamicTimeline = z.infer<typeof DynamicTimelineSchema>;
 
 export const CalculateMetaSchema = z.object({
   engineVersion: z.string(),
@@ -103,6 +150,7 @@ export const CalculateMetaSchema = z.object({
 export const CalculateResultSchema = z.object({
   meta: CalculateMetaSchema,
   baseProfile: BaseProfileLayer2Schema,
+  dynamicTimeline: DynamicTimelineSchema,
   interactionRules: InteractionRulesLayer2Schema,
 });
 

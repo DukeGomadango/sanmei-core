@@ -120,7 +120,15 @@ describe("CalculateResult Zod", () => {
           "SHUKUMEI_TENCHUSATSU_YEAR",
         ],
       },
-      interactionRules: { guardianDeities: [], kishin: [] },
+      dynamicTimeline: {
+        daiun: {
+          startAge: 0,
+          phases: [{ phaseIndex: 0, sexagenaryIndex: 0, spanYears: 10 }],
+          currentPhase: { phaseIndex: 0, sexagenaryIndex: 0, spanYears: 10 },
+        },
+        annual: { calendarYear: 2000, sexagenaryIndex: 0, relatedStarId: "x" },
+      },
+      interactionRules: { guardianDeities: [], kishin: [], isouhou: [], kyoki: null },
     });
     expect(parsed.baseProfile.destinyBugs).toEqual([
       "IJOU_KANSHI_NORMAL",

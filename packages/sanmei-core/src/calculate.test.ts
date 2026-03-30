@@ -8,6 +8,8 @@ import { SolarTermStore } from "./layer1/solarTerms/store.js";
 import type { SolarTermsFile } from "./layer1/solarTerms/types.js";
 import { createJodaCalendarPort } from "./layer1/calendar/jodaAdapter.js";
 import { CalculateResultSchema } from "./schemas/layer2.js";
+import { normalizeResultMeta } from "./__tests__/goldenHarness.js";
+import { getBundledRuleset } from "./layer2/bundledRulesets.js";
 
 const pkgRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const solarPath = join(pkgRoot, "data", "solar-terms", "solar_terms.json");
@@ -116,7 +118,62 @@ describe("calculate", () => {
     const expected = JSON.parse(readFileSync(join(goldenDir, "expected_output.json"), "utf-8"));
     const got = calculate(input, { solarTermStore: store, port, nowUtcMs: 0 });
     expect(CalculateResultSchema.safeParse(got).success).toBe(true);
-    got.meta.calculatedAt = "1970-01-01T00:00:00.000Z";
-    expect(got).toEqual(expected);
+    expect(normalizeResultMeta(got, { calculatedAt: "1970-01-01T00:00:00.000Z" })).toEqual(expected);
+  });
+
+  it("mock-internal-v2 は同一ルール本文なら baseProfile・dynamicTimeline が mock-v1 と一致", () => {
+    const baseInput = JSON.parse(readFileSync(join(goldenDir, "calculate_input.json"), "utf-8"));
+    const a = calculate(baseInput, { solarTermStore: store, port, nowUtcMs: 0 });
+    const b = calculate(
+      {
+        ...baseInput,
+        systemConfig: { ...baseInput.systemConfig, rulesetVersion: "mock-internal-v2" },
+      },
+      { solarTermStore: store, port, nowUtcMs: 0 },
+    );
+    expect(b.meta.rulesetVersion).toBe("mock-internal-v2");
+    expect(b.baseProfile).toEqual(a.baseProfile);
+    expect(b.dynamicTimeline).toEqual(a.dynamicTimeline);
+  });
+
+  it("UTC タイムゾーンで計算できる", () => {
+    const r = calculate(
+      {
+        user: {
+          birthDate: "2000-06-15",
+          birthTime: "12:00",
+          timeZoneId: "UTC",
+          gender: "female",
+        },
+        context: { asOf: "2026-01-01", timeZone: "UTC" },
+        systemConfig: { sect: "takao", rulesetVersion: "mock-v1" },
+      },
+      { solarTermStore: store, port, nowUtcMs: 0 },
+    );
+    expect(CalculateResultSchema.safeParse(r).success).toBe(true);
+    expect(r.interactionRules.isouhou).toEqual([]);
+    expect(r.interactionRules.kyoki).toBeNull();
+  });
+
+  it("deps.ruleset がリクエストの rulesetVersion と不一致なら VALIDATION_ERROR", () => {
+    try {
+      calculate(
+        {
+          user: {
+            birthDate: "2000-06-15",
+            birthTime: "12:00",
+            timeZoneId: "Asia/Tokyo",
+            gender: "male",
+          },
+          context: { asOf: "2026-01-01", timeZone: "Asia/Tokyo" },
+          systemConfig: { sect: "takao", rulesetVersion: "mock-v1" },
+        },
+        { solarTermStore: store, port, ruleset: getBundledRuleset("mock-internal-v2") },
+      );
+      expect.fail("throw すべき");
+    } catch (e) {
+      expect(e).toBeInstanceOf(SanmeiError);
+      expect((e as SanmeiError).code).toBe(SanmeiErrorCode.VALIDATION_ERROR);
+    }
   });
 });

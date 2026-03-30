@@ -60,7 +60,7 @@
 | `energyData` の入力 | **位相法・虚気を含めない**素の三柱＋蔵干。位相後の数理は将来 Layer3（例: `shadowEnergyData`）。 |
 | `energyData` の幾何・丸め | API は**極座標（角度）＋面積比**に正規化、**固定丸め**でゴールデン安定。 |
 | `destinyBugs` | **出生で凍結・静的のみ**。年運／大運天中殺・スライドは `dynamicTimeline`。 |
-| mock ruleset | **`mock-v1.json` 単一ファイル**を拡張。`meta.schemaRevision` 等で世代追跡。 |
+| mock ruleset | **`mock-v1.json` を主系**とし必要に応じ拡張。検証用に `mock-internal-v2` 等を追加可。`meta.schemaRevision` で世代追跡。 |
 
 **監修または実装直前に詰めるとよいこと**
 

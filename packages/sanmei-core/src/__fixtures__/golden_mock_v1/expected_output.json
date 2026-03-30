@@ -1,6 +1,6 @@
 {
   "meta": {
-    "engineVersion": "0.1.0",
+    "engineVersion": "0.2.0",
     "rulesetVersion": "mock-v1",
     "sect": "takao",
     "calculatedAt": "1970-01-01T00:00:00.000Z"
@@ -79,8 +79,31 @@
     },
     "destinyBugs": []
   },
+  "dynamicTimeline": {
+    "daiun": {
+      "startAge": 2,
+      "phases": [
+        { "phaseIndex": 0, "sexagenaryIndex": 0, "spanYears": 10 },
+        { "phaseIndex": 1, "sexagenaryIndex": 1, "spanYears": 10 },
+        { "phaseIndex": 2, "sexagenaryIndex": 2, "spanYears": 10 },
+        { "phaseIndex": 3, "sexagenaryIndex": 3, "spanYears": 10 },
+        { "phaseIndex": 4, "sexagenaryIndex": 4, "spanYears": 10 },
+        { "phaseIndex": 5, "sexagenaryIndex": 5, "spanYears": 10 },
+        { "phaseIndex": 6, "sexagenaryIndex": 6, "spanYears": 10 },
+        { "phaseIndex": 7, "sexagenaryIndex": 7, "spanYears": 10 }
+      ],
+      "currentPhase": { "phaseIndex": 2, "sexagenaryIndex": 2, "spanYears": 10 }
+    },
+    "annual": {
+      "calendarYear": 2026,
+      "sexagenaryIndex": 41,
+      "relatedStarId": "ANNUAL_MOCK_41_d0"
+    }
+  },
   "interactionRules": {
     "guardianDeities": [0, 1],
-    "kishin": [3]
+    "kishin": [3],
+    "isouhou": [],
+    "kyoki": null
   }
 }

@@ -131,19 +131,26 @@ flowchart TB
   calc[calculate.ts]
   req[requiresBirthTimeForAnySolarTermOnDate]
   d1[resolveInsenWithDepth]
-  rs[bundled mock ruleset JSON]
+  rs[getBundledRuleset]
   l2[layer2 リゾルバ L2a–b]
   l2c[L2c: resolveEnergyData / resolveDestinyBugs]
+  dt[resolveDynamicTimeline]
+  l3a[applyLayer3aMock]
   in --> calc
   calc --> req
   calc --> d1
   calc --> rs
   calc --> l2
   calc --> l2c
+  calc --> dt
+  calc --> l3a
   d1 --> l2
   d1 --> l2c
+  d1 --> dt
   rs --> l2
   rs --> l2c
+  rs --> dt
+  rs --> l3a
 ```
 
 ### Layer1 内部の依存（主要ファイル）
@@ -191,6 +198,7 @@ flowchart LR
 | [tools/solar-term-build/](../tools/solar-term-build/) | 節入り JSON 生成（Python / Skyfield / DE421）。ランタイム非依存。 |
 | [README.md](../README.md) | ルートの開発・データ生成コマンド。 |
 | [LICENSES.md](../LICENSES.md) | 第三者ライセンス・エフェメリス出所。 |
+| [.github/workflows/ci.yml](../.github/workflows/ci.yml) | **CI**: `npm ci` → `npm test` → `npm run build`（Node 20）。 |
 
 ---
 
@@ -206,14 +214,14 @@ flowchart LR
 
 **実装済み（Layer2 / Phase L2a＋L2b＋L2c、mock のみ）**
 
-- Orchestrator: [calculate.ts](../packages/sanmei-core/src/calculate.ts)— `CalculateInputSchema` → `requiresBirthTimeForAnySolarTermOnDate` → `resolveInsenWithDepth` → `rulesetVersion === 'mock-v1'` のバンドル JSON → 蔵干・主星・従星・守護神／忌神・六親（`familyNodes` 座標付き）→ **L2c** `resolveEnergyData`／`resolveDestinyBugs`。`user.timeZoneId` と `context.timeZone` の一致を要求（REQUIREMENTS の民用 TZ 基準）。
-- Ruleset: `bundledMockRulesetV1`（`import`）、Zod は `schemas/rulesetMockV1.ts`（`meta.schemaRevision`、`energyWeights`・`energyMock`・`destinyBugRules` を含む）。欠セルは `RULESET_DATA_MISSING`。
-- レスポンス契約: `schemas/layer2.ts`（`baseProfile.insen` に蔵干＋深さ、`yousen`、`familyNodes`、**`energyData`**（`totalEnergy`・`actionAreaSize`・`actionAreaGeometry.vertexAnglesDegTenths`／`areaRatioPermille`）、**`destinyBugs`**（`DestinyBugCode` 列、Zod で重複除去）；`interactionRules.guardianDeities`／`kishin` は五行コード列＝`Element` 数値）。
-- ゴールデン: `src/__fixtures__/golden_mock_v1/`（入力 JSON＋期待 JSON）。
+- Orchestrator: [calculate.ts](../packages/sanmei-core/src/calculate.ts)— `CalculateInputSchema` → `requiresBirthTimeForAnySolarTermOnDate` → `resolveInsenWithDepth` → **`getBundledRuleset(rulesetVersion)`**（`mock-v1` / `mock-internal-v2`）→ 蔵干・主星・従星・守護神／忌神・六親（`familyNodes` 座標付き）→ **L2c** `resolveEnergyData`／`resolveDestinyBugs` → **`dynamicTimeline`**（`.resolveDynamicTimeline`、mock・満年齢ベースの `currentPhase`）→ **Layer3a スタブ** `applyLayer3aMock`（`isouhou` 空・`kyoki: null`）。`user.timeZoneId` と `context.timeZone` の一致を要求（REQUIREMENTS の民用 TZ 基準）。
+- Ruleset: [bundledRulesets.ts](../packages/sanmei-core/src/layer2/bundledRulesets.ts)＋`bundledMockRulesetV1`（後方互換）、Zod は `schemas/rulesetMockV1.ts`（`BundledRulesetSchema`＝`mock-v1`／`mock-internal-v2` の `z.union`、`timelineMock`、`meta.schemaRevision`、`energyWeights` 等）。欠セルは `RULESET_DATA_MISSING`。
+- レスポンス契約: `schemas/layer2.ts`（`baseProfile` は従来どおり＋**`dynamicTimeline`**（`daiun`／`annual` 等）。**`interactionRules`** に `isouhou`・`kyoki`（スタブは `[]`／`null`）を追加；`guardianDeities`／`kishin` は五行コード列＝`Element` 数値）。
+- ゴールデン: `src/__fixtures__/golden_mock_v1/`（入力 JSON＋期待 JSON）。**追加手順（要約）**: 入力 JSON を追加 → `calculate` を固定 `nowUtcMs` で実行 → `CalculateResultSchema.safeParse` 通過を確認 → 期待値は `meta.calculatedAt`／必要なら `engineVersion` を [goldenHarness](../packages/sanmei-core/src/__tests__/goldenHarness.ts) で正規化してコミット。
 
-**未実装（Layer2 以降・別フェーズ）**
+**未実装（別フェーズ）**
 
-- 監修 ruleset（`mock-v1` 以外の `rulesetVersion`）、大運・流年の本番 `dynamicTimeline`、位相法・虚気・格法の本実装（Layer3）、Proto 正本、HTTP サーバ。
+- 監修 ruleset（学派別本番データ）、`dynamicTimeline` の学派依存境界の本算法、位相法・虚気・格法の**本実装**（Layer3；現状はスタブのみ）、Proto 正本、HTTP サーバ。
 
 ### Layer2 基盤の方針（ドキュメント正本）
 
@@ -320,7 +328,9 @@ flowchart LR
 
 - **L2a（済）**: ruleset 取り込み、Zod、従星、守護神／忌神→`interactionRules`、ゴールデン土台、`mock-v1` のみ。
 - **L2b（済）**: Layer1 深さ、蔵干、十大主星（上表）、`familyNodes`（座標必須）。※ ruleset は引き続き `mock-v1` のみ。
-- **L2c（済・mock）**: `energyData`・`destinyBugs`・`mock-v1` の `schemaRevision` 1。採用方針は本章「Phase L2c」、契約の細部は [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §6.2。
+- **L2c（済・mock）**: `energyData`・`destinyBugs`。`mock-v1` の `schemaRevision` は **2**（`timelineMock` 追加時にインクリメント）。
+- **DynamicTimeline（済・mock）**: `resolveDynamicTimeline`・`timelineMock`（満年齢による `currentPhase`／`annual` のプレースホルダ）。要件の細部は [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §6.3。
+- **Layer3a（スタブ済）**: `applyLayer3aMock`（`isouhou`・`kyoki` の枠のみ）。
 
 ---
 
@@ -332,15 +342,15 @@ flowchart LR
 |------|----------------|------|
 | 公開 API | [index.ts](../packages/sanmei-core/src/index.ts) | 再エクスポート集約（`calculate`・`SanmeiError`・Layer2 Zod 型など）。 |
 | Orchestrator | [calculate.ts](../packages/sanmei-core/src/calculate.ts)、[schemas/calculateInput.ts](../packages/sanmei-core/src/schemas/calculateInput.ts)、[errors/sanmeiError.ts](../packages/sanmei-core/src/errors/sanmeiError.ts) | §2。TZ 要否→Layer1 深さ→mock ruleset。 |
-| Layer2 | [layer2/](../packages/sanmei-core/src/layer2/)、[schemas/layer2.ts](../packages/sanmei-core/src/schemas/layer2.ts)、[schemas/rulesetMockV1.ts](../packages/sanmei-core/src/schemas/rulesetMockV1.ts)、[src/data/rulesets/](../packages/sanmei-core/src/data/rulesets/) | 蔵干・主星・従星・守護神忌神・六親・**L2c**（energy／destiny）。§2 参照 |
-| ゴールデン | [__fixtures__/golden_mock_v1/](../packages/sanmei-core/src/__fixtures__/golden_mock_v1/) | `calculate` 内部整合 |
+| Layer2 | [layer2/](../packages/sanmei-core/src/layer2/)、[schemas/layer2.ts](../packages/sanmei-core/src/schemas/layer2.ts)、[schemas/rulesetMockV1.ts](../packages/sanmei-core/src/schemas/rulesetMockV1.ts)、[src/data/rulesets/](../packages/sanmei-core/src/data/rulesets/) | 蔵干・主星・従星・守護神忌神・六親・**L2c**・**`resolveDynamicTimeline`**・**`applyLayer3aMock`**・[bundledRulesets.ts](../packages/sanmei-core/src/layer2/bundledRulesets.ts)。§2 参照 |
+| ゴールデン | [__fixtures__/golden_mock_v1/](../packages/sanmei-core/src/__fixtures__/golden_mock_v1/)、[__tests__/goldenHarness.ts](../packages/sanmei-core/src/__tests__/goldenHarness.ts) | `calculate` 内部整合・メタ正規化ヘルパ |
 | Primitives | `layer1/enums.ts`, `stemBranchTables.ts`, `wuxingRelations.ts`, `kango.ts`, `sexagenary.ts` | DOMAIN-GLOSSARY Layer1 に対応。 |
 | 定数 | `layer1/pillarConstants.ts` | 年柱アンカー・日柱 JDN 加算（キャリブレーション）。 |
 | 柱アルゴリズム | `layer1/pillarRules.ts`, `pillars.ts` | 五虎遁・`resolveInsenThreePillars`。 |
 | 節入り | `layer1/solarTerms/*` | `constants`（二十四節 id・月建「節」）, `types`, `store`, `loadJson` |
 | 暦 | `layer1/calendar/*` | `julian.ts`, `types`, `jodaAdapter.ts`, `calendarBoundary.ts` |
 | 契約（Zod） | `schemas/layer1.ts`、`schemas/layer2.ts`、`schemas/calculateInput.ts`、`schemas/rulesetMockV1.ts` | Layer1 入力片／Layer2 応答／calculate 入力／mock ruleset。 |
-| テスト | `*.test.ts` | Vitest。 |
+| テスト | `*.test.ts`、`__tests__/goldenHarness.ts` | Vitest。ルート `npm test` で workspace 経由実行。 |
 
 ---
 
@@ -353,10 +363,12 @@ flowchart LR
 
 ### 4.1 `ruleset`（mock）データ
 
-- **配置（ソース）**: `packages/sanmei-core/src/data/rulesets/mock-v1.json`。
-- **ビルド後**: `packages/sanmei-core/dist/data/rulesets/mock-v1.json`（`npm run build` 内の `scripts/copy-rulesets.mjs` でコピー）。
-- **取り込み**: 節入りと異なり **fs ランタイム読込は使わず** `import` バンドル（`layer2/bundledMockRuleset.ts`）。
-- **L2c（初回実装済）**: `energyWeights`・`energyMock`・`destinyBugRules` を同一 JSON に載せ、`meta.schemaRevision`（整数、初回 **1**）で**ブロック世代**を追跡する。API の `rulesetVersion` 文字列は当面 `mock-v1` のまま。**中身を変えたら** `schemaRevision` を上げ、**ゴールデン**と Zod を同期する。
+- **配置（ソース）**: `packages/sanmei-core/src/data/rulesets/*.json`（`mock-v1.json`、`mock-internal-v2.json`＝レジストリ検証用・本文は mock と同形）。
+- **ビルド後**: `packages/sanmei-core/dist/data/rulesets/*.json`（`npm run build` 内の [copy-rulesets.mjs](../packages/sanmei-core/scripts/copy-rulesets.mjs) が `src/data/rulesets` の **全 `.json`** をミラー）。
+- **取り込み**: 節入りと異なり **fs ランタイム読込は使わず** `import` バンドル（[bundledRulesets.ts](../packages/sanmei-core/src/layer2/bundledRulesets.ts)、後方互換 [bundledMockRuleset.ts](../packages/sanmei-core/src/layer2/bundledMockRuleset.ts)）。
+- **Zod**: `BundledRulesetSchema`＝`z.union`（将来 **discriminatedUnion** 布石）。`mock-v1` の **`meta.schemaRevision`** は **2**（`timelineMock` 追加）。
+- **L2c**: `energyWeights`・`energyMock`・`destinyBugRules` を同一 JSON に載せる。**中身を変えたら** `schemaRevision` を上げ、**ゴールデン**と Zod を同期する。
+- **`timelineMock`**: 大運 mock（`fixedStartAge`・`phaseSpanYears`・`firstPhaseSexagenaryIndex` 等）。厳密な節入り境界は監修版で拡張。
 
 **コミット済みマスタの年範囲を変えたら**、本節と必要なら [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §9 の説明を更新する。
 

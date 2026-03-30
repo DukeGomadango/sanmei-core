@@ -54,8 +54,16 @@ export const FamilyNodeRuleSchema = z.object({
   locationSlot: z.enum(["STEM", "ZOUKAN_SHOGEN", "ZOUKAN_CHUGEN", "ZOUKAN_HONGEN"]),
 });
 
-export const RulesetMockV1Schema = z.object({
-  meta: RulesetMockV1MetaSchema,
+/** dynamicTimeline mock: 満年齢ベースの currentPhase。厳密な節入り境界は監修 ruleset 側。 */
+export const TimelineMockSchema = z.object({
+  fixedStartAge: z.number().int().nonnegative(),
+  phaseSpanYears: z.number().int().positive(),
+  firstPhaseSexagenaryIndex: z.number().int().min(0).max(59),
+  phaseCount: z.number().int().min(1).max(32),
+  annualStarPlaceholder: z.string().min(1),
+});
+
+const rulesetBodySchema = z.object({
   energyWeights: EnergyWeightsSchema,
   energyMock: EnergyMockSchema,
   destinyBugRules: DestinyBugRulesSchema,
@@ -67,6 +75,33 @@ export const RulesetMockV1Schema = z.object({
   familyRules: z.object({
     mockV1Nodes: z.array(FamilyNodeRuleSchema),
   }),
+  timelineMock: TimelineMockSchema,
 });
 
+export const RulesetMockV1Schema = z
+  .object({
+    meta: RulesetMockV1MetaSchema,
+  })
+  .merge(rulesetBodySchema);
+
+export const RulesetMockInternalV2MetaSchema = z.object({
+  rulesetVersion: z.literal("mock-internal-v2"),
+  description: z.string(),
+  schemaRevision: z.number().int().nonnegative(),
+});
+
+/** レジストリ検証用の第 2 バンドル（本文は mock-v1 と同一形）。 */
+export const RulesetMockInternalV2Schema = z
+  .object({
+    meta: RulesetMockInternalV2MetaSchema,
+  })
+  .merge(rulesetBodySchema);
+
+export const BundledRulesetSchema = z.union([RulesetMockV1Schema, RulesetMockInternalV2Schema]);
+
 export type RulesetMockV1 = z.infer<typeof RulesetMockV1Schema>;
+export type BundledRuleset = z.infer<typeof BundledRulesetSchema>;
+
+/** サポートするバンドル版（`RULESET_VERSION_UNSUPPORTED` 判定用） */
+export const BUNDLED_RULESET_VERSIONS = ["mock-v1", "mock-internal-v2"] as const;
+export type BundledRulesetVersion = (typeof BUNDLED_RULESET_VERSIONS)[number];

@@ -1,14 +1,14 @@
 import { createRequire } from "node:module";
 import { ZodError } from "zod";
 import { CalculateInputSchema } from "./schemas/calculateInput.js";
-import type { CalculateResult, InsenLayer2 } from "./schemas/layer2.js";
+import type { CalculateResult, InsenLayer2, InteractionRulesLayer2 } from "./schemas/layer2.js";
 import { SanmeiError, SanmeiErrorCode } from "./errors/sanmeiError.js";
 import { requiresBirthTimeForAnySolarTermOnDate } from "./layer1/calendar/calendarBoundary.js";
 import { resolveInsenWithDepth } from "./layer1/pillars.js";
 import type { SolarTermStore } from "./layer1/solarTerms/store.js";
 import type { CalendarPort } from "./layer1/calendar/types.js";
-import type { RulesetMockV1 } from "./schemas/rulesetMockV1.js";
-import { bundledMockRulesetV1 } from "./layer2/bundledMockRuleset.js";
+import type { BundledRuleset } from "./schemas/rulesetMockV1.js";
+import { getBundledRuleset, isBundledRulesetVersion, BUNDLED_RULESET_VERSIONS } from "./layer2/bundledRulesets.js";
 import { resolveZokanForBranch } from "./layer2/resolveZokan.js";
 import { resolveSubordinateStars } from "./layer2/resolveSubordinateStars.js";
 import { resolveGuardianKishin } from "./layer2/resolveGuardianKishin.js";
@@ -16,6 +16,8 @@ import { resolveMainStars } from "./layer2/resolveMainStars.js";
 import { resolveFamilyNodes } from "./layer2/resolveFamilyNodes.js";
 import { resolveEnergyData } from "./layer2/resolveEnergyData.js";
 import { resolveDestinyBugs } from "./layer2/resolveDestinyBugs.js";
+import { resolveDynamicTimeline } from "./layer2/resolveDynamicTimeline.js";
+import { applyLayer3aMock } from "./layer2/applyLayer3Mock.js";
 
 const require = createRequire(import.meta.url);
 const { version: packageVersion } = require("../package.json") as { version: string };
@@ -23,7 +25,7 @@ const { version: packageVersion } = require("../package.json") as { version: str
 export type CalculateDeps = {
   solarTermStore: SolarTermStore;
   port: CalendarPort;
-  ruleset?: RulesetMockV1;
+  ruleset?: BundledRuleset;
   nowUtcMs?: number;
 };
 
@@ -52,7 +54,8 @@ function mapCalendarFailure<T>(timeZoneId: string, fn: () => T): T {
 }
 
 /**
- * Layer2 Orchestrator: 入力検証 → 節入り日の時刻要否 → Layer1（深さ付）→ mock ruleset で陽占・守護神・六親。
+ * Layer1〜Layer3a スタブまでのオーケストレータ:
+ * 入力検証 → 節入り日の時刻要否 → Layer1（深さ付）→ バンドル ruleset で L2a–c → dynamicTimeline（mock）→ Layer3a スタブ。
  */
 export function calculate(rawInput: unknown, deps: CalculateDeps): CalculateResult {
   let input;
@@ -76,14 +79,21 @@ export function calculate(rawInput: unknown, deps: CalculateDeps): CalculateResu
   const tz = input.context.timeZone;
   const birthWall = { birthDate: input.user.birthDate, birthTime: input.user.birthTime, timeZoneId: tz };
 
-  if (input.systemConfig.rulesetVersion !== "mock-v1") {
+  if (!isBundledRulesetVersion(input.systemConfig.rulesetVersion)) {
     throw new SanmeiError(SanmeiErrorCode.RULESET_VERSION_UNSUPPORTED, "未対応の rulesetVersion", {
       requested: input.systemConfig.rulesetVersion,
-      supported: ["mock-v1"],
+      supported: [...BUNDLED_RULESET_VERSIONS],
     });
   }
 
-  const ruleset = deps.ruleset ?? bundledMockRulesetV1;
+  const ruleset =
+    deps.ruleset ?? getBundledRuleset(input.systemConfig.rulesetVersion);
+  if (ruleset.meta.rulesetVersion !== input.systemConfig.rulesetVersion) {
+    throw new SanmeiError(SanmeiErrorCode.VALIDATION_ERROR, "deps.ruleset がリクエストの rulesetVersion と一致しません", {
+      requested: input.systemConfig.rulesetVersion,
+      depsMeta: ruleset.meta.rulesetVersion,
+    });
+  }
 
   const needTime = mapCalendarFailure(tz, () =>
     requiresBirthTimeForAnySolarTermOnDate(
@@ -133,6 +143,25 @@ export function calculate(rawInput: unknown, deps: CalculateDeps): CalculateResu
   const energyData = resolveEnergyData(insenLayer2, ruleset);
   const destinyBugs = resolveDestinyBugs(insenLayer2, ruleset);
 
+  const dynamicTimeline = mapCalendarFailure(tz, () =>
+    resolveDynamicTimeline(
+      input.user,
+      input.context,
+      insenLayer2,
+      ruleset,
+      deps.solarTermStore,
+      deps.port,
+    ),
+  );
+
+  let interactionRules: InteractionRulesLayer2 = {
+    guardianDeities,
+    kishin,
+    isouhou: [],
+    kyoki: null,
+  };
+  interactionRules = applyLayer3aMock(interactionRules, ruleset);
+
   const calculatedAt = new Date(deps.nowUtcMs ?? Date.now()).toISOString();
 
   return {
@@ -162,9 +191,7 @@ export function calculate(rawInput: unknown, deps: CalculateDeps): CalculateResu
       energyData,
       destinyBugs,
     },
-    interactionRules: {
-      guardianDeities,
-      kishin,
-    },
+    dynamicTimeline,
+    interactionRules,
   };
 }

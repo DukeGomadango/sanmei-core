@@ -1,5 +1,5 @@
 import type { Branch, Stem } from "../layer1/enums.js";
-import type { RulesetMockV1 } from "../schemas/rulesetMockV1.js";
+import type { BundledRuleset } from "../schemas/rulesetMockV1.js";
 import { SanmeiError, SanmeiErrorCode } from "../errors/sanmeiError.js";
 import { getBranchCharFromId, getStemIdFromChar } from "./stemBranchKey.js";
 
@@ -14,7 +14,7 @@ export type ZokanResolved = {
 export function resolveZokanForBranch(
   branch: Branch,
   displayDepth: number,
-  ruleset: RulesetMockV1,
+  ruleset: BundledRuleset,
 ): ZokanResolved {
   const bc = getBranchCharFromId(branch);
   const rule = ruleset.zokanRules[bc];

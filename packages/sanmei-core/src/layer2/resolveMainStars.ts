@@ -1,6 +1,6 @@
 import type { Pillar } from "../layer1/pillars.js";
 import type { Stem } from "../layer1/enums.js";
-import type { RulesetMockV1 } from "../schemas/rulesetMockV1.js";
+import type { BundledRuleset } from "../schemas/rulesetMockV1.js";
 import type { ZokanResolved } from "./resolveZokan.js";
 import { SanmeiError, SanmeiErrorCode } from "../errors/sanmeiError.js";
 import { getStemCharFromId } from "./stemBranchKey.js";
@@ -11,7 +11,7 @@ type PillarZ = Pillar & { zokan: ZokanResolved };
 export function resolveMainStars(
   dayStem: Stem,
   pillars: { year: PillarZ; month: PillarZ; day: PillarZ },
-  ruleset: RulesetMockV1,
+  ruleset: BundledRuleset,
 ): MainStarPosition[] {
   const dayChar = getStemCharFromId(dayStem);
   const row = ruleset.mainStars[dayChar];

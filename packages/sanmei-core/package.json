@@ -1,6 +1,6 @@
 {
   "name": "@sanmei/sanmei-core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "算命学コア Layer1＋Layer2 — 節入り・三柱・mock ruleset による陽占ブロック（Orchestrator）",
   "type": "module",
   "main": "./dist/index.js",
