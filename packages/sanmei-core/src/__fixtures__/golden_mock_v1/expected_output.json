@@ -1,0 +1,77 @@
+{
+  "meta": {
+    "engineVersion": "0.1.0",
+    "rulesetVersion": "mock-v1",
+    "sect": "takao",
+    "calculatedAt": "1970-01-01T00:00:00.000Z"
+  },
+  "baseProfile": {
+    "insen": {
+      "year": {
+        "stem": 6,
+        "branch": 4,
+        "zokan": {
+          "zoukanShogen": 4,
+          "zoukanChugen": 7,
+          "zoukanHongen": 0,
+          "activeSlot": "ZOUKAN_CHUGEN",
+          "activeStem": 7
+        }
+      },
+      "month": {
+        "stem": 8,
+        "branch": 6,
+        "zokan": {
+          "zoukanShogen": 6,
+          "zoukanChugen": 9,
+          "zoukanHongen": 2,
+          "activeSlot": "ZOUKAN_CHUGEN",
+          "activeStem": 9
+        }
+      },
+      "day": {
+        "stem": 0,
+        "branch": 4,
+        "zokan": {
+          "zoukanShogen": 4,
+          "zoukanChugen": 7,
+          "zoukanHongen": 0,
+          "activeSlot": "ZOUKAN_CHUGEN",
+          "activeStem": 7
+        }
+      },
+      "displayDepth": 11,
+      "rawDelta": 10
+    },
+    "yousen": {
+      "mainStars": [
+        { "part": "HEAD", "starId": "MA_0_6" },
+        { "part": "CHEST", "starId": "MA_0_9" },
+        { "part": "BELLY", "starId": "MA_0_7" },
+        { "part": "RIGHT_HAND", "starId": "MA_0_8" },
+        { "part": "LEFT_HAND", "starId": "MA_0_7" }
+      ],
+      "subordinateStars": [
+        { "anchor": "YEAR_BRANCH", "starId": "SU_0_4" },
+        { "anchor": "MONTH_BRANCH", "starId": "SU_0_6" },
+        { "anchor": "DAY_BRANCH", "starId": "SU_0_4" }
+      ]
+    },
+    "familyNodes": [
+      {
+        "role": "MOTHER",
+        "stem": 6,
+        "location": { "pillar": "MONTH", "slot": "ZOUKAN_CHUGEN" }
+      },
+      {
+        "role": "SPOUSE",
+        "stem": 5,
+        "location": { "pillar": "DAY", "slot": "STEM" }
+      }
+    ]
+  },
+  "interactionRules": {
+    "guardianDeities": [0, 1],
+    "kishin": [3]
+  }
+}

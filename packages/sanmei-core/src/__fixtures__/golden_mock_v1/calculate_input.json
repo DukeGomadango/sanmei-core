@@ -1,0 +1,16 @@
+{
+  "user": {
+    "birthDate": "2000-06-15",
+    "birthTime": "12:00",
+    "timeZoneId": "Asia/Tokyo",
+    "gender": "male"
+  },
+  "context": {
+    "asOf": "2026-01-01",
+    "timeZone": "Asia/Tokyo"
+  },
+  "systemConfig": {
+    "sect": "takao",
+    "rulesetVersion": "mock-v1"
+  }
+}
