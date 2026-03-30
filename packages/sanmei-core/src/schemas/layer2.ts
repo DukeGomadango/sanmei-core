@@ -93,6 +93,7 @@ export const IsouhouEntrySchema = z.object({
   strength: z.number().optional(),
   involved: z.array(z.string()).optional(),
   scope: z.string().optional(),
+  hasCentralBranch: z.boolean().optional(),
 });
 
 export type IsouhouEntry = z.infer<typeof IsouhouEntrySchema>;

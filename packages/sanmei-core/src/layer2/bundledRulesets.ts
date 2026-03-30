@@ -5,6 +5,14 @@ import rawInternalV2 from "../data/rulesets/mock-internal-v2.json" with { type: 
 const cache: Record<string, BundledRuleset> = {
   "mock-v1": BundledRulesetSchema.parse(rawV1),
   "mock-internal-v2": BundledRulesetSchema.parse(rawInternalV2),
+  "research-v1": BundledRulesetSchema.parse({
+    ...rawV1,
+    meta: {
+      ...rawV1.meta,
+      rulesetVersion: "research-v1",
+      description: "Research sect baseline bundle (M1 contract-ready; logic mirrors mock-v1).",
+    },
+  }),
 };
 
 export { BUNDLED_RULESET_VERSIONS };

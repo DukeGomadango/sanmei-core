@@ -18,6 +18,7 @@ const store = new SolarTermStore(solarFile);
 const port = createJodaCalendarPort();
 
 const goldenDir = join(dirname(fileURLToPath(import.meta.url)), "__fixtures__", "golden_mock_v1");
+const researchGoldenDir = join(dirname(fileURLToPath(import.meta.url)), "__fixtures__", "golden_research_v1");
 
 describe("calculate", () => {
   it("RULESET_VERSION_UNSUPPORTED", () => {
@@ -136,6 +137,14 @@ describe("calculate", () => {
     expect(b.dynamicTimeline).toEqual(a.dynamicTimeline);
   });
 
+  it("research-v1 を受理し、最小ゴールデンと一致する", () => {
+    const input = JSON.parse(readFileSync(join(researchGoldenDir, "calculate_input.json"), "utf-8"));
+    const expected = JSON.parse(readFileSync(join(researchGoldenDir, "expected_output.json"), "utf-8"));
+    const got = calculate(input, { solarTermStore: store, port, nowUtcMs: 0 });
+    expect(CalculateResultSchema.safeParse(got).success).toBe(true);
+    expect(normalizeResultMeta(got, { calculatedAt: "1970-01-01T00:00:00.000Z" })).toEqual(expected);
+  });
+
   it("UTC タイムゾーンで計算できる", () => {
     const r = calculate(
       {
@@ -153,6 +162,27 @@ describe("calculate", () => {
     expect(CalculateResultSchema.safeParse(r).success).toBe(true);
     expect(r.interactionRules.isouhou).toEqual([]);
     expect(r.interactionRules.kyoki).toBeNull();
+  });
+
+  it("kyoki は null または shadowYousen 別フィールド契約を満たす", () => {
+    const r = calculate(
+      {
+        user: {
+          birthDate: "2000-06-15",
+          birthTime: "12:00",
+          timeZoneId: "Asia/Tokyo",
+          gender: "male",
+        },
+        context: { asOf: "2026-01-01", timeZone: "Asia/Tokyo" },
+        systemConfig: { sect: "research", rulesetVersion: "research-v1" },
+      },
+      { solarTermStore: store, port, nowUtcMs: 0 },
+    );
+    const kyoki = r.interactionRules.kyoki;
+    if (kyoki !== null) {
+      expect(kyoki).toHaveProperty("shadowYousen");
+      expect(kyoki).not.toHaveProperty("yousen");
+    }
   });
 
   it("includeDebugTrace=true のとき typed debugTrace を返す", () => {

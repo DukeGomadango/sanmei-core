@@ -217,8 +217,8 @@ flowchart LR
 
 **実装済み（Layer2 / Phase L2a＋L2b＋L2c、mock のみ）**
 
-- Orchestrator: [calculate.ts](../packages/sanmei-core/src/calculate.ts)— `CalculateInputSchema` → `requiresBirthTimeForAnySolarTermOnDate` → `resolveInsenWithDepth` → **`getBundledRuleset(rulesetVersion)`**（`mock-v1` / `mock-internal-v2`）→ 蔵干・主星・従星・守護神／忌神・六親（`familyNodes` 座標付き）→ **L2c** `resolveEnergyData`／`resolveDestinyBugs` → **`dynamicTimeline`**（`.resolveDynamicTimeline`、mock・満年齢ベースの `currentPhase`）→ **Layer3a スタブ** `applyLayer3aMock`（`isouhou` 空・`kyoki: null`）。`user.timeZoneId` と `context.timeZone` の一致を要求（REQUIREMENTS の民用 TZ 基準）。
-- Ruleset: [bundledRulesets.ts](../packages/sanmei-core/src/layer2/bundledRulesets.ts)＋`bundledMockRulesetV1`（後方互換）、Zod は `schemas/rulesetMockV1.ts`（`BundledRulesetSchema`＝`mock-v1`／`mock-internal-v2` の `z.union`、`timelineMock`、`meta.schemaRevision`、`energyWeights` 等）。欠セルは `RULESET_DATA_MISSING`。
+- Orchestrator: [calculate.ts](../packages/sanmei-core/src/calculate.ts)— `CalculateInputSchema` → `requiresBirthTimeForAnySolarTermOnDate` → `resolveInsenWithDepth` → **`getBundledRuleset(rulesetVersion)`**（`mock-v1` / `mock-internal-v2` / `research-v1`）→ 蔵干・主星・従星・守護神／忌神・六親（`familyNodes` 座標付き）→ **L2c** `resolveEnergyData`／`resolveDestinyBugs` → **`dynamicTimeline`**（`.resolveDynamicTimeline`、mock・満年齢ベースの `currentPhase`）→ **Layer3a スタブ** `applyLayer3aMock`（`isouhou` 空・`kyoki: null`）。`user.timeZoneId` と `context.timeZone` の一致を要求（REQUIREMENTS の民用 TZ 基準）。
+- Ruleset: [bundledRulesets.ts](../packages/sanmei-core/src/layer2/bundledRulesets.ts)＋`bundledMockRulesetV1`（後方互換）、Zod は `schemas/rulesetMockV1.ts`（`BundledRulesetSchema`＝`mock-v1`／`mock-internal-v2`／`research-v1` の `z.union`、`timelineMock`、`meta.schemaRevision`、`energyWeights` 等）。欠セルは `RULESET_DATA_MISSING`。
 - レスポンス契約: `schemas/layer2.ts`（`baseProfile` は従来どおり＋**`dynamicTimeline`**（`daiun`／`annual` 等）。**`interactionRules`** に `isouhou`・`kyoki`（スタブは `[]`／`null`）を追加；`guardianDeities`／`kishin` は五行コード列＝`Element` 数値）。
 - ゴールデン: `src/__fixtures__/golden_mock_v1/`（入力 JSON＋期待 JSON）。**追加手順（要約）**: 入力 JSON を追加 → `calculate` を固定 `nowUtcMs` で実行 → `CalculateResultSchema.safeParse` 通過を確認 → 期待値は `meta.calculatedAt`／必要なら `engineVersion` を [goldenHarness](../packages/sanmei-core/src/__tests__/goldenHarness.ts) で正規化してコミット。
 
@@ -290,7 +290,7 @@ flowchart LR
 
 - **ファイル**: `packages/sanmei-core/src/calculate.ts`。**`CalculateInputSchema`（Zod）**に **`user`（`BirthInput`＋`gender`）**、**`context`（`asOf`・`timeZone` 必須）**、**`systemConfig.sect`／`rulesetVersion`（必須）**を含める（HTTP の `POST /api/v1/calculate` と揃える）。
 - **実行順（先頭）**: `requiresBirthTimeForAnySolarTermOnDate`（マスタ全件走査・現仕様維持）→ 未充足なら `SanmeiError` `TIME_REQUIRED_FOR_SOLAR_TERM` → 通過後に Layer1（`resolveInsenWithDepth`）。続けて Layer2。全件走査は Node 上で通常 **ミリ秒未満〜低ミリ秒**クラスでボトルネックになりにくい前提。
-- **バンドル ruleset**: サポートは **`BUNDLED_RULESET_VERSIONS`**（例: `mock-v1`、`mock-internal-v2`）。レジストリに無い版は `RULESET_VERSION_UNSUPPORTED`。BFF は本番と同形のリクエストを送れる。
+- **バンドル ruleset**: サポートは **`BUNDLED_RULESET_VERSIONS`**（例: `mock-v1`、`mock-internal-v2`、`research-v1`）。レジストリに無い版は `RULESET_VERSION_UNSUPPORTED`。BFF は本番と同形のリクエストを送れる。
 - **BFF**: [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §7 に従い `SanmeiError`・`MALFORMED_JSON` を **400 / 422 / 500** にマップ。判別用は [§5.0.1](#501-sanmeierror-と機械可読-code)。
 
 #### `mock-v1` ruleset（ファイル・読み込み）
@@ -371,10 +371,10 @@ flowchart LR
 
 ### 4.1 `ruleset`（mock）データ
 
-- **配置（ソース）**: `packages/sanmei-core/src/data/rulesets/*.json`（`mock-v1.json`、`mock-internal-v2.json`＝レジストリ検証用・本文は mock と同形）。
+- **配置（ソース）**: `packages/sanmei-core/src/data/rulesets/*.json`（`mock-v1.json`、`mock-internal-v2.json`＝レジストリ検証用・本文は mock と同形）。`research-v1` は M1 では `mock-v1` 本文を流用し、レジストリで `meta.rulesetVersion` を `research-v1` として束ねる。
 - **ビルド後**: `packages/sanmei-core/dist/data/rulesets/*.json`（`npm run build` 内の [copy-rulesets.mjs](../packages/sanmei-core/scripts/copy-rulesets.mjs) が `src/data/rulesets` の **全 `.json`** をミラー）。
 - **取り込み**: 節入りと異なり **fs ランタイム読込は使わず** `import` バンドル（[bundledRulesets.ts](../packages/sanmei-core/src/layer2/bundledRulesets.ts)、後方互換 [bundledMockRuleset.ts](../packages/sanmei-core/src/layer2/bundledMockRuleset.ts)）。
-- **Zod**: `BundledRulesetSchema`＝`z.union`（将来 **discriminatedUnion** 布石）。`mock-v1` の **`meta.schemaRevision`** は **2**（`timelineMock` 追加）。
+- **Zod**: `BundledRulesetSchema`＝`z.union`（将来 **discriminatedUnion** 布石）。`mock-v1` の **`meta.schemaRevision`** は **2**（`timelineMock` 追加）。`research-v1` は契約準備段階として同等本文を受理する。
 - **L2c**: `energyWeights`・`energyMock`・`destinyBugRules` を同一 JSON に載せる。**中身を変えたら** `schemaRevision` を上げ、**ゴールデン**と Zod を同期する。
 - **`timelineMock`**: 大運 mock（`fixedStartAge`・`phaseSpanYears`・`firstPhaseSexagenaryIndex` 等）。厳密な節入り境界は監修版で拡張。
 

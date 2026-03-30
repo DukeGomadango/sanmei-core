@@ -97,11 +97,31 @@ export const RulesetMockInternalV2Schema = z
   })
   .merge(rulesetBodySchema);
 
-export const BundledRulesetSchema = z.union([RulesetMockV1Schema, RulesetMockInternalV2Schema]);
+export const RulesetResearchV1MetaSchema = z.object({
+  rulesetVersion: z.literal("research-v1"),
+  description: z.string(),
+  schemaRevision: z.number().int().nonnegative(),
+});
+
+/**
+ * 研究流派の契約準備バンドル。
+ * M1 では本文を mock-v1 互換で保持し、M2 以降で interaction ブロック等を段階追加する。
+ */
+export const RulesetResearchV1Schema = z
+  .object({
+    meta: RulesetResearchV1MetaSchema,
+  })
+  .merge(rulesetBodySchema);
+
+export const BundledRulesetSchema = z.union([
+  RulesetMockV1Schema,
+  RulesetMockInternalV2Schema,
+  RulesetResearchV1Schema,
+]);
 
 export type RulesetMockV1 = z.infer<typeof RulesetMockV1Schema>;
 export type BundledRuleset = z.infer<typeof BundledRulesetSchema>;
 
 /** サポートするバンドル版（`RULESET_VERSION_UNSUPPORTED` 判定用） */
-export const BUNDLED_RULESET_VERSIONS = ["mock-v1", "mock-internal-v2"] as const;
+export const BUNDLED_RULESET_VERSIONS = ["mock-v1", "mock-internal-v2", "research-v1"] as const;
 export type BundledRulesetVersion = (typeof BUNDLED_RULESET_VERSIONS)[number];
