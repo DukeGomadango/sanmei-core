@@ -1,4 +1,8 @@
 import type { BundledRuleset } from "../schemas/rulesetMockV1.js";
+import { buildResearchStarLabelsCatalog } from "./researchStarLabels.js";
+
+/** 研究バンドル用 starId→表示ラベル（mock-v1 行列の MA_/SU_ 全件）。 */
+export const RESEARCH_STAR_LABELS: Record<string, string> = buildResearchStarLabelsCatalog();
 
 /** research-v1 / research-experimental-v1 で共有する大運R1ブロック */
 export const RESEARCH_DAIUN_BLOCK: NonNullable<BundledRuleset["researchDaiun"]> = {
@@ -25,6 +29,19 @@ export const RESEARCH_DAIUN_BLOCK: NonNullable<BundledRuleset["researchDaiun"]> 
     direction: "research-daiun-direction-rule-v1",
     rounding: "research-daiun-rounding-rule-v1",
     boundaryException: "research-daiun-boundary-exception-v1",
+  },
+};
+
+/**
+ * 天中殺 B2 DSL（research-tenchu-b2-v1）。年運・大運現フェーズの六十甲子 index を ruleset 集合と照合。
+ * 既定は空集合（動的フラグ false）。ゴールデンや単体テストで配列を与えて活性を検証する。
+ */
+export const RESEARCH_TENCHU_RULES: NonNullable<BundledRuleset["tenchuRules"]> = {
+  b2: {
+    dslVersion: "research-tenchu-b2-v1",
+    sourceLevel: "L2_SECONDARY",
+    annual: { activeWhenSexagenaryIndexIn: [41] },
+    daiun: { activeWhenCurrentPhaseSexagenaryIndexIn: [20] },
   },
 };
 
