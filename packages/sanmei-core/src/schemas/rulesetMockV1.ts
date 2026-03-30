@@ -63,6 +63,33 @@ export const TimelineMockSchema = z.object({
   annualStarPlaceholder: z.string().min(1),
 });
 
+export const IsouhouKindSchema = z.enum([
+  "SHIGO",
+  "HOSANUI",
+  "HANKAI",
+  "SANGOU",
+  "TAICHU",
+  "GAI",
+  "KEI",
+  "HA",
+]);
+
+export const InteractionPatternSchema = z.object({
+  kind: IsouhouKindSchema,
+  branches: z.array(z.number().int().min(0).max(11)).min(2).max(3),
+});
+
+export const InteractionRulesetSchema = z.object({
+  enabledKinds: z.array(IsouhouKindSchema),
+  patterns: z.array(InteractionPatternSchema),
+  priorityOrder: z.array(IsouhouKindSchema),
+  priorityVersion: z.string().optional(),
+  sourceLevel: z.string().optional(),
+  kyoki: z.object({
+    featureEnabled: z.boolean(),
+  }),
+});
+
 const rulesetBodySchema = z.object({
   energyWeights: EnergyWeightsSchema,
   energyMock: EnergyMockSchema,
@@ -76,6 +103,7 @@ const rulesetBodySchema = z.object({
     mockV1Nodes: z.array(FamilyNodeRuleSchema),
   }),
   timelineMock: TimelineMockSchema,
+  interaction: InteractionRulesetSchema.optional(),
 });
 
 export const RulesetMockV1Schema = z
@@ -111,7 +139,11 @@ export const RulesetResearchV1Schema = z
   .object({
     meta: RulesetResearchV1MetaSchema,
   })
-  .merge(rulesetBodySchema);
+  .merge(
+    rulesetBodySchema.extend({
+      interaction: InteractionRulesetSchema,
+    }),
+  );
 
 export const BundledRulesetSchema = z.union([
   RulesetMockV1Schema,

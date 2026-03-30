@@ -134,6 +134,13 @@ export const InteractionRulesLayer2Schema = z.object({
       shadowYousen: YousenLayer2Schema.optional(),
     })
     .nullable(),
+  resolutionMeta: z
+    .object({
+      ruleSetId: z.string(),
+      priorityVersion: z.string(),
+      sourceLevel: z.string(),
+    })
+    .optional(),
   priorityResolution: z.unknown().optional(),
   debugTrace: DebugTraceSchema.optional(),
 });

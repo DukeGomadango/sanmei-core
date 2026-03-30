@@ -131,6 +131,7 @@
   - 発火時は `shadowYousen` 相当オブジェクトを **元の `yousen` とは別フィールド**で返す
   - `yousen` を上書きしない
   - 不発火時は `kyoki = null`（または未成立を明示）
+- `interactionRules` には任意で `resolutionMeta`（`ruleSetId` / `priorityVersion` / `sourceLevel`）を持てるようにし、研究段階の判定根拠を追跡可能にする。
 
 ---
 

@@ -103,7 +103,18 @@
   "interactionRules": {
     "guardianDeities": [0, 1],
     "kishin": [3],
-    "isouhou": [],
-    "kyoki": null
+    "isouhou": [
+      {
+        "kind": "KEI",
+        "involved": ["辰", "辰"],
+        "scope": "NATAL_3"
+      }
+    ],
+    "kyoki": null,
+    "resolutionMeta": {
+      "ruleSetId": "research-v1",
+      "priorityVersion": "research-v1-l3a-priority-r1",
+      "sourceLevel": "L2_SECONDARY"
+    }
   }
 }
