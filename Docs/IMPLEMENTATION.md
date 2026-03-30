@@ -132,13 +132,18 @@ flowchart TB
   req[requiresBirthTimeForAnySolarTermOnDate]
   d1[resolveInsenWithDepth]
   rs[bundled mock ruleset JSON]
-  l2[layer2 リゾルバ群]
+  l2[layer2 リゾルバ L2a–b]
+  l2c[L2c: resolveEnergyData / resolveDestinyBugs]
   in --> calc
   calc --> req
   calc --> d1
   calc --> rs
   calc --> l2
+  calc --> l2c
   d1 --> l2
+  d1 --> l2c
+  rs --> l2
+  rs --> l2c
 ```
 
 ### Layer1 内部の依存（主要ファイル）
@@ -199,35 +204,30 @@ flowchart LR
 - 陰占三柱: 年柱（立春基準・簡略太陽年ラベル）、月柱（十二「節」＋五虎遁）、日柱（JDN + mod 60）
 - **蔵干用の深さ（Layer1）**: `resolveInsenWithDepth` が **月柱と同一の** `monthSectionEntryAtOrBefore` エントリ由来のローカル暦日 JDN と `birthDate` の差から `rawDelta`・`displayDepth` を返す（§5.0）。`resolveInsenThreePillars` はそのラッパ。
 
-**実装済み（Layer2 / Phase L2a＋L2b、mock のみ）**
+**実装済み（Layer2 / Phase L2a＋L2b＋L2c、mock のみ）**
 
-- Orchestrator: [calculate.ts](../packages/sanmei-core/src/calculate.ts)— `CalculateInputSchema` → `requiresBirthTimeForAnySolarTermOnDate` → `resolveInsenWithDepth` → `rulesetVersion === 'mock-v1'` のバンドル JSON → 蔵干・主星・従星・守護神／忌神・六親（`familyNodes` 座標付き）。`user.timeZoneId` と `context.timeZone` の一致を要求（REQUIREMENTS の民用 TZ 基準）。
-- Ruleset: `bundledMockRulesetV1`（`import`）、Zod は `schemas/rulesetMockV1.ts`。欠セルは `RULESET_DATA_MISSING`。
-- レスポンス契約: `schemas/layer2.ts`（`baseProfile.insen` に蔵干＋深さ、`yousen`、`familyNodes`；`interactionRules.guardianDeities`／`kishin` は五行コード列＝`Element` 数値）。
+- Orchestrator: [calculate.ts](../packages/sanmei-core/src/calculate.ts)— `CalculateInputSchema` → `requiresBirthTimeForAnySolarTermOnDate` → `resolveInsenWithDepth` → `rulesetVersion === 'mock-v1'` のバンドル JSON → 蔵干・主星・従星・守護神／忌神・六親（`familyNodes` 座標付き）→ **L2c** `resolveEnergyData`／`resolveDestinyBugs`。`user.timeZoneId` と `context.timeZone` の一致を要求（REQUIREMENTS の民用 TZ 基準）。
+- Ruleset: `bundledMockRulesetV1`（`import`）、Zod は `schemas/rulesetMockV1.ts`（`meta.schemaRevision`、`energyWeights`・`energyMock`・`destinyBugRules` を含む）。欠セルは `RULESET_DATA_MISSING`。
+- レスポンス契約: `schemas/layer2.ts`（`baseProfile.insen` に蔵干＋深さ、`yousen`、`familyNodes`、**`energyData`**（`totalEnergy`・`actionAreaSize`・`actionAreaGeometry.vertexAnglesDegTenths`／`areaRatioPermille`）、**`destinyBugs`**（`DestinyBugCode` 列、Zod で重複除去）；`interactionRules.guardianDeities`／`kishin` は五行コード列＝`Element` 数値）。
 - ゴールデン: `src/__fixtures__/golden_mock_v1/`（入力 JSON＋期待 JSON）。
 
 **未実装（Layer2 以降・別フェーズ）**
 
-- 監修 ruleset（`mock-v1` 以外の `rulesetVersion`）、**L2c 実装**（`energyData`／`destinyBugs`・mock-v1 拡張）、大運・流年の本番 `dynamicTimeline`、位相法・虚気・格法の本実装（Layer3）、Proto 正本、HTTP サーバ。
+- 監修 ruleset（`mock-v1` 以外の `rulesetVersion`）、大運・流年の本番 `dynamicTimeline`、位相法・虚気・格法の本実装（Layer3）、Proto 正本、HTTP サーバ。
 
 ### Layer2 基盤の方針（ドキュメント正本）
 
 #### Phase L2 のスコープ境界（採用）
 
-**Phase L2a＋L2b（到達済・mock）**で `baseProfile` に載せるブロックは次の **3 つ**。
+**Phase L2a＋L2b＋L2c（到達済・mock）**で `baseProfile` に載せるブロックは次の **5 つ**。
 
 | ブロック | 内容 |
 |----------|------|
 | `insen` | 三柱の器＋**蔵干（初元・中元・本元の採用）** |
 | `yousen` | **十大主星**（5 箇所）＋**十二大従星**（3 箇所） |
 | `familyNodes` | **六親（座標必須）**。[REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §6.2 は本表に従い座標付きを正とする（[OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) §11 と整合） |
-
-**Phase L2c（未実装・設計固定）**で `baseProfile` に加えるブロック:
-
-| ブロック | 内容（要約） |
-|----------|----------------|
-| `energyData` | 数理法・行動領域。入力は**位相法・虚気を加味しない**素の三柱＋蔵干（採用蔵干まで）のみ。幾何は API 契約上 **極座標（角度）**と**面積比**に正規化した形で返す（詳細は同節「Phase L2c」）。 |
-| `destinyBugs` | **出生時点で一生不変**の宿命系フラグのみ。年運・大運天中殺・スライドは [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) `dynamicTimeline.tenchuSatsuStatus` 側（[DOMAIN-GLOSSARY.md](./DOMAIN-GLOSSARY.md) §3.2）。 |
+| `energyData` | **数理法・行動領域（L2c）**。入力は**位相法・虚気を加味しない**素の三柱＋蔵干（採用蔵干まで）のみ。幾何は **極座標（度×10 整数）**と**面積比（千分率整数）**。算法は `mock-v1` の `energyWeights`／`energyMock`（詳細は同節「Phase L2c」）。 |
+| `destinyBugs` | **出生時点で一生不変**の宿命系フラグ（L2c）。`destinyBugRules` 照合。**年運・大運天中殺・スライド**は [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) `dynamicTimeline.tenchuSatsuStatus` 側（[DOMAIN-GLOSSARY.md](./DOMAIN-GLOSSARY.md) §3.2）。 |
 
 守護神・忌神の**計算**は Layer2 の静的ルール内。**レスポンス**では [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §6.4 に従い **`interactionRules.guardianDeities` / `interactionRules.kishin`** に載せる（Orchestrator の組み立て。現状は L2a/b 直後に組み立て、`calculate` パイプライン上は **位相法より前**）。
 
@@ -242,14 +242,17 @@ flowchart LR
 **`energyData`（出力契約の骨子）**
 
 - **Zod で厳格に固定**する（浮動小数のまま生返ししない）。
-- **幾何**: **各頂点の極座標（角度。度）**および**行動領域の面積比**（正規化された数）に集約。一般の二次メッシュ座標は L2c の契約外（将来拡張は別フィールド・別 `rulesetVersion` で検討）。
-- **丸めとゴールデン**: 三角関数等で浮動小数が出る場合、**エンジン内で丸め規則を固定**（例: 角度は小数第1位で四捨五入）し、**レスポンスは整数または固定桁の decimal 表現**に正規化して返す。学派ごとに丸めが変わる場合は **後から `ruleset` メタ**へ移せるが、mock 段階では固定でよい。
+- **幾何**: **各頂点の極座標（角度）**を **度×10 の整数**（`vertexAnglesDegTenths`）および**行動領域の面積比**を **千分率の整数**（`areaRatioPermille`）に集約。一般の二次メッシュ座標は L2c の契約外（将来拡張は別フィールド・別 `rulesetVersion` で検討）。
+- **mock の頂点角度（実装計画に準拠）**: 宇宙盤の円周 360° を六十甲子 60 ステップに対応させる慣習（**1 ステップ 6°**）に合わせ、**年・月・日柱の六十甲子インデックス（0〜59）ごとに** `vertexAnglesDegTenths = index * 60` とする（UI 描画テストが本番近似に寄る）。
+- **面積比の算出**: 角度→単位円上の直交座標 `(cos θ, sin θ)` に変換し、**Shoelace 公式（靴ひもの公式）**で多角形面積を求める。辺長＋**ヘロンの公式**は `sqrt` 連鎖で誤差が増えやすいため L2c では用いない。最大面積（単位円に内接する正三角形の面積など）で除算して permille に**整数化**する。**オーバー時は 1000 クランプ**を検討。
+- **丸めとゴールデン**: 中間計算は浮動小数になりうるが、**レスポンスは整数のみ**。学派ごとに丸めが変わる場合は **後から `ruleset` メタ**へ移せるが、mock 段階ではエンジン固定でよい。
 - **算法の中身**（干支の重み行列など）は **`ruleset` に閉じる**（[DOMAIN-GLOSSARY.md](./DOMAIN-GLOSSARY.md) §2.3）。
 
 **`destinyBugs`（静的タクソノミの骨子）**
 
 - **格納するのは**出生情報から決まり**生涯変わらない**フラグのみ（宿命天中殺・異常干支等）。**年運／大運天中殺・スライド・`asOf` 依存**は一切ここに載せない。
 - **表現**: 安定 **`code` 文字列**の列（または `code` ＋補助フィールドを持つオブジェクト列）。学派差の真理値表は **`ruleset` JSON**（mock は本章 §4.1 の単一 `mock-v1.json` を拡張）。
+- **重複コード**: リゾルバでは気にせず付与し、**Zod の `.transform` でユニーク配列に正規化**してもよい（オーケストレータを汚さない。順序は初出順など仕様で固定）。
 - **コード例**（監修確定前のプレースホルダ。名称は OPEN-QUESTIONS 参照）: `SHUKUMEI_TENCHUSATSU_YEAR`、`SHUKUMEI_TENCHUSATSU_MONTH`、`IJOU_KANSHI_NORMAL`、`IJOU_KANSHI_DARK`（**暗干支**を指す。**暗号**との誤記に注意）。
 
 **mock `rulesetVersion: mock-v1` の拡張**
@@ -260,7 +263,7 @@ flowchart LR
 
 #### Orchestrator 実行順（正本・将来の Layer3 含む）
 
-**現状**（Layer2a/b のみ）: Layer1（暦・三柱＋深さ）→ L2 リゾルバ → 守護神／忌神を `interactionRules` に載せる。
+**現状**（Layer2a/b＋L2c まで）: Layer1（暦・三柱＋深さ）→ L2a/b リゾルバ → 守護神／忌神を `interactionRules` に載せる → **L2c**（`energyData`／`destinyBugs`、位相・虚気は見ない）。
 
 **目標 DAG（L2c〜Layer3 本番）**— 依存の向きのみ規定（レスポンス JSON のキー順は任意）:
 
@@ -311,13 +314,13 @@ flowchart LR
 - **`ruleset` モック**: 自己整合検証用。メタに監修外である旨を明記。
 - **経過日数・蔵干**: §5.0（`rawDelta`／`displayDepth`）、同一深さで年・月・日の支（§5 表）。
 - **ゴールデン**: 内部整合。`src/__fixtures__/golden_mock_v1/`。
-- **モジュール**: `layer2/*`（`stemBranchKey`・各リゾルバ・`bundledMockRuleset.ts`）、`schemas/layer2.ts`、`schemas/calculateInput.ts`、`schemas/rulesetMockV1.ts`、`errors/sanmeiError.ts`。Proto は §5.1。
+- **モジュール**: `layer2/*`（`stemBranchKey`・各リゾルバ・**`l2cGeometry.ts`**・**`resolveEnergyData.ts`**・**`resolveDestinyBugs.ts`**・`bundledMockRuleset.ts`）、`schemas/layer2.ts`、`schemas/calculateInput.ts`、`schemas/rulesetMockV1.ts`、`errors/sanmeiError.ts`。Proto は §5.1。
 
 #### 実装フェーズ（目安）
 
 - **L2a（済）**: ruleset 取り込み、Zod、従星、守護神／忌神→`interactionRules`、ゴールデン土台、`mock-v1` のみ。
 - **L2b（済）**: Layer1 深さ、蔵干、十大主星（上表）、`familyNodes`（座標必須）。※ ruleset は引き続き `mock-v1` のみ。
-- **L2c（未実装）**: `energyData`・`destinyBugs`。採用方針は本章「Phase L2c」、契約の細部は [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §6.2。
+- **L2c（済・mock）**: `energyData`・`destinyBugs`・`mock-v1` の `schemaRevision` 1。採用方針は本章「Phase L2c」、契約の細部は [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §6.2。
 
 ---
 
@@ -329,7 +332,7 @@ flowchart LR
 |------|----------------|------|
 | 公開 API | [index.ts](../packages/sanmei-core/src/index.ts) | 再エクスポート集約（`calculate`・`SanmeiError`・Layer2 Zod 型など）。 |
 | Orchestrator | [calculate.ts](../packages/sanmei-core/src/calculate.ts)、[schemas/calculateInput.ts](../packages/sanmei-core/src/schemas/calculateInput.ts)、[errors/sanmeiError.ts](../packages/sanmei-core/src/errors/sanmeiError.ts) | §2。TZ 要否→Layer1 深さ→mock ruleset。 |
-| Layer2 | [layer2/](../packages/sanmei-core/src/layer2/)、[schemas/layer2.ts](../packages/sanmei-core/src/schemas/layer2.ts)、[schemas/rulesetMockV1.ts](../packages/sanmei-core/src/schemas/rulesetMockV1.ts)、[src/data/rulesets/](../packages/sanmei-core/src/data/rulesets/) | 蔵干・主星・従星・守護神忌神・六親。§2 参照 |
+| Layer2 | [layer2/](../packages/sanmei-core/src/layer2/)、[schemas/layer2.ts](../packages/sanmei-core/src/schemas/layer2.ts)、[schemas/rulesetMockV1.ts](../packages/sanmei-core/src/schemas/rulesetMockV1.ts)、[src/data/rulesets/](../packages/sanmei-core/src/data/rulesets/) | 蔵干・主星・従星・守護神忌神・六親・**L2c**（energy／destiny）。§2 参照 |
 | ゴールデン | [__fixtures__/golden_mock_v1/](../packages/sanmei-core/src/__fixtures__/golden_mock_v1/) | `calculate` 内部整合 |
 | Primitives | `layer1/enums.ts`, `stemBranchTables.ts`, `wuxingRelations.ts`, `kango.ts`, `sexagenary.ts` | DOMAIN-GLOSSARY Layer1 に対応。 |
 | 定数 | `layer1/pillarConstants.ts` | 年柱アンカー・日柱 JDN 加算（キャリブレーション）。 |
@@ -353,7 +356,7 @@ flowchart LR
 - **配置（ソース）**: `packages/sanmei-core/src/data/rulesets/mock-v1.json`。
 - **ビルド後**: `packages/sanmei-core/dist/data/rulesets/mock-v1.json`（`npm run build` 内の `scripts/copy-rulesets.mjs` でコピー）。
 - **取り込み**: 節入りと異なり **fs ランタイム読込は使わず** `import` バンドル（`layer2/bundledMockRuleset.ts`）。
-- **L2c 拡張時**: 同一ファイルに `energyWeights`・`destinyBugRules` 等を追加し、`meta.schemaRevision`（または同等）で**ブロック追加の世代**を追跡する。API の `rulesetVersion` 文字列は当面 `mock-v1` のままでよいが、**スキーマとゴールデン**は `schemaRevision` とセットで管理する。
+- **L2c（初回実装済）**: `energyWeights`・`energyMock`・`destinyBugRules` を同一 JSON に載せ、`meta.schemaRevision`（整数、初回 **1**）で**ブロック世代**を追跡する。API の `rulesetVersion` 文字列は当面 `mock-v1` のまま。**中身を変えたら** `schemaRevision` を上げ、**ゴールデン**と Zod を同期する。
 
 **コミット済みマスタの年範囲を変えたら**、本節と必要なら [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §9 の説明を更新する。
 
