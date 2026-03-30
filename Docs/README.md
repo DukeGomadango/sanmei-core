@@ -16,7 +16,7 @@
 
 ## Layer 1 実装の所在
 
-- **詳細**: [IMPLEMENTATION.md](./IMPLEMENTATION.md)（モジュール一覧・節入り JSON 手順・実装前提）。
+- **詳細**: [IMPLEMENTATION.md](./IMPLEMENTATION.md)（モジュール一覧・節入り／**ruleset** JSON・**Phase L2 / L2c 境界**・経過日数 §5.0・`SanmeiError` §5.0.1・Orchestrator・ゴールデン・Zod→Proto）。[REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §6 は L2 スコープと同期。
 - **パッケージ**: [`packages/sanmei-core`](../packages/sanmei-core)。
 - **README / ライセンス**: ルート [README.md](../README.md) ・ [LICENSES.md](../LICENSES.md)。
 

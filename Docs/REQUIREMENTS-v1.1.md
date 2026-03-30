@@ -139,12 +139,12 @@
 
 #### `systemConfig`
 
-| フィールド | 説明 |
-|------------|------|
-| `sect` | 学派。 |
-| `allowGohouInKaku` | 格法判定に位相法（半会等）を含めるか。 |
-| `rulesetVersion` | クライアントが期待するルール版。サーバがサポートしない場合はエラー（§7）。 |
-| `clientRulesetHint` | 任意。将来の A/B やデバッグ用。 |
+| フィールド | 必須 | 説明 |
+|------------|------|------|
+| `sect` | **はい**（コア `calculate` 経路） | 学派。 |
+| `allowGohouInKaku` | いいえ | 格法判定に位相法（半会等）を含めるか。 |
+| `rulesetVersion` | **はい**（コア `calculate` 経路） | クライアントが期待するルール版。未サポートなら §7。Phase L2a 実装時は `mock-v1` のみの場合あり（[IMPLEMENTATION.md](./IMPLEMENTATION.md) §2）。 |
+| `clientRulesetHint` | いいえ | 将来の A/B やデバッグ用。 |
 
 #### `options`
 
@@ -179,13 +179,15 @@
 
 ### 6.2 `BaseProfile`（静的・生涯不変のハードウェア）
 
+**Phase L2（コア実装の分割）**: `insen`（蔵干含む）・`yousen`・`familyNodes` を先行実装する。**`energyData`**・**`destinyBugs`** は計算系が異なるため **Phase L2c または別 PR** に遅延する（[IMPLEMENTATION.md](./IMPLEMENTATION.md) §2）。
+
 | ブロック | 内容 |
 |----------|------|
 | `insen` | 陰占: **年柱・月柱・日柱の三柱のみ**の十干十二支。**時柱は算命学コアの出力に含めない**（リクエストの `birthTime` は暦境界用であり、時柱とは別物。[DOMAIN-GLOSSARY.md](./DOMAIN-GLOSSARY.md) §2.1）。Protobuf／OpenAPI 等でも **`timePillar`・`hourStem` 等のフィールドを定義しない**。節入りからの経過に基づく**蔵干（初元・中元・本元）**を `sect` ルールで特定。 |
 | `yousen` | 陽占: **十大主星**（5 箇所）、**十二大従星**（3 箇所）。部位は人体図座標または部位 ID で返す。 |
-| `energyData` | `totalEnergy`（例: 数値）, `actionAreaSize`（1〜4）, `actionAreaGeometry`（三角形頂点等、UI 用） |
-| `destinyBugs` | 宿命天中殺・異常干支などのフラグ集合 |
-| `familyNodes` | 六親法: マッチング用に `{ "mother": "丁", "spouse": "癸" }` 形式。拡張時は干に加え**柱・蔵干スロット等の位置**を載せるオブジェクトを許容する設計を推奨（[OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) §11）。 |
+| `energyData` | `totalEnergy`（例: 数値）, `actionAreaSize`（1〜4）, `actionAreaGeometry`（三角形頂点等、UI 用）— **L2c／別 PR** |
+| `destinyBugs` | 宿命天中殺・異常干支などのフラグ集合 — **L2c／別 PR** |
+| `familyNodes` | 六親法: **各ノードに干に加え、柱（年／月／日）および蔵干スロット（初元・中元・本元等）等の座標を必須**とする。干のみのフラットマップは採用しない（[OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) §11）。配列またはロールキー付きオブジェクトの形は Zod（`schemas/layer2.ts`）で固定する。 |
 
 **星・干・支**: API 内部は**列挙コード**（安定 ID）を正とし、表示ラベルはクライアントの i18n で解決してよい。
 
@@ -201,6 +203,8 @@
 | `tenchuSatsuStatus` | 天中殺の稼働状況。大運天中殺の**スライド**は **JSON／DSL 化した `ruleset`** で定義し、API が解釈して**ゴールデン可能なフラグ・期間・スコア**を返す。**機械的条件の再計算をフロント専用ロジックに置かない**。問診に依る**ナラティブな説明**のみフロント／LLM の責務（API 出力と矛盾する上書きはしない）。詳細は [OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) §8。 |
 
 ### 6.4 `InteractionRules`
+
+**Phase L2**: 守護神・忌神の計算は静的ルールで行い、戻り値は本ブロックの **`guardianDeities` / `kishin`** に載せる（Orchestrator の組み立て。位相法・虚気・Priority は後続）。
 
 | ブロック | 内容 |
 |----------|------|
@@ -221,6 +225,8 @@ HTTP ステータスと機械可読 `code` を組み合わせる。
 |------|------|-----------|----------------|
 | 「節入り日」に該当する `birthDate` で `birthTime` が未指定 | 422 | `TIME_REQUIRED_FOR_SOLAR_TERM` | フロントが時刻入力へ誘導（[OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) 暦・時刻 **1**） |
 | 未サポートの `rulesetVersion` | 400 または 422 | `RULESET_VERSION_UNSUPPORTED` | サポート一覧への誘導 |
+| `ruleset` 参照で必須データ欠損 | 422 または 500 | `RULESET_DATA_MISSING` | 版と参照明示 |
+| 深さ等の計算異常（例: `rawDelta < 0`） | 500 | `CALCULATION_ANOMALY` | 内部不整合・マスタ欠落の疑い |
 | TZ 不正 | 400 | `INVALID_TIMEZONE` | IANA 名の例示 |
 | バリデーション失敗 | 400 | `VALIDATION_ERROR` | フィールド別 `details[]` |
 
