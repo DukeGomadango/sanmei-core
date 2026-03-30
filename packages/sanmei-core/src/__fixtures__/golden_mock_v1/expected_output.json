@@ -68,7 +68,16 @@
         "stem": 5,
         "location": { "pillar": "DAY", "slot": "STEM" }
       }
-    ]
+    ],
+    "energyData": {
+      "totalEnergy": 23,
+      "actionAreaSize": 3,
+      "actionAreaGeometry": {
+        "vertexAnglesDegTenths": [960, 1080, 2400],
+        "areaRatioPermille": 140
+      }
+    },
+    "destinyBugs": []
   },
   "interactionRules": {
     "guardianDeities": [0, 1],
