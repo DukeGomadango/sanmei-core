@@ -39,13 +39,17 @@ export {
   DestinyBugCodeSchema,
   EnergyDataSchema,
   DynamicTimelineSchema,
+  DebugTraceSchema,
+  TraceNodeSchema,
   type CalculateResult,
+  type DebugTrace,
   type DestinyBugCode,
   type EnergyData,
   type InsenLayer2,
   type BaseProfileLayer2,
   type DynamicTimeline,
   type InteractionRulesLayer2,
+  type TraceNode,
 } from "./schemas/layer2.js";
 export {
   RulesetMockV1Schema,

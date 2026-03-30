@@ -155,6 +155,46 @@ describe("calculate", () => {
     expect(r.interactionRules.kyoki).toBeNull();
   });
 
+  it("includeDebugTrace=true のとき typed debugTrace を返す", () => {
+    const r = calculate(
+      {
+        user: {
+          birthDate: "2000-06-15",
+          birthTime: "12:00",
+          timeZoneId: "Asia/Tokyo",
+          gender: "male",
+        },
+        context: { asOf: "2026-01-01", timeZone: "Asia/Tokyo" },
+        systemConfig: { sect: "takao", rulesetVersion: "mock-v1" },
+        options: { includeDebugTrace: true },
+      },
+      { solarTermStore: store, port, nowUtcMs: 0 },
+    );
+    expect(r.interactionRules.debugTrace).toBeDefined();
+    expect(r.interactionRules.debugTrace?.traceVersion).toBe(1);
+    expect((r.interactionRules.debugTrace?.nodes ?? []).length).toBeGreaterThan(0);
+  });
+
+  it("debugTrace は birthDate/birthTime の生値を保持しない", () => {
+    const r = calculate(
+      {
+        user: {
+          birthDate: "2000-06-15",
+          birthTime: "12:00",
+          timeZoneId: "Asia/Tokyo",
+          gender: "male",
+        },
+        context: { asOf: "2026-01-01", timeZone: "Asia/Tokyo" },
+        systemConfig: { sect: "takao", rulesetVersion: "mock-v1" },
+        options: { includeDebugTrace: true },
+      },
+      { solarTermStore: store, port, nowUtcMs: 0 },
+    );
+    const serialized = JSON.stringify(r.interactionRules.debugTrace ?? {});
+    expect(serialized).not.toContain("2000-06-15");
+    expect(serialized).not.toContain("12:00");
+  });
+
   it("deps.ruleset がリクエストの rulesetVersion と不一致なら VALIDATION_ERROR", () => {
     try {
       calculate(

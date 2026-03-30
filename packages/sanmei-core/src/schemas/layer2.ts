@@ -97,6 +97,33 @@ export const IsouhouEntrySchema = z.object({
 
 export type IsouhouEntry = z.infer<typeof IsouhouEntrySchema>;
 
+const TraceScalarSchema = z.union([
+  z.string(),
+  z.number(),
+  z.boolean(),
+  z.null(),
+  z.array(z.string()),
+  z.array(z.number()),
+  z.array(z.boolean()),
+]);
+
+export const TraceNodeSchema = z.object({
+  phase: z.enum(["LAYER1", "LAYER2", "LAYER3", "SYSTEM"]),
+  stepId: z.string().min(1),
+  ruleId: z.string().nullable(),
+  inputs: z.record(z.string(), TraceScalarSchema),
+  result: z.record(z.string(), TraceScalarSchema),
+  reasonCode: z.string().nullable().optional(),
+});
+
+export const DebugTraceSchema = z.object({
+  traceVersion: z.literal(1),
+  nodes: z.array(TraceNodeSchema),
+});
+
+export type TraceNode = z.infer<typeof TraceNodeSchema>;
+export type DebugTrace = z.infer<typeof DebugTraceSchema>;
+
 export const InteractionRulesLayer2Schema = z.object({
   guardianDeities: z.array(z.number().int().min(0).max(4)),
   kishin: z.array(z.number().int().min(0).max(4)),
@@ -107,7 +134,7 @@ export const InteractionRulesLayer2Schema = z.object({
     })
     .nullable(),
   priorityResolution: z.unknown().optional(),
-  debugTrace: z.unknown().optional(),
+  debugTrace: DebugTraceSchema.optional(),
 });
 
 export const DaiunPhaseSchema = z.object({
