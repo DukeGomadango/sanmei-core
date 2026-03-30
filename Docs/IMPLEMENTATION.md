@@ -208,13 +208,13 @@ flowchart LR
 
 **未実装（Layer2 以降・別フェーズ）**
 
-- 監修 ruleset（`mock-v1` 以外の `rulesetVersion`）、大運・流年の本番 `dynamicTimeline`、位相法・虚気の本実装、`energyData`／`destinyBugs`（L2c）、Proto 正本、HTTP サーバ。
+- 監修 ruleset（`mock-v1` 以外の `rulesetVersion`）、**L2c 実装**（`energyData`／`destinyBugs`・mock-v1 拡張）、大運・流年の本番 `dynamicTimeline`、位相法・虚気・格法の本実装（Layer3）、Proto 正本、HTTP サーバ。
 
 ### Layer2 基盤の方針（ドキュメント正本）
 
 #### Phase L2 のスコープ境界（採用）
 
-**Phase L2（L2a＋L2b の到達目標）**で `baseProfile` に載せるブロックは次の **3 つだけ**とする。
+**Phase L2a＋L2b（到達済・mock）**で `baseProfile` に載せるブロックは次の **3 つ**。
 
 | ブロック | 内容 |
 |----------|------|
@@ -222,9 +222,55 @@ flowchart LR
 | `yousen` | **十大主星**（5 箇所）＋**十二大従星**（3 箇所） |
 | `familyNodes` | **六親（座標必須）**。[REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §6.2 は本表に従い座標付きを正とする（[OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) §11 と整合） |
 
-**Phase L2c（または別 PR）に遅延**: `energyData`（数理法・宇宙盤）、`destinyBugs`（宿命天中殺・異常干支フラグ等）。
+**Phase L2c（未実装・設計固定）**で `baseProfile` に加えるブロック:
 
-守護神・忌神の**計算**は Layer2 の静的ルール内。**レスポンス**では [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §6.4 に従い **`interactionRules.guardianDeities` / `interactionRules.kishin`** に載せる（Orchestrator の組み立て責務）。
+| ブロック | 内容（要約） |
+|----------|----------------|
+| `energyData` | 数理法・行動領域。入力は**位相法・虚気を加味しない**素の三柱＋蔵干（採用蔵干まで）のみ。幾何は API 契約上 **極座標（角度）**と**面積比**に正規化した形で返す（詳細は同節「Phase L2c」）。 |
+| `destinyBugs` | **出生時点で一生不変**の宿命系フラグのみ。年運・大運天中殺・スライドは [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) `dynamicTimeline.tenchuSatsuStatus` 側（[DOMAIN-GLOSSARY.md](./DOMAIN-GLOSSARY.md) §3.2）。 |
+
+守護神・忌神の**計算**は Layer2 の静的ルール内。**レスポンス**では [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §6.4 に従い **`interactionRules.guardianDeities` / `interactionRules.kishin`** に載せる（Orchestrator の組み立て。現状は L2a/b 直後に組み立て、`calculate` パイプライン上は **位相法より前**）。
+
+#### Phase L2c（`energyData`／`destinyBugs`）— 採用方針
+
+**入力スコープ（L2c）**
+
+- **含める**: Layer1／L2a/b が返す**素の命式**—三柱・深さに基づく蔵干（初／中／本の干および採用スロット）、既存ルールで確定した陽占ブロックがあれば参照可。
+- **含めない（L2c）**: **位相法**（半会・三合・干合など）による干／五行の**仮想的な置き換え**、**虚気**による `shadowYousen` 相当の状態。これらを加味した数理・エネルギーは **Layer3（将来）** の責務（例: `shadowEnergyData` 等の別フィールドで検討。正本は GLOSSARY）。
+- **意図**: L2c 実装は **位相法・虚気の完成を待たず**に進められる。
+
+**`energyData`（出力契約の骨子）**
+
+- **Zod で厳格に固定**する（浮動小数のまま生返ししない）。
+- **幾何**: **各頂点の極座標（角度。度）**および**行動領域の面積比**（正規化された数）に集約。一般の二次メッシュ座標は L2c の契約外（将来拡張は別フィールド・別 `rulesetVersion` で検討）。
+- **丸めとゴールデン**: 三角関数等で浮動小数が出る場合、**エンジン内で丸め規則を固定**（例: 角度は小数第1位で四捨五入）し、**レスポンスは整数または固定桁の decimal 表現**に正規化して返す。学派ごとに丸めが変わる場合は **後から `ruleset` メタ**へ移せるが、mock 段階では固定でよい。
+- **算法の中身**（干支の重み行列など）は **`ruleset` に閉じる**（[DOMAIN-GLOSSARY.md](./DOMAIN-GLOSSARY.md) §2.3）。
+
+**`destinyBugs`（静的タクソノミの骨子）**
+
+- **格納するのは**出生情報から決まり**生涯変わらない**フラグのみ（宿命天中殺・異常干支等）。**年運／大運天中殺・スライド・`asOf` 依存**は一切ここに載せない。
+- **表現**: 安定 **`code` 文字列**の列（または `code` ＋補助フィールドを持つオブジェクト列）。学派差の真理値表は **`ruleset` JSON**（mock は本章 §4.1 の単一 `mock-v1.json` を拡張）。
+- **コード例**（監修確定前のプレースホルダ。名称は OPEN-QUESTIONS 参照）: `SHUKUMEI_TENCHUSATSU_YEAR`、`SHUKUMEI_TENCHUSATSU_MONTH`、`IJOU_KANSHI_NORMAL`、`IJOU_KANSHI_DARK`（**暗干支**を指す。**暗号**との誤記に注意）。
+
+**mock `rulesetVersion: mock-v1` の拡張**
+
+- **別 JSON ファイルに分けない**。既存 [src/data/rulesets/mock-v1.json](../packages/sanmei-core/src/data/rulesets/mock-v1.json) にブロックを追加し、**単一のエンジン検証ベクトル**を保つ。
+- **追加ブロック例**: `energyWeights`（干など→重み。将来は支・蔵干重みも `ruleset` で拡張可）、`destinyBugRules`（異常干支リスト・宿命天中殺参照表など）。**Zod**（`schemas/rulesetMockV1.ts`）を同期拡張。
+- **追跡**: JSON `meta` に **`schemaRevision`**（整数インクリメント）または同等を載せ、**同一文字列 `mock-v1` でも中身の世代**が分かるようにする（リリースノートまたは IMPLEMENTATION と突き合わせ）。
+
+#### Orchestrator 実行順（正本・将来の Layer3 含む）
+
+**現状**（Layer2a/b のみ）: Layer1（暦・三柱＋深さ）→ L2 リゾルバ → 守護神／忌神を `interactionRules` に載せる。
+
+**目標 DAG（L2c〜Layer3 本番）**— 依存の向きのみ規定（レスポンス JSON のキー順は任意）:
+
+1. **Layer1**: 暦・三柱＋`displayDepth`
+2. **Layer2a/b**: 蔵干・主星・従星・六親；**守護神／忌神**（静的）を `interactionRules` に載せる
+3. **Layer2c**: **`energyData`・`destinyBugs`**（位相・虚気は**見ない**）
+4. **Layer3a**: **位相法**（`interactionRules.isouhou`）・**虚気**（`kyoki`／`shadowYousen`）
+5. **Layer3b（格法）**: [SECT-RULESET-MATRIX.template.md](./SECT-RULESET-MATRIX.template.md) と `allowGohouInKaku` に従い、**Layer2 の素の命式**と **Layer3a の結果**を入力に**格・局**を最終判定
+
+これにより L2c は **Layer3a をブロックしない**。
 
 #### Orchestrator・入力・実行順
 
@@ -271,7 +317,7 @@ flowchart LR
 
 - **L2a（済）**: ruleset 取り込み、Zod、従星、守護神／忌神→`interactionRules`、ゴールデン土台、`mock-v1` のみ。
 - **L2b（済）**: Layer1 深さ、蔵干、十大主星（上表）、`familyNodes`（座標必須）。※ ruleset は引き続き `mock-v1` のみ。
-- **L2c / 別 PR**: `energyData`、`destinyBugs`。
+- **L2c（未実装）**: `energyData`・`destinyBugs`。採用方針は本章「Phase L2c」、契約の細部は [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §6.2。
 
 ---
 
@@ -307,6 +353,7 @@ flowchart LR
 - **配置（ソース）**: `packages/sanmei-core/src/data/rulesets/mock-v1.json`。
 - **ビルド後**: `packages/sanmei-core/dist/data/rulesets/mock-v1.json`（`npm run build` 内の `scripts/copy-rulesets.mjs` でコピー）。
 - **取り込み**: 節入りと異なり **fs ランタイム読込は使わず** `import` バンドル（`layer2/bundledMockRuleset.ts`）。
+- **L2c 拡張時**: 同一ファイルに `energyWeights`・`destinyBugRules` 等を追加し、`meta.schemaRevision`（または同等）で**ブロック追加の世代**を追跡する。API の `rulesetVersion` 文字列は当面 `mock-v1` のままでよいが、**スキーマとゴールデン**は `schemaRevision` とセットで管理する。
 
 **コミット済みマスタの年範囲を変えたら**、本節と必要なら [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §9 の説明を更新する。
 
@@ -400,6 +447,7 @@ cd packages/sanmei-core && npm run build && npm run test
 - [ ] **契約・用語・境界**が変わったら [DOMAIN-GLOSSARY.md](./DOMAIN-GLOSSARY.md) / [OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) / [REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) の該当箇所を更新した（該当時）
 - [ ] **アーキテクチャ・Proto／契約・フェーズ**を変えたら [ARCHITECTURE-AND-CONTRACTS.md](./ARCHITECTURE-AND-CONTRACTS.md) を更新した（該当時）
 - [ ] **Layer2 系**（`ruleset` 配置・Zod・ゴールデン・深さ・`SanmeiError` 等）を §2・§5 とコードで揃えた（該当時。変更がなければスキップ可）
+- [ ] **L2c**（`energyData`／`destinyBugs`・mock の `schemaRevision`・`rulesetMockV1`）を触ったら §2「Phase L2c」・§4.1・REQUIREMENTS §6.2・OPEN-QUESTIONS「L2c」と一致させた（該当時）
 - [ ] [Docs/README.md](./README.md) の索引から本書が辿れる（索引やパスを変えたとき）
 
 ### 7.3 節目（マイルストーン）— 全件レビュー＋ルールの短文化
@@ -408,6 +456,7 @@ cd packages/sanmei-core && npm run build && npm run test
 
 | 節目の例 |
 |----------|
+| **L2c 初実装**（`energyData`／`destinyBugs`・mock `schemaRevision`・Zod 拡張） |
 | 新 Layer・サブパッケージ・`calculate` 公開契約の変更 |
 | 節入りマスタの生成手順・同梱パス・年範囲の変更 |
 | SSOT を Proto／OpenAPI に切り替える等、契約方式の変更 |

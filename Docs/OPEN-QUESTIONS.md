@@ -51,6 +51,25 @@
 
 ---
 
+## L2c（`energyData`／`destinyBugs`）— 採用済み骨子と監修タスク
+
+以下は**コード未実装でもドキュメント上固定した**方針である（詳細は [IMPLEMENTATION.md](./IMPLEMENTATION.md) §2「Phase L2c」、[REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §6.2）。
+
+| 論点 | 採用 |
+|------|------|
+| `energyData` の入力 | **位相法・虚気を含めない**素の三柱＋蔵干。位相後の数理は将来 Layer3（例: `shadowEnergyData`）。 |
+| `energyData` の幾何・丸め | API は**極座標（角度）＋面積比**に正規化、**固定丸め**でゴールデン安定。 |
+| `destinyBugs` | **出生で凍結・静的のみ**。年運／大運天中殺・スライドは `dynamicTimeline`。 |
+| mock ruleset | **`mock-v1.json` 単一ファイル**を拡張。`meta.schemaRevision` 等で世代追跡。 |
+
+**監修または実装直前に詰めるとよいこと**
+
+- `destinyBugs` の **`code` 最終名**と教材用語の対応（プレースホルダ: `SHUKUMEI_TENCHUSATSU_YEAR`、`SHUKUMEI_TENCHUSATSU_MONTH`、`IJOU_KANSHI_NORMAL`、`IJOU_KANSHI_DARK`＝**暗干支**）。
+- **`SHUKUMEI_TENCHUSATSU_MONTH`** を製品に載せるか（学説・教材により要否が分かれうる）。
+- **`energyData` の丸め**を常にエンジン固定にするか、`ruleset` に逃がすか（学派差の有無）。
+
+---
+
 ## 検証データ
 
 13. **ゴールデンマスター**（**採用: 早期 CI**）  

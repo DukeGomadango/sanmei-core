@@ -4,7 +4,7 @@
 
 | 項目 | 内容 |
 |------|------|
-| ドキュメント改訂 | v1.1.4（節入り生成のライセンス注意、日柱の日界0:00固定・子初非対応、TIME_REQUIRED の TZ 手続き）— ファイル名は従来どおり |
+| ドキュメント改訂 | v1.1.5（L2c `energyData`／`destinyBugs` の契約骨子・静的／動的天中殺の分離）— ファイル名は従来どおり |
 | ステータス | Draft → 監修・実装で更新 |
 | 前身 | v1.0 要件＋設計レビュー（再現性・契約・NFR・ゴールデンテスト） |
 | 関連文書 | [ARCHITECTURE-AND-CONTRACTS.md](./ARCHITECTURE-AND-CONTRACTS.md), [DOMAIN-GLOSSARY.md](./DOMAIN-GLOSSARY.md), [OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) |
@@ -185,8 +185,8 @@
 |----------|------|
 | `insen` | 陰占: **年柱・月柱・日柱の三柱のみ**の十干十二支。**時柱は算命学コアの出力に含めない**（リクエストの `birthTime` は暦境界用であり、時柱とは別物。[DOMAIN-GLOSSARY.md](./DOMAIN-GLOSSARY.md) §2.1）。Protobuf／OpenAPI 等でも **`timePillar`・`hourStem` 等のフィールドを定義しない**。節入りからの経過に基づく**蔵干（初元・中元・本元）**を `sect` ルールで特定。 |
 | `yousen` | 陽占: **十大主星**（5 箇所）、**十二大従星**（3 箇所）。部位は人体図座標または部位 ID で返す。 |
-| `energyData` | `totalEnergy`（例: 数値）, `actionAreaSize`（1〜4）, `actionAreaGeometry`（三角形頂点等、UI 用）— **L2c／別 PR** |
-| `destinyBugs` | 宿命天中殺・異常干支などのフラグ集合 — **L2c／別 PR** |
+| `energyData` | **Phase L2c**。数理法・行動領域。**入力**は位相法・虚気を**含まない**素の三柱＋蔵干（IMPLEMENTATION §2「Phase L2c」）。**契約**: `totalEnergy`、`actionAreaSize`（1〜4）、`actionAreaGeometry` を **Zod 固定**—幾何は **極座標（角度・度）と面積比**の正規化表現に限定。浮動小数はエンジン内で**固定丸め規則**のうえ整数／固定桁で返し、ゴールデンを安定させる。算法・重みは `ruleset`。位相後の数理は将来 **Layer3**（例: `shadowEnergyData`）で扱う。 |
+| `destinyBugs` | **Phase L2c**。**出生時点で確定し生涯不変**の宿命系フラグのみ（例: 宿命天中殺・異常干支）。**年運／大運天中殺・スライド・`asOf` 依存**は `dynamicTimeline.tenchuSatsuStatus` に載せ、本フィールドには**含めない**。`code` は安定文字列（監修確定）。プレースホルダ例: `SHUKUMEI_TENCHUSATSU_YEAR`、`SHUKUMEI_TENCHUSATSU_MONTH`、`IJOU_KANSHI_NORMAL`、`IJOU_KANSHI_DARK`（暗干支。詳細は IMPLEMENTATION §2・OPEN-QUESTIONS）。 |
 | `familyNodes` | 六親法: **各ノードに干に加え、柱（年／月／日）および蔵干スロット（初元・中元・本元等）等の座標を必須**とする。干のみのフラットマップは採用しない（[OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) §11）。配列またはロールキー付きオブジェクトの形は Zod（`schemas/layer2.ts`）で固定する。 |
 
 **星・干・支**: API 内部は**列挙コード**（安定 ID）を正とし、表示ラベルはクライアントの i18n で解決してよい。
@@ -332,6 +332,7 @@ HTTP ステータスと機械可読 `code` を組み合わせる。
 | v1.1.2 | 真太陽時・経度を **API コア責務**と明記（`birthLongitude` / `birthCityCode`）。節入りマスタの **Swiss Ephemeris 想定パイプライン**と TS/Rust 共有。天中殺スライドの **API／フロント責務境界**を OPEN-QUESTIONS と整合。ゴールデン早期 CI をテスト戦略に追記。Proto SSOT とゴールデンの役割分担を §2 に明文化 |
 | v1.1.3 | **sanmei-core v1** で暦を固定: 節入り境界は \(t \ge t_s\) で当月、**節入り日一致時のみ** `TIME_REQUIRED_FOR_SOLAR_TERM`。民用標準時として解釈し**API 内では真太陽時変換しない**（補正はクライアント任意）。`birthLongitude` / `birthCityCode` は v1 コア未使用。OPEN-QUESTIONS・ARCHITECTURE §7 と整合 |
 | v1.1.4 | §9.2: Swiss Ephemeris AGPL リスクと**代替生成**を明記。§5: **日柱は民用0:00日界**・**子初換日は v1 未対応**、`TIME_REQUIRED` の **TZ 変換後ローカル日付**での一致判定を明記 |
+| v1.1.5 | §6.2: L2c の **`energyData`**（素の器・幾何正規化・丸め）・**`destinyBugs`**（静的のみ、動的天中殺は §6.3）を具体化。IMPLEMENTATION §2・GLOSSARY と整合 |
 
 ---
 

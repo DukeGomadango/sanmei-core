@@ -17,7 +17,7 @@ alwaysApply: false
 
 - **Layer1（Primitives）**: 干支・五行・節入りストア・民用暦ポート・陰占三柱の「器」まで。蔵干用の**深さ**は**同一 TZ の暦日 JDN 差**（月柱と同一の基準節、§5.0）で三柱とまとめて解決し Layer2 に渡す。詳細は `Docs/DOMAIN-GLOSSARY.md`・`Docs/IMPLEMENTATION.md` §2・§5.0。
 - **Orchestrator（実装済）**: `packages/sanmei-core/src/calculate.ts` が `CalculateInputSchema`・`requiresBirthTimeForAnySolarTermOnDate`・`resolveInsenWithDepth` を経て、**mock `rulesetVersion` 相当**のバンドル JSON を Layer2 リゾルバへ渡す。HTTP 422 は BFF が `SanmeiError.code` へマップ。`Docs/ARCHITECTURE-AND-CONTRACTS.md` §2.4。
-- **Layer2**: `layer2/*`・`schemas/layer2.ts`・`schemas/rulesetMockV1.ts`・`schemas/calculateInput.ts`。Phase L2（実装済・mock のみ）は `insen`（蔵干）・`yousen`・`familyNodes`。`energyData`／`destinyBugs` は L2c 以降。守護神・忌神は Layer2 で算出し、返却は `interactionRules`。`ruleset` ソースは **`src/data/rulesets/*.json`**、ビルドで **`dist/data/rulesets/`** にミラー（`import` バンドル、`fs.readFile` 禁止）。詳細は `Docs/IMPLEMENTATION.md` §2・§4.1。
+- **Layer2**: `layer2/*`・`schemas/layer2.ts`・`schemas/rulesetMockV1.ts`・`schemas/calculateInput.ts`。L2a/b（実装済・mock）は `insen`・`yousen`・`familyNodes`。**L2c（未実装）**は `energyData`・`destinyBugs`（入力に**位相・虚気を含めない**。実行順・mock 拡張は `Docs/IMPLEMENTATION.md` §2）。守護神・忌神は静的に算出し返却は `interactionRules`。**Layer3**（位相・虚気→格法）は L2c の**後**。`ruleset` ソースは **`src/data/rulesets/*.json`**、ビルドで **`dist/data/rulesets/`** にミラー（`import` バンドル、`fs.readFile` 禁止）。§4.1。
 
 ## MECE に近づける指針
 

@@ -16,7 +16,7 @@
 
 ## sanmei-core 実装の所在（Layer1 ＋ Layer2 mock）
 
-- **詳細**: [IMPLEMENTATION.md](./IMPLEMENTATION.md)（モジュール一覧・節入り／**ruleset**（`src/data/rulesets/`・`dist` ミラー）・**Phase L2 / L2c 境界**・経過日数 §5.0・`SanmeiError` §5.0.1・`calculate.ts`・ゴールデン・Zod→Proto）。[REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §6 と応答形の対応は IMPLEMENTATION §2 と突き合わせる。
+- **詳細**: [IMPLEMENTATION.md](./IMPLEMENTATION.md)（モジュール一覧・節入り／**ruleset**（`src/data/rulesets/`・`dist` ミラー）・**L2a/b 済・L2c 設計固定**（`energyData`／`destinyBugs`）・**Layer3 DAG**・経過日数 §5.0・`SanmeiError` §5.0.1・`calculate.ts`・ゴールデン・Zod→Proto）。[REQUIREMENTS-v1.1.md](./REQUIREMENTS-v1.1.md) §6 と応答形の対応は IMPLEMENTATION §2 と突き合わせる。[OPEN-QUESTIONS.md](./OPEN-QUESTIONS.md) に L2c の監修残タスクあり。
 - **パッケージ**: [`packages/sanmei-core`](../packages/sanmei-core)。
 - **README / ライセンス**: ルート [README.md](../README.md) ・ [LICENSES.md](../LICENSES.md)。
 
