@@ -1,6 +1,6 @@
 # Agent / Cursor 向けメモ
 
-詳細な指示は **`.cursor/rules/`** の `.mdc`（特に `sanmei-project.mdc`）を正とする。**コミット文**は `sanmei-commits.mdc`。
+詳細な指示は **`.cursor/rules/`** の `.mdc` を正とする。常時の最小情報は `sanmei-context.mdc`、運用・Docs 同期は `sanmei-doc-sync.mdc`、**コミット文**は `sanmei-commits.mdc`。
 
 作業の流れの要約:
 

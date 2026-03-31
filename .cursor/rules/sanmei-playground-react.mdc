@@ -1,0 +1,17 @@
+---
+description: sanmei-playground TS/TSX（React UI の規約）
+globs: packages/sanmei-playground/src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# TypeScript / React（sanmei-playground）
+
+## UI 運用（抜粋）
+
+- カード余白は原則 `p-5`、見出し下 `mb-4`
+- タイムライン系ラベルは `whitespace-nowrap`（語中改行より横スクロール優先）
+- 可変長ラベルを固定 SVG 座標へ直接描画しない（ラベルは HTML overlay を優先）
+
+## 型
+
+- `@sanmei/sanmei-core` の型（`CalculateResult` 等）を正として扱う

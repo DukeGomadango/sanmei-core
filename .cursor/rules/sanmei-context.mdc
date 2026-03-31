@@ -1,0 +1,27 @@
+---
+description: Sanmeigaku 最小コンテキスト（常時）
+alwaysApply: true
+---
+
+# Sanmeigaku（最小コンテキスト）
+
+## モノレポ構成（概要）
+
+- `packages/sanmei-core`: 計算コア（Layer1/2/3・`calculate`）
+- `packages/sanmei-bff`: HTTP BFF（`POST /api/v1/calculate`）
+- `packages/sanmei-playground`: 管理者用 SPA（Vite+React）
+- `tools/solar-term-build`: 節入りマスタ生成（オフラインのみ）
+- `packages/sanmei-core/data/`: 同梱データ（例: `solar-terms/solar_terms.json`）
+
+## 正本ドキュメント（必要時のみ参照）
+
+- 実装インデックス: `Docs/IMPLEMENTATION.md`
+- 用語・層境界: `Docs/DOMAIN-GLOSSARY.md`
+- API・要件: `Docs/REQUIREMENTS-v1.1.md`
+- アーキテクチャ: `Docs/ARCHITECTURE-AND-CONTRACTS.md`
+- 未確定: `Docs/OPEN-QUESTIONS.md`
+
+## 重要な禁則（抜粋）
+
+- ランタイム（TS）で天文計算ライブラリに依存しない（節入りは同梱 JSON を使う）
+- ユーザーへの説明は日本語

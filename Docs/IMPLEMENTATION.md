@@ -8,7 +8,7 @@
 
 - PR・リリース前に、変更した節（ディレクトリ・公開 API・データパイプライン）を本書に反映する。
 - **層・フェーズ・契約（Proto/Zod 等）や責務境界が変わったら** [ARCHITECTURE-AND-CONTRACTS.md](./ARCHITECTURE-AND-CONTRACTS.md) と、必要なら [DOMAIN-GLOSSARY.md](./DOMAIN-GLOSSARY.md) を更新する。
-- **実装で繰り返し使う方針・禁則が変わったら** [.cursor/rules/](../.cursor/rules) を見直す（ルールは長文を持たず正本ドキュメントを指すが、パス・レイヤ説明のズレはここでも解消する）。
+- **実装で繰り返し使う方針・禁則が変わったら** [.cursor/rules/](../.cursor/rules) を見直す（ルールは長文を持たず正本ドキュメントを指すが、パス・レイヤ説明のズレはここでも解消する）。常時適用は `sanmei-context.mdc` と `sanmei-commits.mdc` の **最小**に抑え、運用・Docs 同期は `sanmei-doc-sync.mdc` に寄せる。
 - `packages/sanmei-core` の **バージョン**（`meta.engineVersion`・リリースの目安）は [packages/sanmei-core/package.json](../packages/sanmei-core/package.json) の `version` を正とする（本書に毎回書かなくてよい）。
 - **レイアウトやサイクルが変わったら**、下記の Mermaid 図も併せて更新する。
 

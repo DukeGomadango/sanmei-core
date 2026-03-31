@@ -1,0 +1,35 @@
+# Cursor 用 ignore（探索・自動参照のノイズ削減）
+
+## 依存・ビルド成果物・キャッシュ
+**/node_modules/**
+**/dist/**
+**/build/**
+**/coverage/**
+**/.turbo/**
+**/.vite/**
+**/.next/**
+**/.cache/**
+**/.parcel-cache/**
+**/.pytest_cache/**
+
+## ロック/ログ/一時ファイル
+**/*.log
+**/*.tmp
+**/*.swp
+**/*.swo
+**/*.map
+
+## OS / IDE
+**/.DS_Store
+**/Thumbs.db
+**/.idea/**
+**/.vscode/**
+
+## 生成/取得されることが多い大容量データ
+**/*.bsp
+**/*.sqlite
+**/*.sqlite3
+
+## 研究メモ（通常タスクでは参照しない。必要時は明示的に開く）
+Docs/RESEARCH-*.md
+Docs/PLAN-RESEARCH-*.md

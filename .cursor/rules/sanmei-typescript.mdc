@@ -1,49 +1,14 @@
 ---
-description: packages 配下の TypeScript（strict・型安全・構造・巨大ファイル回避・エラー処理・テスト）
-globs: packages/**/*.ts
+description: TypeScript 規約（オンデマンド・分割案内）
 alwaysApply: false
 ---
 
-# TypeScript（sanmei パッケージ）
+# TypeScript 規約（分割）
 
-## 構造（スパゲッティ回避）
+このファイルは「広すぎる `globs`」によるコンテキスト肥大を避けるため、**案内のみ**にしました。
 
-- **責務分離の詳細**（ファイル分割・循環依存・行数目安）は `.cursor/rules/sanmei-architecture.mdc` を参照。
-- **関数は短く**: 1 関数が複数のことをしすぎるなら抽出。分岐だらけなら **lookup テーブル**や既存の `*Tables.ts` パターンに寄せる。
-- **index の肥大化**: `index.ts` は再エクスポートに留め、実装を詰め込まない。
+- `packages/sanmei-core` の TS: `.cursor/rules/sanmei-core-typescript.mdc`
+- `packages/sanmei-bff` の TS: `.cursor/rules/sanmei-bff-typescript.mdc`
+- `packages/sanmei-playground` の TS/TSX: `.cursor/rules/sanmei-playground-react.mdc`
 
-## コンパイラ
-
-`packages/sanmei-core/tsconfig.json` は **strict**、未使用禁止。これを弱める変更はしない。
-
-## 型（`any` を避ける）
-
-- **`any` は使わない**。どうしても不明なら **`unknown` + 型ガード / Zod parse** で狭める。
-- 外部入力は **スキーマで検証**してからドメイン型へ。握りつぶし禁止。
-
-```typescript
-// ❌ BAD
-catch (e: any) {
-  return null;
-}
-function parse(x: any) { ... }
-
-// ✅ GOOD
-catch (e) {
-  const msg = e instanceof Error ? e.message : String(e);
-  throw new Error(`...: ${msg}`, { cause: e });
-}
-```
-
-## エラー処理
-
-- **空の `catch` 禁止**。ログ・再送出・ドメイン例外に変換のいずれか。
-- 「失敗を成功として返す」（黙ってデフォルト値）より、**呼び出し側が扱える明示的エラー**を優先。オーケストレータ・契約境界は **`SanmeiError`（`SanmeiErrorCode`）**、Layer1 純粋部は当面 `Error` も許容（`IMPLEMENTATION.md` §5.0.1）。
-
-## テスト
-
-- 計算・境界は **Vitest** でカバー。既存の `*.test.ts` のスタイルに合わせる。
-
-## 実装のお手本
-
-新規コードは `layer1/` の分割に揃え、命理ルール適用は `layer2/`・`schemas/`・`calculate.ts` の流れに寄せる。迷ったら `Docs/IMPLEMENTATION.md` §3。
+共通の責務分離は `.cursor/rules/sanmei-architecture.mdc` を参照します。

@@ -1,0 +1,20 @@
+---
+description: sanmei-bff TypeScript（HTTP・エラーマップ周りの規約）
+globs: packages/sanmei-bff/src/**/*.ts
+alwaysApply: false
+---
+
+# TypeScript（sanmei-bff）
+
+## 構造
+
+- ルート/ユースケースの責務分離は `.cursor/rules/sanmei-architecture.mdc` を参照
+
+## 型と入力
+
+- 外部入力（HTTP）はスキーマで検証してから扱う
+- `any` は使わない（`unknown` から絞る）
+
+## エラー
+
+- `SanmeiError` / `MALFORMED_JSON` の HTTP マップは要件（`Docs/REQUIREMENTS-v1.1.md` §7）に合わせる

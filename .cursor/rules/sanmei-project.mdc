@@ -1,82 +1,12 @@
 ---
-description: Sanmeigaku モノレポの全体像とドキュメント正本への参照（常時）
-alwaysApply: true
+description: Sanmeigaku 旧・常時ルール（短文化してオンデマンド化）
+alwaysApply: false
 ---
 
-# プロジェクト・コンテキスト
+# sanmei-project.mdc（オンデマンド）
 
-## リポジトリの骨格
+以前は「常時適用」でしたが、**トークン節約のためオンデマンド**にしました。
 
-- **計算コア**: `packages/sanmei-core`（Layer1 ＋ **Layer2 mock（L2a–c）** ＋ **`dynamicTimeline` mock** ＋ **Layer3a/Layer3b（research-v1 実装済・resolverディスパッチ）**・`calculate` オーケストレータ。本番監修 `ruleset` 拡張は別フェーズ）。
-- **HTTP BFF**: `packages/sanmei-bff`（Hono・`POST /api/v1/calculate`・要件 §7 のエラーマップ・最小 Playground）。
-- **管理者 Playground（フロント）**: `packages/sanmei-playground`（Vite+React 管理者用 SPA）。
-- **フェーズ2（計画）**: `takao-v1`・大運本算法・監修ゴールデン → **`Docs/PHASE2-RULESET-AND-DAIUN.md`** を正本（詳細はルールに書かない）。
-- **オフラインビルド**: `tools/solar-term-build` — 節入りマスタ生成のみ。ランタイムの TS から天文計算ライブラリを引かない。
-- **同梱データ**: `packages/sanmei-core/data/`（例: `solar-terms/solar_terms.json`）。
-
-## ドキュメント正本（ルールに全文を複製しない）
-
-| 用途 | パス |
-|------|------|
-| 実装インデックス・モジュールマップ・Mermaid | `Docs/IMPLEMENTATION.md` |
-| ドメイン層・用語境界・Layer1/2/3 | `Docs/DOMAIN-GLOSSARY.md` |
-| API・NFR・万年暦要約 | `Docs/REQUIREMENTS-v1.1.md` |
-| アーキテクチャ・Proto/ゴールデン・節入り方針 | `Docs/ARCHITECTURE-AND-CONTRACTS.md` |
-| 確定待ち論点 | `Docs/OPEN-QUESTIONS.md` |
-
-仕様とコードが食い違ったら、**コードか `IMPLEMENTATION.md` のどちらかを直し**、可能なら両方を揃える。
-
-## 変更時の同期（自動ではない）
-
-- ドキュメントと **本フォルダの `.mdc` は CI で検証されない**。**マージ前に** [IMPLEMENTATION.md](../../Docs/IMPLEMENTATION.md) **§7** の手順に従う。
-- 繰り返しエージェント／人が同じ誤りをするなら、**正本（`Docs/*.md`）を先に直し**、必要なら本ルールに**短い追記**（パス・禁則のみ。長文はドキュメント側）。
-
-- フロント反映確認では、ブラウザで見ている `localhost:port` が意図した `sanmei-playground`（Vite）か必ず確認し、古い Vite プロセスは停止してから再起動する。
-- 可変長ラベルを固定SVG座標へ直接描画しない（SVGは骨格/線、ラベルはHTML overlayで重なり回避）。
-- Playground のカード余白は原則 `p-5`・見出し下 `mb-4` を基準に揃える（Bento の整列優先）。
-- タイムライン系ラベルは `whitespace-nowrap` を使い、語中改行より横スクロールを優先する。
-
-### §7 チェックリスト運用（必須）
-
-1. **毎タスク完了時**: `Docs/IMPLEMENTATION.md` の **§7.2 を上から目視**し、今回の変更に**該当する項目**について、**コードと同じセッション**で `Docs/*.md` を更新する。エージェントは完了報告に **§7.2 のどれを満たしたか**（または「全項目該当なし」）を**短く**書く。
-2. **人間向け PR**: `.github/pull_request_template.md` のドキュメント欄を埋める。§7.1 にあるとおり、該当なしでも「触っていない」と明示してよい。
-3. **節目（マイルストーン）**: §7.3 の表のいずれかに当てはまる変更では、§7.2 **全項目**についてレビューし、PR またはエージェント報告で **要更新／該当なし／既に最新** を示す。あわせて **`sanmei-project.mdc`（本ファイルの骨格・パス）**と **`sanmei-architecture.mdc`（層・`ruleset` パス等）** が正本とずれていれば**同じ PR か直後の PR**で直す。
-
-## Cursor エージェント向け（毎タスク）
-
-**着手前（短く）**
-
-- `packages/sanmei-core` や `tools/` を触るなら、先に `Docs/IMPLEMENTATION.md` の **§3（モジュール）** と **システム図** を当たり、全体 grep より**索引から入る**。
-- 語彙・Layer 境界に触れるなら `Docs/DOMAIN-GLOSSARY.md`。未確定は `Docs/OPEN-QUESTIONS.md`。
-
-**タスク完了時（コード変更と同じセッションで必ず）**
-
-上表は **§7.2 のヒント**。迷ったら **§7.2 を総ざらい**する。
-
-| 変えたもの | 更新するもの（必要な範囲） |
-|------------|----------------------------|
-| ファイル配置・公開 API・データパイプライン | `IMPLEMENTATION.md` §3・§4・Mermaid |
-| 日界・節入り・キャリブレーション等の前提 | `IMPLEMENTATION.md` §5、`REQUIREMENTS-v1.1.md` 等の該当箇所 |
-| Layer 境界・新パッケージ・契約方針（Proto/Zod） | `ARCHITECTURE-AND-CONTRACTS.md`、`sanmei-architecture.mdc` |
-| 同じバグ／同じ説明の繰り返し | 正本 `Docs` を直し、再発防止を **`.cursor/rules` に 1〜3 行**だけ追加 |
-
-**原則**: 「コードだけマージしてドキュメントは後」にしない。後回しにすると、次のセッションで同じファイル探索と誤りが再発する。詳細は **§7 チェックリスト運用**（上記）。
-
-## Git・GitHub
-
-- **リモートの正本**: [github.com/DukeGomadango/sanmei-core](https://github.com/DukeGomadango/sanmei-core)。ローカルフォルダ名（例: `Sanmeigaku`）とリポジトリ名が違ってもよい。
-- **初回だけ**: `git init -b main` → `git remote add origin <url>` → `git push -u origin main`。認証は Git Credential Manager・SSH・[GitHub CLI](https://cli.github.com/) のいずれか（環境依存でエージェントはユーザーに任せる）。
-- **含めないもの**: `.gitignore` に従う（`node_modules/`、`dist/`、**`*.bsp`** 等）。天球暦バイナリはコミットせず、ビルド環境で Skyfield の取得／キャッシュを使う。
-- **プッシュ前**: `npm test` が通る状態を推奨。
-
-## コミュニケーション
-
-ユーザーへの説明は **日本語**（リポジトリの会話言語）。
-
-## 検証
-
-変更後は該当パッケージで `npm test` / `npm run build` を実行し、通す。
-
-## コミット
-
-メッセージは **`sanmei-commits.mdc`**（Conventional Commits の型 ＋ 日本語要約）に従う。
+- 常時の最小情報: `.cursor/rules/sanmei-context.mdc`
+- Docs 同期・運用（チェックリスト等）: `.cursor/rules/sanmei-doc-sync.mdc`
+- コミット規約: `.cursor/rules/sanmei-commits.mdc`

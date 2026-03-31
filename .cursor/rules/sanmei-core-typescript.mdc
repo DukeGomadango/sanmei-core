@@ -1,0 +1,30 @@
+---
+description: sanmei-core TypeScript（strict・型安全・構造・エラー・テスト）
+globs: packages/sanmei-core/src/**/*.ts
+alwaysApply: false
+---
+
+# TypeScript（sanmei-core）
+
+## 構造
+
+- 責務分離（分割・循環依存・行数目安）は `.cursor/rules/sanmei-architecture.mdc` を参照
+- `index.ts` は再エクスポート中心（実装を詰め込まない）
+
+## コンパイラ
+
+- `packages/sanmei-core/tsconfig.json` の **strict** を弱めない
+
+## 型
+
+- `any` は使わない（`unknown` + 型ガード / Zod で絞る）
+- 外部入力はスキーマで検証してからドメイン型へ
+
+## エラー
+
+- 空の `catch` 禁止（ログ・再送出・例外変換のいずれか）
+- 契約境界は `SanmeiError`（`SanmeiErrorCode`）を優先
+
+## テスト
+
+- 計算・境界は Vitest（既存の `*.test.ts` の流儀に揃える）
